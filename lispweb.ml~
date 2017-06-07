@@ -1,0 +1,5 @@
+type expression = 
+  | EInteger of int
+  | EIdent of string
+  | ELambda of string * expression
+  | EApplication of expression * expression

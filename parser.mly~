@@ -1,0 +1,16 @@
+%token<int> INT
+%token<string> IDENT
+%token LPAREN RPAREN LAMBDA EOF
+%start start
+%type <Lispweb.expression> start
+
+%%
+
+start: 
+| e = expression EOF { e }
+
+expression:
+| n = INT { Lispweb.EInteger (n) }
+| IDENT { Lispweb.EIdent ($1) }
+| LPAREN LAMBDA LPAREN IDENT RPAREN expression RPAREN { Lispweb.ELambda ($4, $6) }
+| LPAREN expression expression RPAREN { Lispweb.EApplication ($2, $3) }
