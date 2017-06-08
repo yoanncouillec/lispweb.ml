@@ -12,5 +12,7 @@ rule token = parse
   | "#f" { FALSE }
   | "if" { IF }
   | "lambda" { LAMBDA }
+  | "serve" { SERVE }
+  | "string-append" { STRINGAPPEND }
   | ['0'-'9']+ { INT (int_of_string (Lexing.lexeme lexbuf)) }
   | ['a'-'z']+ { IDENT (Lexing.lexeme lexbuf) }

@@ -6,6 +6,8 @@ type expression =
   | EBoolean of bool
   | EIf of expression * expression * expression
   | ELambda of string * expression
+  | EStringAppend of expression * expression
+  | EServe of string * expression
   | EApplication of expression * expression
 
 type environment = (string * value) list
@@ -35,6 +37,28 @@ let rec eval env = function
       | VBoolean false -> eval env e3
       | _ -> eval env e2)
   | ELambda (s, e) -> VClosure (s, e, env)
+  | EServe (s, e) ->
+     (match eval env e with
+     | VClosure (s', e', env') ->
+	let server = Unix.socket Unix.PF_INET Unix.SOCK_STREAM 0 in
+	let address = Unix.inet_addr_of_string "127.0.0.1" in 
+	Unix.bind server (Unix.ADDR_INET(address, 8080));
+	Unix.listen server 100;
+	let (client, _) = Unix.accept server in
+	let client_in = Unix.in_channel_of_descr client in
+	let client_out = Unix.out_channel_of_descr client in
+	(match eval (extend env' s' (VString "Yoann")) e' with
+	 | VString s as res ->
+	    output_string client_out ("HTTP/1.1 200 OK\n\n<html><body>"
+				      ^ s
+				      ^ "</body></html>") ; 
+	    flush client_out ;
+	    Unix.shutdown client Unix.SHUTDOWN_ALL ;
+	    res
+	 | _ -> failwith "Not a string"))
+  | EStringAppend (e1, e2) -> 
+     (match (eval env e1, eval env e2) with
+      | (VString s1, VString s2) -> VString (s1^s2))
   | EApplication (e1, e2) -> 
      match eval env e1 with
      | VClosure (s', e', env') ->
