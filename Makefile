@@ -43,7 +43,7 @@ test: arithc arithrun arithopt
 	ld test.o -o test -macosx_version_min 10.7
 
 clean:
-	rm -rf *.cm* arith arithc arithrun arithopt \#*\# *.mli *.bytecode *.s *.o test
+	rm -rf *.cm* lispwebeval arithc arithrun arithopt \#*\# *.mli *.bytecode *.s *.o test
 
 mrproper: clean
 	rm -rf *~
