@@ -1,7 +1,7 @@
 all: lispwebeval #arithc arithrun arithopt
 
 lispwebeval: lispweb.cmo parser.cmi parser.cmo lexer.cmo lispwebeval.cmo
-	ocamlc -o $@ unix.cma lispweb.cmo parser.cmo lexer.cmo lispwebeval.cmo
+	ocamlc -o $@ str.cma unix.cma lispweb.cmo parser.cmo lexer.cmo lispwebeval.cmo
 
 arithc: lispweb.cmo parser.cmi parser.cmo lexer.cmo arithc.cmo
 	ocamlc -o $@ lispweb.cmo parser.cmo lexer.cmo arithc.cmo

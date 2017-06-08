@@ -8,11 +8,18 @@ rule token = parse
   | ')' { RPAREN }
   | ''' { QUOTE }
   | '"' { DQUOTE }
+  | '+' { PLUS }   
   | "#t" { TRUE }
   | "#f" { FALSE }
   | "if" { IF }
   | "lambda" { LAMBDA }
-  | "serve" { SERVE }
-  | "string-append" { STRINGAPPEND }
+  | "let" { LET }
+  | "listen" { LISTEN }
+  | "list" { LIST }
+  | "tag" { TAG }
+  | "string-append" { STRING_APPEND }
+  | "string->int" { STRING_TO_INT }
+  | "int->string" { INT_TO_STRING }
+  | "->html" { TO_HTML }
   | ['0'-'9']+ { INT (int_of_string (Lexing.lexeme lexbuf)) }
-  | ['a'-'z']+ { IDENT (Lexing.lexeme lexbuf) }
+  | ['a'-'z''/']+ { IDENT (Lexing.lexeme lexbuf) }
