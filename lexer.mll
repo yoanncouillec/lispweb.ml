@@ -20,6 +20,7 @@ rule token = parse
   | "string-append" { STRING_APPEND }
   | "string->int" { STRING_TO_INT }
   | "int->string" { INT_TO_STRING }
-  | "->html" { TO_HTML }
+  | "html" { HTML }
+  | "js" { JS }
   | ['0'-'9']+ { INT (int_of_string (Lexing.lexeme lexbuf)) }
   | ['a'-'z''/']+ { IDENT (Lexing.lexeme lexbuf) }

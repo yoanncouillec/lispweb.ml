@@ -15,7 +15,7 @@ let _ =
       try
         let expression = Parser.start Lexer.token lexbuf in
 	let env = [] in
-	let env = List.fold_left (fun env tag -> extend env tag (VClosure ("l"^tag, ETag (EString tag, [EIdent ("l"^tag)]), env))) env ["html";"body";"div";"i"] in
+	let env = List.fold_left (fun env tag -> extend env tag (VClosure ("l"^tag, ETag (EString tag, [EIdent ("l"^tag)]), env))) env ["head";"body";"div";"span";"form";"input"] in
         let value = eval env expression in
         print_string "= " ; print_string (string_of_value value) ; print_newline ()
       with 

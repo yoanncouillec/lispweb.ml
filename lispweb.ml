@@ -14,7 +14,8 @@ type expression =
   | EStringAppend of expression * expression
   | EStringToInt of expression
   | EIntToString of expression
-  | EToHtml of expression
+  | EHtml of expression
+  | EJs of expression
   | EApplication of expression * expression
 
 type environment = (string * value) list
@@ -27,6 +28,7 @@ and value =
   | VList of value list
   | VTag of string * value list
   | VClosure of string * expression * environment
+  | VJs of expression
 
 let rec lookup env s =
   match env with
@@ -36,12 +38,60 @@ let rec lookup env s =
 
 let extend env s v = (s, v) :: env
 
+(* JS *)
+
+type jexpression = 
+  | JInteger of int
+  | JIdent of string
+  | JString of string
+  | JBoolean of bool
+  | JPlus of jexpression * jexpression
+  | JIf of jexpression * jexpression * jexpression
+  | JFunction of string * jexpression
+  | JVar of string * jexpression
+  | JBlock of jexpression list
+  | JApplication of string * jexpression
+
+let rec jexpression_of_expression = function
+  | EInteger (n) -> JInteger (n)
+  | EIdent (s) -> JIdent (s)
+  | EString (s) -> JString (s)
+  | EBoolean (b) -> JBoolean (b)
+  | EPlus (a,b) -> JPlus (jexpression_of_expression a,jexpression_of_expression b)
+  | EIf (a,b,c) -> JIf (jexpression_of_expression a, 
+			jexpression_of_expression b, 
+			jexpression_of_expression c)
+  | ELambda (s,body) -> JFunction(s,jexpression_of_expression body)
+  | ELet (s, e1, e2) -> JBlock ([JVar (s, jexpression_of_expression e1);
+				jexpression_of_expression e2])
+  | EApplication (e1, e2) ->
+     (match e1 with
+      | EIdent s -> JApplication (s, jexpression_of_expression e2)) 
+	       
+let rec string_of_jexpression = function
+  | JInteger (n) -> string_of_int n
+  | JIdent (s) -> s
+  | JString (s) -> "\"" ^ s ^ "\""
+  | JBoolean (true) -> "true"
+  | JBoolean (false) -> "false"
+  | JPlus (e1, e2) -> "(" ^ "(" ^ (string_of_jexpression e1) ^ ")" ^ "+"
+		      ^ "(" ^ (string_of_jexpression e2) ^ ")" ^ ")"
+  | JIf (e1, e2, e3) -> "if (" ^ (string_of_jexpression e1) ^ "){"
+			^ (string_of_jexpression e2) ^ "} else {"
+			^ (string_of_jexpression e3) ^ "}"
+  | JFunction (s, e1) -> "function("^s^"){"^(string_of_jexpression e1)^"}"
+  | JVar (s, e1) -> "var "^s^" = "^(string_of_jexpression e1)^""
+  | JBlock(l) -> (List.fold_left (fun acc e -> acc ^ (string_of_jexpression e)^";") "{" l) ^"}"
+  | JApplication (s, e1) -> s^"("^(string_of_jexpression e1)^")"
+  | _ -> failwith "string_of_jexpression: match failure"
+
 let rec value_to_html = function
   | VTag (tag, l) ->
      "<" ^ tag ^ ">"
      ^ (List.fold_left (fun acc vt -> (value_to_html vt) ^ acc) "" l)
      ^ "</" ^ tag ^ ">"
   | VString s -> s
+  | VJs e -> "<script>"^(string_of_jexpression (jexpression_of_expression e))^"</script>"
   | VList l -> (List.fold_left (fun acc vt -> (value_to_html vt) ^ acc) "" l)
   | _ -> failwith "value_to_html: not implemented"
 
@@ -104,7 +154,8 @@ let rec eval env = function
      (match eval env e with
       | VInteger s -> VString (string_of_int s)
       | _ -> failwith "Integer expected")
-  | EToHtml e -> VString (value_to_html (eval env e))
+  | EHtml e -> VString ("<html>"^(value_to_html (eval env e))^"</html>")
+  | EJs e -> VJs e
   | EApplication (e1, e2) -> 
      match eval env e1 with
      | VClosure (s', e', env') ->
