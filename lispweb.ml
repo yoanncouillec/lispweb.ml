@@ -16,6 +16,7 @@ type expression =
   | EIntToString of expression
   | EHtml of expression
   | EJs of expression
+  | EFromServer of expression
   | EApplication of expression * expression
 
 type environment = (string * value) list
@@ -85,9 +86,7 @@ let rec string_of_jexpression = function
 			^ (string_of_jexpression e2) ^ "} else {"
 			^ (string_of_jexpression e3) ^ "}"
   | JFunction (s, e1) -> "function("^s^"){"^(string_of_jexpression e1)^"}"
-  | JStringAppend (JString s1, JString s2) -> "\""^s1^"\".concat(\""^s2^"\")"
-  | JStringAppend (_, _) -> 
-     failwith "string_of_jexpression: string append expects strings as arguments"
+  | JStringAppend (e1, e2) -> "\""^(string_of_jexpression e1)^"\".concat(\""^(string_of_jexpression e2)^"\")"
   | JVar (s, e1) -> "var "^s^" = "^(string_of_jexpression e1)^""
   | JApplication (s, e1) -> s^"("^(string_of_jexpression e1)^")"
   | JBlock(l) -> (List.fold_left (fun acc e -> acc ^ (string_of_jexpression e)^";") "{" l) ^"}"
