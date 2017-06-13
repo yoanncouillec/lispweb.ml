@@ -49,8 +49,9 @@ type jexpression =
   | JIf of jexpression * jexpression * jexpression
   | JFunction of string * jexpression
   | JVar of string * jexpression
-  | JBlock of jexpression list
+  | JStringAppend of jexpression * jexpression
   | JApplication of string * jexpression
+  | JBlock of jexpression list
 
 let rec jexpression_of_expression = function
   | EInteger (n) -> JInteger (n)
@@ -64,9 +65,13 @@ let rec jexpression_of_expression = function
   | ELambda (s,body) -> JFunction(s,jexpression_of_expression body)
   | ELet (s, e1, e2) -> JBlock ([JVar (s, jexpression_of_expression e1);
 				jexpression_of_expression e2])
+  | EStringAppend (e1, e2) -> JStringAppend (jexpression_of_expression e1,
+					     jexpression_of_expression e2)
   | EApplication (e1, e2) ->
      (match e1 with
-      | EIdent s -> JApplication (s, jexpression_of_expression e2)) 
+      | EIdent s -> JApplication (s, jexpression_of_expression e2)
+      | _ -> failwith "jexpression_of_expression: call expects an identifer at functional position")
+  | _ -> failwith "jexpression_of_expression: cannot compile"
 	       
 let rec string_of_jexpression = function
   | JInteger (n) -> string_of_int n
@@ -80,10 +85,12 @@ let rec string_of_jexpression = function
 			^ (string_of_jexpression e2) ^ "} else {"
 			^ (string_of_jexpression e3) ^ "}"
   | JFunction (s, e1) -> "function("^s^"){"^(string_of_jexpression e1)^"}"
+  | JStringAppend (JString s1, JString s2) -> "\""^s1^"\".concat(\""^s2^"\")"
+  | JStringAppend (_, _) -> 
+     failwith "string_of_jexpression: string append expects strings as arguments"
   | JVar (s, e1) -> "var "^s^" = "^(string_of_jexpression e1)^""
-  | JBlock(l) -> (List.fold_left (fun acc e -> acc ^ (string_of_jexpression e)^";") "{" l) ^"}"
   | JApplication (s, e1) -> s^"("^(string_of_jexpression e1)^")"
-  | _ -> failwith "string_of_jexpression: match failure"
+  | JBlock(l) -> (List.fold_left (fun acc e -> acc ^ (string_of_jexpression e)^";") "{" l) ^"}"
 
 let rec value_to_html = function
   | VTag (tag, l) ->
@@ -136,8 +143,14 @@ let rec eval env = function
 			       flush cout ;
 			       Unix.close client ;
 			       Unix.close server ;
-			       res)
-			 else failwith "Query string parameter name is not correct")))))
+			       res
+			    | _ -> failwith "eval EListen: expects a string for query string parameter value")
+			 else failwith "eval EListen: query string parameter name does not match argument name of called service"
+		      | _ -> failwith "eval EListen: query string parameter is malformed, should be one key=value")
+		  | _ -> failwith "eval EListen: uri does not match any function in the execution environment")
+	      | _ -> failwith "eval EListen: query string does not contain parameter, it is mandatory in this semantic")
+	  | _ -> failwith "eval EListen: http command line is malformed, should be:  <command> <query_string> <protocol>, ex: GET /hello?name=Alan  HTTP/1.1")
+      | _ -> failwith "eval EListen: port should be of type integer")
   | EList l -> VList (List.fold_left (fun acc e -> (eval env e)::acc) [] l)
   | ETag (e1, l) ->
      (match eval env e1 with
@@ -145,7 +158,8 @@ let rec eval env = function
       | _ -> failwith "tag: expect a string as first argument")
   | EStringAppend (e1, e2) -> 
      (match (eval env e1, eval env e2) with
-      | (VString s1, VString s2) -> VString (s1^s2))
+      | (VString s1, VString s2) -> VString (s1^s2)
+      | _ -> failwith "eval EStringAppend: arguments should be evaluated to strings")
   | EStringToInt e ->
      (match eval env e with
       | VString s -> VInteger (int_of_string s)
@@ -157,11 +171,11 @@ let rec eval env = function
   | EHtml e -> VString ("<html>"^(value_to_html (eval env e))^"</html>")
   | EJs e -> VJs e
   | EApplication (e1, e2) -> 
-     match eval env e1 with
-     | VClosure (s', e', env') ->
-	let arg = eval env e2 in
-	eval (extend env' s' arg) e'
-     | _ -> failwith "Not a closure"
+     (match eval env e1 with
+      | VClosure (s', e', env') ->
+	 let arg = eval env e2 in
+	 eval (extend env' s' arg) e'
+      | _ -> failwith "Not a closure")
 
 let rec string_of_expression = function
   | EInteger n -> string_of_int n
@@ -169,11 +183,25 @@ let rec string_of_expression = function
   | EString s -> "\"" ^ s ^ "\""
   | EQuote e -> "'" ^ (string_of_expression e)
   | EBoolean b -> string_of_bool b
+  | EPlus (e1, e2) -> "(+ "^(string_of_expression e1)^(string_of_expression e2)^")"
   | EIf (e1, e2, e3) -> 
      "(if " ^ (string_of_expression e1) 
      ^ " " ^ (string_of_expression e2)
      ^ " " ^ (string_of_expression e3) ^ ")"
   | ELambda (s, e) -> "(lambda (" ^ s ^ ") " ^ (string_of_expression e) ^ ")"
+  | ELet (s, e1, e2) -> "(let ("^s^" "^(string_of_expression e1)^") "^(string_of_expression e2)^")"
+  | EListen e1 -> "(listen "^(string_of_expression e1)^")"
+  | EList l -> "(list"^(List.fold_left (fun acc e -> " "^(string_of_expression e)) "" l)^")"
+  | ETag (e, l) -> 
+     "(tag "^(string_of_expression e)^" "
+     ^(List.fold_left (fun acc e -> " "^(string_of_expression e)^acc) "" l)
+     ^")"
+  | EStringAppend (e1, e2) -> 
+     "(string-append "^(string_of_expression e1)^" "^(string_of_expression e2)^")"
+  | EStringToInt e -> "(string->int "^(string_of_expression e)^")"
+  | EIntToString e -> "(int->string "^(string_of_expression e)^")"
+  | EHtml e -> "(html "^(string_of_expression e)^")"
+  | EJs e -> "(js "^(string_of_expression e)^")"
   | EApplication (e1, e2) -> 
      "(" ^ (string_of_expression e1) ^ " " ^ (string_of_expression e2) ^ ")"
 
@@ -187,3 +215,4 @@ let rec string_of_value = function
   | VTag (s, l) -> 
      (List.fold_right (fun v acc -> acc ^ " " ^ (string_of_value v)) l ("(tag \""^s^"\"")) ^ ")"
   | VClosure (s, e, env) -> "#CLOSURE"
+  | VJs e -> "(js "^(string_of_expression e)^")"
