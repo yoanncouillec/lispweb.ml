@@ -7,7 +7,6 @@ rule token = parse
   | '(' { LPAREN }
   | ')' { RPAREN }
   | ''' { QUOTE }
-  | '"' { DQUOTE }
   | '+' { PLUS }   
   | "#t" { TRUE }
   | "#f" { FALSE }
@@ -23,5 +22,6 @@ rule token = parse
   | "html" { HTML }
   | "script" { SCRIPT }
   | "from-server" { FROM_SERVER }
+  | '\"' ('\\'* | [^'\"'])* '\"' { STRING (Lexing.lexeme lexbuf) }
   | ['0'-'9']+ { INT (int_of_string (Lexing.lexeme lexbuf)) }
   | ['a'-'z''/']+ { IDENT (Lexing.lexeme lexbuf) }

@@ -1,6 +1,6 @@
 %token<int> INT
-%token<string> IDENT
-%token LPAREN RPAREN LAMBDA LET LISTEN STRING_APPEND STRING_TO_INT INT_TO_STRING HTML SCRIPT FROM_SERVER TRUE FALSE IF QUOTE DQUOTE PLUS LIST TAG EOF
+%token<string> IDENT STRING
+%token LPAREN RPAREN LAMBDA LET LISTEN STRING_APPEND STRING_TO_INT INT_TO_STRING HTML SCRIPT FROM_SERVER TRUE FALSE IF QUOTE PLUS LIST TAG EOF
 %start start
 %type <Lispweb.expression> start
 
@@ -17,7 +17,7 @@ expression:
 | n = INT { Lispweb.EInteger (n) }
 | IDENT { Lispweb.EIdent ($1) }
 | QUOTE expression { Lispweb.EQuote ($2) }
-| DQUOTE IDENT DQUOTE { Lispweb.EString ($2) }
+| STRING { Lispweb.EString (String.sub ($1) 1 ((String.length $1) - 2)) }
 | TRUE { Lispweb.EBoolean (true) }
 | FALSE { Lispweb.EBoolean (false) }
 | LPAREN PLUS expression expression RPAREN { Lispweb.EPlus ($3, $4) }
