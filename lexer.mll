@@ -21,7 +21,7 @@ rule token = parse
   | "string->int" { STRING_TO_INT }
   | "int->string" { INT_TO_STRING }
   | "html" { HTML }
-  | "js" { JS }
+  | "script" { SCRIPT }
   | "from-server" { FROM_SERVER }
   | ['0'-'9']+ { INT (int_of_string (Lexing.lexeme lexbuf)) }
   | ['a'-'z''/']+ { IDENT (Lexing.lexeme lexbuf) }

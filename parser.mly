@@ -1,6 +1,6 @@
 %token<int> INT
 %token<string> IDENT
-%token LPAREN RPAREN LAMBDA LET LISTEN STRING_APPEND STRING_TO_INT INT_TO_STRING HTML JS FROM_SERVER TRUE FALSE IF QUOTE DQUOTE PLUS LIST TAG EOF
+%token LPAREN RPAREN LAMBDA LET LISTEN STRING_APPEND STRING_TO_INT INT_TO_STRING HTML SCRIPT FROM_SERVER TRUE FALSE IF QUOTE DQUOTE PLUS LIST TAG EOF
 %start start
 %type <Lispweb.expression> start
 
@@ -32,6 +32,6 @@ expression:
 | LPAREN STRING_TO_INT expression RPAREN { Lispweb.EStringToInt ($3) }
 | LPAREN INT_TO_STRING expression RPAREN { Lispweb.EIntToString ($3) }
 | LPAREN HTML expression RPAREN { Lispweb.EHtml ($3) }
-| LPAREN JS expression RPAREN { Lispweb.EJs ($3) }
-| LPAREN FROM_SERVER expression RPAREN { Lispweb.EFromServer ($3) }
+| LPAREN SCRIPT expression RPAREN { Lispweb.EScript ($3) }
+| LPAREN FROM_SERVER IDENT RPAREN { Lispweb.EFromServer ($3) }
 | LPAREN expression expression RPAREN { Lispweb.EApplication ($2, $3) }

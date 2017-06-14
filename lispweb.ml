@@ -1,13 +1,15 @@
+type ident = string
+
 type expression = 
   | EInteger of int
-  | EIdent of string
+  | EIdent of ident
   | EString of string
   | EQuote of expression
   | EBoolean of bool
   | EPlus of expression * expression
   | EIf of expression * expression * expression
-  | ELambda of string * expression
-  | ELet of string * expression * expression
+  | ELambda of ident * expression
+  | ELet of ident * expression * expression
   | EListen of expression
   | EList of expression list
   | ETag of expression * expression list 
@@ -15,9 +17,22 @@ type expression =
   | EStringToInt of expression
   | EIntToString of expression
   | EHtml of expression
-  | EJs of expression
-  | EFromServer of expression
+  | EScript of expression
+  | EFromServer of ident
   | EApplication of expression * expression
+
+type script = 
+  | SInteger of int
+  | SIdent of string
+  | SString of string
+  | SBoolean of bool
+  | SPlus of script * script
+  | SIf of script * script * script
+  | SFunction of string * script
+  | SVar of string * script
+  | SStringAppend of script * script
+  | SApplication of string * script
+  | SBlock of script list
 
 type environment = (string * value) list
 
@@ -29,7 +44,7 @@ and value =
   | VList of value list
   | VTag of string * value list
   | VClosure of string * expression * environment
-  | VJs of expression
+  | VScript of script
 
 let rec lookup env s =
   match env with
@@ -41,55 +56,53 @@ let extend env s v = (s, v) :: env
 
 (* JS *)
 
-type jexpression = 
-  | JInteger of int
-  | JIdent of string
-  | JString of string
-  | JBoolean of bool
-  | JPlus of jexpression * jexpression
-  | JIf of jexpression * jexpression * jexpression
-  | JFunction of string * jexpression
-  | JVar of string * jexpression
-  | JStringAppend of jexpression * jexpression
-  | JApplication of string * jexpression
-  | JBlock of jexpression list
+let rec script_of_value = function
+  | VInteger n -> SInteger n
+  | VString s -> SString s
+  | VQuote _ -> failwith "script_of_value: cannot compile value of type VQuote to script"
+  | VBoolean b -> SBoolean b
+  | VList _ -> failwith "script_of_value: cannot compile value of type VList to script. will be compiled to array in further version"
+  | VTag (_,_) -> failwith "script_of_value: cannot compile value of type VTag to script"
+  | VClosure (s, e, env) -> failwith "script_of_value: cannot compile value of type VClosure to script. will be compiled to ScriptValueClosure in further version. need a compiler from value to script_value. then need to define script_value"
+  | VScript s -> failwith "script_of_value: cannot compile value of type VScript to script"
 
-let rec jexpression_of_expression = function
-  | EInteger (n) -> JInteger (n)
-  | EIdent (s) -> JIdent (s)
-  | EString (s) -> JString (s)
-  | EBoolean (b) -> JBoolean (b)
-  | EPlus (a,b) -> JPlus (jexpression_of_expression a,jexpression_of_expression b)
-  | EIf (a,b,c) -> JIf (jexpression_of_expression a, 
-			jexpression_of_expression b, 
-			jexpression_of_expression c)
-  | ELambda (s,body) -> JFunction(s,jexpression_of_expression body)
-  | ELet (s, e1, e2) -> JBlock ([JVar (s, jexpression_of_expression e1);
-				jexpression_of_expression e2])
-  | EStringAppend (e1, e2) -> JStringAppend (jexpression_of_expression e1,
-					     jexpression_of_expression e2)
+let rec script_of_expression env = function
+  | EInteger (n) -> SInteger (n)
+  | EIdent (s) -> SIdent (s)
+  | EString (s) -> SString (s)
+  | EBoolean (b) -> SBoolean (b)
+  | EPlus (a,b) -> SPlus (script_of_expression env a,script_of_expression env b)
+  | EIf (a,b,c) -> SIf (script_of_expression env a, 
+			script_of_expression env b, 
+			script_of_expression env c)
+  | ELambda (s,body) -> SFunction(s,script_of_expression env body)
+  | ELet (s, e1, e2) -> SBlock ([SVar (s, script_of_expression env e1);
+				script_of_expression env e2])
+  | EStringAppend (e1, e2) -> SStringAppend (script_of_expression env e1,
+					     script_of_expression env e2)
   | EApplication (e1, e2) ->
      (match e1 with
-      | EIdent s -> JApplication (s, jexpression_of_expression e2)
-      | _ -> failwith "jexpression_of_expression: call expects an identifer at functional position")
-  | _ -> failwith "jexpression_of_expression: cannot compile"
+      | EIdent s -> SApplication (s, script_of_expression env e2)
+      | _ -> failwith "script_of_expression: call expects an identifer at functional position")
+  | EFromServer ident -> script_of_value (lookup env ident)
+  | _ -> failwith "script_of_expression: cannot compile"
 	       
-let rec string_of_jexpression = function
-  | JInteger (n) -> string_of_int n
-  | JIdent (s) -> s
-  | JString (s) -> "\"" ^ s ^ "\""
-  | JBoolean (true) -> "true"
-  | JBoolean (false) -> "false"
-  | JPlus (e1, e2) -> "(" ^ "(" ^ (string_of_jexpression e1) ^ ")" ^ "+"
-		      ^ "(" ^ (string_of_jexpression e2) ^ ")" ^ ")"
-  | JIf (e1, e2, e3) -> "if (" ^ (string_of_jexpression e1) ^ "){"
-			^ (string_of_jexpression e2) ^ "} else {"
-			^ (string_of_jexpression e3) ^ "}"
-  | JFunction (s, e1) -> "function("^s^"){"^(string_of_jexpression e1)^"}"
-  | JStringAppend (e1, e2) -> "\""^(string_of_jexpression e1)^"\".concat(\""^(string_of_jexpression e2)^"\")"
-  | JVar (s, e1) -> "var "^s^" = "^(string_of_jexpression e1)^""
-  | JApplication (s, e1) -> s^"("^(string_of_jexpression e1)^")"
-  | JBlock(l) -> (List.fold_left (fun acc e -> acc ^ (string_of_jexpression e)^";") "{" l) ^"}"
+let rec string_of_script = function
+  | SInteger (n) -> string_of_int n
+  | SIdent (s) -> s
+  | SString (s) -> "\"" ^ s ^ "\""
+  | SBoolean (true) -> "true"
+  | SBoolean (false) -> "false"
+  | SPlus (e1, e2) -> "(" ^ "(" ^ (string_of_script e1) ^ ")" ^ "+"
+		      ^ "(" ^ (string_of_script e2) ^ ")" ^ ")"
+  | SIf (e1, e2, e3) -> "if (" ^ (string_of_script e1) ^ "){"
+			^ (string_of_script e2) ^ "} else {"
+			^ (string_of_script e3) ^ "}"
+  | SFunction (s, e1) -> "function("^s^"){"^(string_of_script e1)^"}"
+  | SStringAppend (e1, e2) -> (string_of_script e1)^".concat("^(string_of_script e2)^")"
+  | SVar (s, e1) -> "var "^s^" = "^(string_of_script e1)^""
+  | SApplication (s, e1) -> s^"("^(string_of_script e1)^")"
+  | SBlock(l) -> (List.fold_left (fun acc e -> acc ^ (string_of_script e)^";") "{" l) ^"}"
 
 let rec value_to_html = function
   | VTag (tag, l) ->
@@ -97,7 +110,7 @@ let rec value_to_html = function
      ^ (List.fold_left (fun acc vt -> (value_to_html vt) ^ acc) "" l)
      ^ "</" ^ tag ^ ">"
   | VString s -> s
-  | VJs e -> "<script>"^(string_of_jexpression (jexpression_of_expression e))^"</script>"
+  | VScript e -> "<script>"^(string_of_script e)^"</script>"
   | VList l -> (List.fold_left (fun acc vt -> (value_to_html vt) ^ acc) "" l)
   | _ -> failwith "value_to_html: not implemented"
 
@@ -168,7 +181,8 @@ let rec eval env = function
       | VInteger s -> VString (string_of_int s)
       | _ -> failwith "Integer expected")
   | EHtml e -> VString ("<html>"^(value_to_html (eval env e))^"</html>")
-  | EJs e -> VJs e
+  | EScript e -> VScript (script_of_expression env e)
+  | EFromServer _ -> failwith "eval EFromServer: cannot be executed on server. should be executed on client"
   | EApplication (e1, e2) -> 
      (match eval env e1 with
       | VClosure (s', e', env') ->
@@ -200,7 +214,8 @@ let rec string_of_expression = function
   | EStringToInt e -> "(string->int "^(string_of_expression e)^")"
   | EIntToString e -> "(int->string "^(string_of_expression e)^")"
   | EHtml e -> "(html "^(string_of_expression e)^")"
-  | EJs e -> "(js "^(string_of_expression e)^")"
+  | EScript e -> "(script "^(string_of_expression e)^")"
+  | EFromServer ident -> "(from-server "^ident^")"
   | EApplication (e1, e2) -> 
      "(" ^ (string_of_expression e1) ^ " " ^ (string_of_expression e2) ^ ")"
 
@@ -214,4 +229,4 @@ let rec string_of_value = function
   | VTag (s, l) -> 
      (List.fold_right (fun v acc -> acc ^ " " ^ (string_of_value v)) l ("(tag \""^s^"\"")) ^ ")"
   | VClosure (s, e, env) -> "#CLOSURE"
-  | VJs e -> "(js "^(string_of_expression e)^")"
+  | VScript e -> "(script "^(string_of_script e)^")"
