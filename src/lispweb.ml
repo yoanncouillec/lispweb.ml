@@ -148,7 +148,6 @@ let rec value_to_html = function
      "<" ^ tag 
      ^ (List.fold_left 
 	  (fun acc attr ->
-	   (print_endline (string_of_value attr));
 	   (match attr with
 	    | VList((VString attrname)::attrvalue::[]) -> acc ^ " " ^ attrname ^ "='"^(value_to_html attrvalue)^"' "
 	    | _ -> failwith "value_to_html VTag: attribute is not a couple")) 
@@ -162,7 +161,51 @@ let rec value_to_html = function
   | VList l -> (List.fold_left (fun acc vt -> acc ^ (value_to_html vt)) "" l)
   | _ -> failwith "value_to_html: not implemented" (* TODO *)
 
-let rec eval env = function
+let rec chars_of_string acc s = 
+  if String.length s = 0 then
+    acc
+  else
+    chars_of_string (acc@[String.get s 0]) (String.sub s 1 ((String.length s)-1))
+
+let rec print_chars = function
+  | [] -> print_endline "";
+  | hd::rest -> print_string "[" ; print_char hd ; print_string "]" ; print_chars rest
+
+let rec read_headers headers cin = 
+    let line = input_line cin in
+    (if String.compare line "\r" = 0 then
+       headers
+    else 
+       read_headers (headers@[line]) cin)
+
+let rec serve_client env client = 
+  let cin = Unix.in_channel_of_descr client in
+  let cout = Unix.out_channel_of_descr client in
+  (match Str.split_delim (Str.regexp " ") (input_line cin) with
+   | cmd::qs::prtcl::[] -> 
+      (match Str.split_delim (Str.regexp "?") qs with
+       | uri::arg::[] ->
+	  (match lookup env uri with
+	   | VClosure (parameter, body, env') ->
+	      (match Str.split_delim (Str.regexp "=") arg with
+	       | key::value::[] ->
+		  if key = parameter then
+		    (match eval (extend env' parameter (VString value)) body with
+		     | VString s as res ->
+			let headers = read_headers [] cin in
+			output_string cout ("HTTP/1.1 200 OK\n\n" ^ s) ; 
+			flush cout ;
+			(*Unix.close client ;
+			       Unix.close server ;*)
+			res
+		     | _ -> failwith "eval EListen: expects a string for query string parameter value")
+		  else failwith "eval EListen: query string parameter name does not match argument name of called service"
+	       | _ -> failwith "eval EListen: query string parameter is malformed, should be one key=value")
+	   | _ -> failwith "eval EListen: uri does not match any function in the execution environment")
+       | _ -> failwith "eval EListen: query string does not contain parameter, it is mandatory in this semantic")
+   | _ -> failwith "eval EListen: http command line is malformed, should be:  <command> <query_string> <protocol>, ex: GET /hello?name=Alan  HTTP/1.1")
+
+and eval env = function
   | EInteger n -> VInteger n
   | EIdent s -> lookup env s
   | EString s -> VString s
@@ -185,31 +228,7 @@ let rec eval env = function
 	 let address = Unix.inet_addr_of_string "127.0.0.1" in 
 	 Unix.bind server (Unix.ADDR_INET(address, port));
 	 Unix.listen server 100;
-	 let client = fst (Unix.accept server) in
-	 let cin = Unix.in_channel_of_descr client in
-	 let cout = Unix.out_channel_of_descr client in
-	 (match Str.split_delim (Str.regexp " ") (input_line cin) with
-	  | cmd::qs::prtcl::[] -> 
-	     (match Str.split_delim (Str.regexp "?") qs with
-	      | uri::arg::[] ->
-		 (match lookup env uri with
-		  | VClosure (parameter, body, env') ->
-		     (match Str.split_delim (Str.regexp "=") arg with
-		      | key::value::[] ->
-			 if key = parameter then
-			   (match eval (extend env' parameter (VString value)) body with
-			    | VString s as res ->
-			       output_string cout ("HTTP/1.1 200 OK\n\n" ^ s) ; 
-			       flush cout ;
-			       Unix.close client ;
-			       Unix.close server ;
-			       res
-			    | _ -> failwith "eval EListen: expects a string for query string parameter value")
-			 else failwith "eval EListen: query string parameter name does not match argument name of called service"
-		      | _ -> failwith "eval EListen: query string parameter is malformed, should be one key=value")
-		  | _ -> failwith "eval EListen: uri does not match any function in the execution environment")
-	      | _ -> failwith "eval EListen: query string does not contain parameter, it is mandatory in this semantic")
-	  | _ -> failwith "eval EListen: http command line is malformed, should be:  <command> <query_string> <protocol>, ex: GET /hello?name=Alan  HTTP/1.1")
+	 serve_client env (fst (Unix.accept server))
       | _ -> failwith "eval EListen: port should be of type integer")
   | EList l -> VList (List.fold_left (fun acc e -> acc@[(eval env e)]) [] l)
   | ETag (tag, attributes, expressions) ->

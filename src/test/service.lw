@@ -1,1 +1,6 @@
-(let (/hello (lambda (name) (html (body (script (alert (string-append "hello" (from-server name)))))))) (listen 8080))
+(let (/hello (lambda (name) 
+	       (html 
+		(body 
+		 (script 
+		  (alert (string-append "hello" (from-server name)))))))) 
+  (listen 8080))
