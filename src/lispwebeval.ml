@@ -19,10 +19,10 @@ let _ =
   try
     let expression = Parser.start Lexer.token lexbuf in
     let env = [] in
-    let tags = ["head";"body";"div";"span";"form";"input"] in
-    let env = List.fold_left (fun env tag -> extend env tag (parse env ("(lambda (l"^tag^") (tag \""^tag^"\" l"^tag^"))"))) env tags in
-    let env = populate_env env [("id","(lambda (x) x)");
-				("idd","(lambda (x) (id x))")] in
+    (* let tags = ["head";"body";"div";"span";"form";"input";"button"] in *)
+    (* let env = List.fold_left (fun env tag -> extend env tag (parse env ("(lambda (l"^tag^") (tag \""^tag^"\" l"^tag^"))"))) env tags in *)
+    (* let env = populate_env env [("id","(lambda (x) x)"); *)
+    (* 				("idd","(lambda (x) (id x))")] in *)
     let value = eval env expression in
     print_string (string_of_value value) ; print_newline ()
   with 

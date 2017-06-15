@@ -27,7 +27,15 @@ expression:
 | LPAREN LISTEN expression RPAREN { Lispweb.EListen ($3) }
 | LPAREN LIST RPAREN { Lispweb.EList ([]) }
 | LPAREN LIST expressions RPAREN { Lispweb.EList ($3) }
-| LPAREN TAG expression expressions RPAREN { Lispweb.ETag ($3, $4) }
+
+ (*
+ (tag <tagname> <attributes> <expression> ...)
+ (tag "html" (list) "lipsum")
+ (tag "html" (list (list "onclick" (script (alert "click")))) "lipsum")
+ (tag "p" '(list) (tag "span" (list) "lipsum"))
+ (tag "p" '(list) (tag "span" (list) "lipsum") (tag "div" (list) "webum"))
+ *)
+| LPAREN TAG expression expression expressions RPAREN { Lispweb.ETag ($3, $4, $5) }
 | LPAREN STRING_APPEND expression expression RPAREN { Lispweb.EStringAppend ($3, $4) }
 | LPAREN STRING_TO_INT expression RPAREN { Lispweb.EStringToInt ($3) }
 | LPAREN INT_TO_STRING expression RPAREN { Lispweb.EIntToString ($3) }

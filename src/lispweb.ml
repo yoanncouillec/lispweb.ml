@@ -12,7 +12,7 @@ type expression =
   | ELet of ident * expression * expression
   | EListen of expression
   | EList of expression list
-  | ETag of expression * expression list 
+  | ETag of expression * expression * expression list 
   | EStringAppend of expression * expression
   | EStringToInt of expression
   | EIntToString of expression
@@ -42,7 +42,7 @@ and value =
   | VQuote of expression
   | VBoolean of bool
   | VList of value list
-  | VTag of string * value list
+  | VTag of string * value * value list (* tagname attributes content *)
   | VClosure of string * expression * environment
   | VScript of script
 
@@ -54,7 +54,63 @@ let rec lookup env s =
 
 let extend env s v = (s, v) :: env
 
-(* JS *)
+let rec string_of_expression = function
+  | EInteger n -> string_of_int n
+  | EIdent s -> s
+  | EString s -> "\"" ^ s ^ "\""
+  | EQuote e -> "'" ^ (string_of_expression e)
+  | EBoolean b -> string_of_bool b
+  | EPlus (e1, e2) -> "(+ "^(string_of_expression e1)^(string_of_expression e2)^")"
+  | EIf (e1, e2, e3) -> 
+     "(if " ^ (string_of_expression e1) 
+     ^ " " ^ (string_of_expression e2)
+     ^ " " ^ (string_of_expression e3) ^ ")"
+  | ELambda (s, e) -> "(lambda (" ^ s ^ ") " ^ (string_of_expression e) ^ ")"
+  | ELet (s, e1, e2) -> "(let ("^s^" "^(string_of_expression e1)^") "^(string_of_expression e2)^")"
+  | EListen e1 -> "(listen "^(string_of_expression e1)^")"
+  | EList l -> "(list"^(List.fold_left (fun acc e -> acc ^ " " ^(string_of_expression e)) "" l)^")"
+  | ETag (e, _, l) -> (* TODO *)
+     "(tag "^(string_of_expression e)^" "
+     ^(List.fold_left (fun acc e -> acc^" "^(string_of_expression e)) "" l)
+     ^")"
+  | EStringAppend (e1, e2) -> 
+     "(string-append "^(string_of_expression e1)^" "^(string_of_expression e2)^")"
+  | EStringToInt e -> "(string->int "^(string_of_expression e)^")"
+  | EIntToString e -> "(int->string "^(string_of_expression e)^")"
+  | EHtml e -> "(html "^(string_of_expression e)^")"
+  | EScript e -> "(script "^(string_of_expression e)^")"
+  | EFromServer ident -> "(from-server "^ident^")"
+  | EApplication (e1, e2) -> 
+     "(" ^ (string_of_expression e1) ^ " " ^ (string_of_expression e2) ^ ")"
+
+and string_of_value = function
+  | VInteger n -> string_of_int n
+  | VString s -> "\"" ^ s ^ "\""
+  | VQuote e -> "'" ^ (string_of_expression e)
+  | VBoolean b -> string_of_bool b
+  | VList l -> 
+     (List.fold_left (fun acc v -> acc ^ " " ^ (string_of_value v)) "(list" l) ^ ")"
+  | VTag (s, _, l) -> (* TODO *)
+     (List.fold_left (fun acc v -> acc ^ " " ^ (string_of_value v)) ("(tag \""^s^"\"") l) ^ ")"
+  | VClosure (s, e, env) -> "#CLOSURE"
+  | VScript e -> "(script "^(string_of_script e)^")"
+
+and string_of_script = function
+  | SInteger (n) -> string_of_int n
+  | SIdent (s) -> s
+  | SString (s) -> "\"" ^ s ^ "\""
+  | SBoolean (true) -> "true"
+  | SBoolean (false) -> "false"
+  | SPlus (e1, e2) -> "(" ^ "(" ^ (string_of_script e1) ^ ")" ^ "+"
+		      ^ "(" ^ (string_of_script e2) ^ ")" ^ ")"
+  | SIf (e1, e2, e3) -> "if (" ^ (string_of_script e1) ^ "){"
+			^ (string_of_script e2) ^ "} else {"
+			^ (string_of_script e3) ^ "}"
+  | SFunction (s, e1) -> "function("^s^"){"^(string_of_script e1)^"}"
+  | SStringAppend (e1, e2) -> (string_of_script e1)^".concat("^(string_of_script e2)^")"
+  | SVar (s, e1) -> "var "^s^" = "^(string_of_script e1)^""
+  | SApplication (s, e1) -> s^"("^(string_of_script e1)^")"
+  | SBlock(l) -> (List.fold_left (fun acc e -> acc ^ (string_of_script e)^";") "{" l) ^"}"
 
 let rec script_of_value = function
   | VInteger n -> SInteger n
@@ -62,7 +118,7 @@ let rec script_of_value = function
   | VQuote _ -> failwith "script_of_value: cannot compile value of type VQuote to script"
   | VBoolean b -> SBoolean b
   | VList _ -> failwith "script_of_value: cannot compile value of type VList to script. will be compiled to array in further version"
-  | VTag (_,_) -> failwith "script_of_value: cannot compile value of type VTag to script"
+  | VTag (_,_,_) -> failwith "script_of_value: cannot compile value of type VTag to script"
   | VClosure (s, e, env) -> failwith "script_of_value: cannot compile value of type VClosure to script. will be compiled to ScriptValueClosure in further version. need a compiler from value to script_value. then need to define script_value"
   | VScript s -> failwith "script_of_value: cannot compile value of type VScript to script"
 
@@ -87,32 +143,24 @@ let rec script_of_expression env = function
   | EFromServer ident -> script_of_value (lookup env ident)
   | _ -> failwith "script_of_expression: cannot compile"
 	       
-let rec string_of_script = function
-  | SInteger (n) -> string_of_int n
-  | SIdent (s) -> s
-  | SString (s) -> "\"" ^ s ^ "\""
-  | SBoolean (true) -> "true"
-  | SBoolean (false) -> "false"
-  | SPlus (e1, e2) -> "(" ^ "(" ^ (string_of_script e1) ^ ")" ^ "+"
-		      ^ "(" ^ (string_of_script e2) ^ ")" ^ ")"
-  | SIf (e1, e2, e3) -> "if (" ^ (string_of_script e1) ^ "){"
-			^ (string_of_script e2) ^ "} else {"
-			^ (string_of_script e3) ^ "}"
-  | SFunction (s, e1) -> "function("^s^"){"^(string_of_script e1)^"}"
-  | SStringAppend (e1, e2) -> (string_of_script e1)^".concat("^(string_of_script e2)^")"
-  | SVar (s, e1) -> "var "^s^" = "^(string_of_script e1)^""
-  | SApplication (s, e1) -> s^"("^(string_of_script e1)^")"
-  | SBlock(l) -> (List.fold_left (fun acc e -> acc ^ (string_of_script e)^";") "{" l) ^"}"
-
 let rec value_to_html = function
-  | VTag (tag, l) ->
-     "<" ^ tag ^ ">"
-     ^ (List.fold_left (fun acc vt -> (value_to_html vt) ^ acc) "" l)
+  | VTag (tag, VList attrs, l) ->
+     "<" ^ tag 
+     ^ (List.fold_left 
+	  (fun acc attr ->
+	   (print_endline (string_of_value attr));
+	   (match attr with
+	    | VList((VString attrname)::attrvalue::[]) -> acc ^ " " ^ attrname ^ "='"^(value_to_html attrvalue)^"' "
+	    | _ -> failwith "value_to_html VTag: attribute is not a couple")) 
+	  "" 
+	  attrs)
+     ^ ">"
+     ^ (List.fold_left (fun acc vt -> acc ^ (value_to_html vt)) "" l)
      ^ "</" ^ tag ^ ">"
   | VString s -> s
-  | VScript e -> "<script>"^(string_of_script e)^"</script>"
-  | VList l -> (List.fold_left (fun acc vt -> (value_to_html vt) ^ acc) "" l)
-  | _ -> failwith "value_to_html: not implemented"
+  | VScript e -> (string_of_script e)
+  | VList l -> (List.fold_left (fun acc vt -> acc ^ (value_to_html vt)) "" l)
+  | _ -> failwith "value_to_html: not implemented" (* TODO *)
 
 let rec eval env = function
   | EInteger n -> VInteger n
@@ -163,10 +211,14 @@ let rec eval env = function
 	      | _ -> failwith "eval EListen: query string does not contain parameter, it is mandatory in this semantic")
 	  | _ -> failwith "eval EListen: http command line is malformed, should be:  <command> <query_string> <protocol>, ex: GET /hello?name=Alan  HTTP/1.1")
       | _ -> failwith "eval EListen: port should be of type integer")
-  | EList l -> VList (List.fold_left (fun acc e -> (eval env e)::acc) [] l)
-  | ETag (e1, l) ->
-     (match eval env e1 with
-      | VString s  -> VTag (s, List.fold_left (fun acc e -> (eval env e) :: acc) [] l)
+  | EList l -> VList (List.fold_left (fun acc e -> acc@[(eval env e)]) [] l)
+  | ETag (tag, attributes, expressions) ->
+     (match eval env tag with
+      | VString s  -> 
+	 VTag (s, 
+	       eval env attributes,
+	       List.fold_left
+		 (fun acc e -> acc@[(eval env e)]) [] expressions)
       | _ -> failwith "tag: expect a string as first argument")
   | EStringAppend (e1, e2) -> 
      (match (eval env e1, eval env e2) with
@@ -190,43 +242,3 @@ let rec eval env = function
 	 eval (extend env' s' arg) e'
       | _ -> failwith "Not a closure")
 
-let rec string_of_expression = function
-  | EInteger n -> string_of_int n
-  | EIdent s -> s
-  | EString s -> "\"" ^ s ^ "\""
-  | EQuote e -> "'" ^ (string_of_expression e)
-  | EBoolean b -> string_of_bool b
-  | EPlus (e1, e2) -> "(+ "^(string_of_expression e1)^(string_of_expression e2)^")"
-  | EIf (e1, e2, e3) -> 
-     "(if " ^ (string_of_expression e1) 
-     ^ " " ^ (string_of_expression e2)
-     ^ " " ^ (string_of_expression e3) ^ ")"
-  | ELambda (s, e) -> "(lambda (" ^ s ^ ") " ^ (string_of_expression e) ^ ")"
-  | ELet (s, e1, e2) -> "(let ("^s^" "^(string_of_expression e1)^") "^(string_of_expression e2)^")"
-  | EListen e1 -> "(listen "^(string_of_expression e1)^")"
-  | EList l -> "(list"^(List.fold_left (fun acc e -> " "^(string_of_expression e)) "" l)^")"
-  | ETag (e, l) -> 
-     "(tag "^(string_of_expression e)^" "
-     ^(List.fold_left (fun acc e -> " "^(string_of_expression e)^acc) "" l)
-     ^")"
-  | EStringAppend (e1, e2) -> 
-     "(string-append "^(string_of_expression e1)^" "^(string_of_expression e2)^")"
-  | EStringToInt e -> "(string->int "^(string_of_expression e)^")"
-  | EIntToString e -> "(int->string "^(string_of_expression e)^")"
-  | EHtml e -> "(html "^(string_of_expression e)^")"
-  | EScript e -> "(script "^(string_of_expression e)^")"
-  | EFromServer ident -> "(from-server "^ident^")"
-  | EApplication (e1, e2) -> 
-     "(" ^ (string_of_expression e1) ^ " " ^ (string_of_expression e2) ^ ")"
-
-let rec string_of_value = function
-  | VInteger n -> string_of_int n
-  | VString s -> "\"" ^ s ^ "\""
-  | VQuote e -> "'" ^ (string_of_expression e)
-  | VBoolean b -> string_of_bool b
-  | VList l -> 
-     (List.fold_right (fun v acc -> acc ^ " " ^ (string_of_value v)) l "(list") ^ ")"
-  | VTag (s, l) -> 
-     (List.fold_right (fun v acc -> acc ^ " " ^ (string_of_value v)) l ("(tag \""^s^"\"")) ^ ")"
-  | VClosure (s, e, env) -> "#CLOSURE"
-  | VScript e -> "(script "^(string_of_script e)^")"
