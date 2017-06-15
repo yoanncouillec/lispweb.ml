@@ -1,7 +1,7 @@
-all: bin/lispwebrepl #arithc arithrun arithopt
+all: lispwebrepl #arithc arithrun arithopt
 
-bin/lispwebrepl: obj/lispweb.cmo obj/parser.cmi obj/parser.cmo obj/lexer.cmo obj/lispwebrepl.cmo
-	ocamlc -o $@ str.cma unix.cma obj/lispweb.cmo obj/parser.cmo obj/lexer.cmo obj/lispwebrepl.cmo
+lispwebrepl: lispweb.cmo parser.cmi parser.cmo lexer.cmo lispwebrepl.cmo
+	ocamlc -o $@ str.cma unix.cma lispweb.cmo parser.cmo lexer.cmo lispwebrepl.cmo
 
 arithc: lispweb.cmo parser.cmi parser.cmo lexer.cmo arithc.cmo
 	ocamlc -o $@ lispweb.cmo parser.cmo lexer.cmo arithc.cmo
@@ -32,10 +32,10 @@ arithopt: lispweb.cmo parser.cmi parser.cmo lexer.cmo arithopt.cmo
 .mli.cmi:
 	ocamlc -c $^
 
-obj/%.cmi:src/%.ml
+%.cmi:%.ml
 	ocamlc -c $^ -o $@
 
-obj/%.cmo:src/%.ml
+%.cmo:%.ml
 	ocamlc -c $^ -o $@
 
 test: arithc arithrun arithopt
@@ -46,7 +46,7 @@ test: arithc arithrun arithopt
 	ld test.o -o test -macosx_version_min 10.7
 
 clean:
-	rm -rf *.cm* lispwebeval arithc arithrun arithopt \#*\# *.mli *.bytecode *.s *.o test
+	rm -rf *.cm* lispwebrepl \#*\# *.mli *.bytecode *.s *.o test
 
 mrproper: clean
 	rm -rf *~
