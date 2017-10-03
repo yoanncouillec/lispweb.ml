@@ -49,7 +49,7 @@ Copy/past in your browser
 http://localhost:9091/inc?a=41
 ```
 
-<img src="inc.png" alt="Drawing" style="width: 100px;"/>
+<img src="inc.png" alt="Drawing" style="width: 50px;"/>
 
 It will always answer 42 ;)
 
