@@ -6,7 +6,7 @@ LispWeb is a functional web language with native support of data sources.
 It is an all-in-one language (a.k.a. multi-tier). 
 It supports server code, client code and data sources code in only a single language.
 
-- Functional: because function is a first class citizen, the expressiveness becomes high.
+- Functional: the high expressiveness of functional programming languages is mainly due to functions that are [first-class citizen](https://en.wikipedia.org/wiki/First-class_citizen)
 
 In functional languages you can sum integers in a very class manner
 
@@ -14,7 +14,7 @@ In functional languages you can sum integers in a very class manner
 List.fold_left (fun sum x -> sum + x) 0 [1;2;3] (*OCaml*)
 ```
 
-Copy/paste to try
+Copy/paste
 
 `echo "print_int(List.fold_left (fun sum x -> sum + x) 0 [1;2;3])" | ocaml -stdin`
 
