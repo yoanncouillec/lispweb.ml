@@ -39,11 +39,11 @@ void h(int x, int y){}
 int main() {h(f(),g());printf("%c\n",c);return 0;}
 ```
 
-with 
+It will display "f" because execute order is *right to left*.
+
+Copy/paste 
 
 `printf "#include <stdio.h>\nchar c='a';int f(){c='f';return 6;}int g(){c='f';return 7;}void h(int x,int y){}int main(){h(f(),g());printf(\"%%c\",c);return 0;}\n" | gcc -x c - & ./a.out`.
-
-It will display "f" because execute order is *right to left*.
 
 ## Demo
 You can test a fully working live demo at https://antun.me/node-chat/
