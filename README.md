@@ -7,15 +7,22 @@ It is an all-in-one language (a.k.a. multi-tier).
 It supports server code, client code and data sources code in only a single language.
 
 - Functional: because function is a first class citizen, the expressiveness becomes high.
-In functional languages you can sum integers in a very class manner:
+
+In functional languages you can sum integers in a very class manner
+
 ```ocaml
 List.fold_left (fun sum x -> sum + x) 0 [1;2;3] (*OCaml*)
 ```
-Try it with `echo "print_int(List.fold_left (fun sum x -> sum + x) 0 [1;2;3])" | ocaml -stdin`
+
+Try it with
+
+`echo "print_int(List.fold_left (fun sum x -> sum + x) 0 [1;2;3])" | ocaml -stdin`
 
 - Lisp: parenthesis is a big advantage because it leaves no space for ambiguity.
 Do you know that in C, arguments of function are evaluated in reverse order?
+
 If you try to compile and execute
+
 ```c
 #include <stdio.h>
 char c = 'a';
@@ -24,7 +31,11 @@ int g(){c = 'f';return 7;}
 void h(int x, int y){}
 int main() {h(f(),g());printf("%c\n",c);return 0;}
 ```
-with `printf "#include <stdio.h>\nchar c='a';int f(){c='f';return 6;}int g(){c='f';return 7;}void h(int x,int y){}int main(){h(f(),g());printf(\"%%c\",c);return 0;}\n" | gcc -x c - & ./a.out`.
+
+with 
+
+`printf "#include <stdio.h>\nchar c='a';int f(){c='f';return 6;}int g(){c='f';return 7;}void h(int x,int y){}int main(){h(f(),g());printf(\"%%c\",c);return 0;}\n" | gcc -x c - & ./a.out`.
+
 It will display "f" because execute order is *right to left*.
 
 ## Demo
