@@ -1,4 +1,4 @@
-(let (/button (lambda (name) 
+(let (/add (lambda (name) 
 		(html
 		 (tag "body" (list)
 		      (tag "button" 

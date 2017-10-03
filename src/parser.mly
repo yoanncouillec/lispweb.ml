@@ -27,7 +27,6 @@ expression:
 | LPAREN LISTEN expression RPAREN { Lispweb.EListen ($3) }
 | LPAREN LIST RPAREN { Lispweb.EList ([]) }
 | LPAREN LIST expressions RPAREN { Lispweb.EList ($3) }
-
  (*
  (tag <tagname> <attributes> <expression> ...)
  (tag "html" (list) "lipsum")

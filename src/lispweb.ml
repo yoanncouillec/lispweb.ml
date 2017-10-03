@@ -50,7 +50,7 @@ let rec lookup env s =
   match env with
   | (s',v') :: rest ->
      if s = s' then v' else lookup rest s
-  | [] -> failwith "No such binding"
+  | [] -> failwith ("No such binding: "^s)
 
 let extend env s v = (s, v) :: env
 
@@ -158,6 +158,7 @@ let rec value_to_html = function
      ^ "</" ^ tag ^ ">"
   | VString s -> s
   | VScript e -> (string_of_script e)
+  | VInteger n -> string_of_int n
   | VList l -> (List.fold_left (fun acc vt -> acc ^ (value_to_html vt)) "" l)
   | _ -> failwith "value_to_html: not implemented" (* TODO *)
 
@@ -214,6 +215,7 @@ and eval env = function
   | EPlus (e1, e2) ->
      (match (eval env e1, eval env e2) with
       | (VInteger n1, VInteger n2) -> VInteger (n1 + n2)
+      | (VString s1, VInteger n2) -> VInteger ((int_of_string s1) + n2)
       | _ -> failwith "+: Integer expected")
   | EIf (e1, e2, e3) ->
      (match eval env e1 with
