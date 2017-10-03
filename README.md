@@ -2,9 +2,30 @@ LispWeb
 ============
 ![Current Version](https://img.shields.io/badge/version-1.0.0--beta-green.svg)
 
-This is a node.js chat application powered by SockJS and Express that provides the main functions you'd expect from a chat, such as emojis, private messages, an admin system, etc.
+LispWeb is a functional web language with native support of data sources.
+It is an all-in-one language (a.k.a. multi-tier). 
+It supports server code, client code and data sources code in only a single language.
 
-![Chat Preview](http://i.imgur.com/lgRe8z4.png)
+- Functional: because function is a first class citizen, the expressiveness becomes high.
+In functional languages you can sum integers in a very class manner:
+```ocaml
+List.fold_left (fun sum x -> sum + x) 0 [1;2;3] (*OCaml*)
+```
+Try it with `echo "print_int(List.fold_left (fun sum x -> sum + x) 0 [1;2;3])" | ocaml -stdin`
+
+- Lisp: parenthesis is a big advantage because it leaves no space for ambiguity.
+Do you know that in C, arguments of function are evaluated in reverse order?
+If you try to compile and execute
+```c
+#include <stdio.h>
+char c = 'a';
+int f(){c = 'f';return 6;}
+int g(){c = 'f';return 7;}
+void h(int x, int y){}
+int main() {h(f(),g());printf("%c\n",c);return 0;}
+```
+with `printf "#include <stdio.h>\nchar c='a';int f(){c='f';return 6;}int g(){c='f';return 7;}void h(int x,int y){}int main(){h(f(),g());printf(\"%%c\",c);return 0;}\n" | gcc -x c - & ./a.out`.
+It will display "f" because execute order is *right to left*.
 
 ## Demo
 You can test a fully working live demo at https://antun.me/node-chat/
