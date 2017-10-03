@@ -10,11 +10,13 @@ It supports server code, client code and data sources code in only a single lang
 
 The high expressiveness of functional programming languages is mainly due to functions that are [first-class citizen](https://en.wikipedia.org/wiki/First-class_citizen)
 
-In functional languages you can sum integers in a very class manner
+In functional languages you can sum integers without managing an index or using a for-each loop.
 
 ```ocaml
 List.fold_left (fun sum x -> sum + x) 0 [1;2;3] (*OCaml*)
 ```
+
+You express everything in a declarative manner, saying exactly what you need.
 
 Copy/paste
 
