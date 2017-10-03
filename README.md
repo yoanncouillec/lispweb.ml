@@ -14,9 +14,13 @@ In functional languages you can sum integers in a very class manner
 List.fold_left (fun sum x -> sum + x) 0 [1;2;3] (*OCaml*)
 ```
 
-Try it with
+Copy/paste to try
 
 `echo "print_int(List.fold_left (fun sum x -> sum + x) 0 [1;2;3])" | ocaml -stdin`
+
+It will display
+
+`6`
 
 - Lisp: parenthesis is a big advantage because it leaves no space for ambiguity.
 Do you know that in C, arguments of function are evaluated in reverse order?
