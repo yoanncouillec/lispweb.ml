@@ -49,7 +49,7 @@ Copy/past in your browser
 http://localhost:9091/inc?a=41
 ```
 
-![inc](inc.png| width=100)
+![inc](inc.png)
 
 It will always answer 42 ;)
 
