@@ -49,7 +49,7 @@ Copy/past in your browser
 http://localhost:9091/inc?a=41
 ```
 
-![inc](inc.png =100x)
+<img src="inc.png" alt="Drawing" style="width: 100px;"/>
 
 It will always answer 42 ;)
 
