@@ -3,8 +3,53 @@ LispWeb
 ![Current Version](https://img.shields.io/badge/version-1.0.0--beta-green.svg)
 
 LispWeb is a functional web language with native support of data sources.
+
 It is an all-in-one language (a.k.a. multi-tier). 
+
 It supports server code, client code and data sources code in only a single language.
+
+## Server
+
+LispWeb can create servers with only the needed pieces.
+
+### Port
+
+In every languages, a server listen to a port for client.
+
+In LispWeb, you can listen to a port with
+
+```
+(listen 9090)
+```
+
+### Service
+
+The first line of HTTP client query is
+
+```
+<method> <url> <version>
+```
+
+The URL can contains query parameters.
+
+In LispWeb
+
+-  the name of the URL is the name of a function
+-  a query parameter is a parameter of the function
+
+Let's declare a very simple service that increments an integer:
+
+```scheme
+(let (/inc (lambda (a) (+ a 1))) (listen 9090))
+```
+
+Copy/past in your browser
+
+```
+http://localhost:9090/inc?a=41
+```
+
+It will always answer 42 ;)
 
 ## Functional
 
@@ -20,7 +65,9 @@ You express everything in a declarative manner, saying exactly what you need.
 
 Copy/paste
 
-`echo "print_int(List.fold_left (fun sum x -> sum + x) 0 [1;2;3])" | ocaml -stdin`
+```shell
+echo "print_int(List.fold_left (fun sum x -> sum + x) 0 [1;2;3])" | ocaml -stdin
+```
 
 It will display `6`
 
@@ -33,7 +80,7 @@ Do you know that in C, arguments of function are evaluated in reverse order?
 If you try to compile and execute
 
 ```c
-#include <stdio.h>
+#include <stdio.h> /* C */
 char c = 'a';
 int f(){c = 'f';return 6;}
 int g(){c = 'f';return 7;}
@@ -45,7 +92,9 @@ It will display "f" because execute order is *right to left*.
 
 Copy/paste 
 
-`printf "#include <stdio.h>\nchar c='a';int f(){c='f';return 6;}int g(){c='f';return 7;}void h(int x,int y){}int main(){h(f(),g());printf(\"%%c\",c);return 0;}\n" | gcc -x c - & ./a.out`.
+```shell
+printf "#include <stdio.h>\nchar c='a';int f(){c='f';return 6;}int g(){c='f';return 7;}void h(int x,int y){}int main(){h(f(),g());printf(\"%%c\",c);return 0;}\n" | gcc -x c - & ./a.out
+```
 
 ## Demo
 You can test a fully working live demo at https://antun.me/node-chat/

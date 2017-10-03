@@ -199,6 +199,11 @@ let rec serve_client env client =
 			(*Unix.close client ;
 			       Unix.close server ;*)
 			res
+		     | VInteger n as res ->
+			let headers = read_headers [] cin in
+			output_string cout ("HTTP/1.1 200 OK\n\n" ^ (string_of_int n)) ; 
+			flush cout ;
+			res
 		     | _ -> failwith "eval EListen: expects a string for query string parameter value")
 		  else failwith "eval EListen: query string parameter name does not match argument name of called service"
 	       | _ -> failwith "eval EListen: query string parameter is malformed, should be one key=value")
