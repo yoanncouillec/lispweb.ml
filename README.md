@@ -6,7 +6,9 @@ LispWeb is a functional web language with native support of data sources.
 It is an all-in-one language (a.k.a. multi-tier). 
 It supports server code, client code and data sources code in only a single language.
 
-- Functional: the high expressiveness of functional programming languages is mainly due to functions that are [first-class citizen](https://en.wikipedia.org/wiki/First-class_citizen)
+## Functional
+
+The high expressiveness of functional programming languages is mainly due to functions that are [first-class citizen](https://en.wikipedia.org/wiki/First-class_citizen)
 
 In functional languages you can sum integers in a very class manner
 
@@ -20,7 +22,10 @@ Copy/paste
 
 It will display `6`
 
-- Lisp: parenthesis is a big advantage because it leaves no space for ambiguity.
+## Parenthesis 
+
+Most people are frigthened by parenthesis while it is a big advantage. 
+It leaves no space for ambiguity.
 Do you know that in C, arguments of function are evaluated in reverse order?
 
 If you try to compile and execute
