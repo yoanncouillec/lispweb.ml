@@ -10,7 +10,7 @@ It supports server code, client code and data sources code in only a single lang
 
 ## Server
 
-LispWeb can create servers with only the needed pieces.
+LispWeb can create servers with only two pieces.
 
 ### Port
 
