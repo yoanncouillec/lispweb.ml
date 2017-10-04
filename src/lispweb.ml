@@ -14,7 +14,7 @@ type expression =
   | EBoolean of bool
   | EBinary of operator * expression * expression
   | EIf of expression * expression * expression
-  | ELambda of ident * expression
+  | ELambda of ident list * expression
   | ELet of ident * expression * expression
   | EListen of expression
   | EList of expression list
@@ -25,7 +25,7 @@ type expression =
   | EHtml of expression
   | EScript of expression
   | EFromServer of ident
-  | EApplication of expression * expression
+  | EApplication of expression * expression list
 
 type script = 
   | SInteger of int
@@ -34,10 +34,10 @@ type script =
   | SBoolean of bool
   | SBinary of operator * script * script
   | SIf of script * script * script
-  | SFunction of string * script
+  | SFunction of string list * script
   | SVar of string * script
   | SStringAppend of script * script
-  | SApplication of string * script
+  | SApplication of string * script list
   | SBlock of script list
 
 type environment = (string * value) list
@@ -49,7 +49,7 @@ and value =
   | VBoolean of bool
   | VList of value list
   | VTag of string * value * value list (* tagname attributes content *)
-  | VClosure of string * expression * environment
+  | VClosure of string list * expression * environment
   | VScript of script
 
 let rec lookup env s =
@@ -76,7 +76,7 @@ let rec string_of_expression = function
      "(if " ^ (string_of_expression e1) 
      ^ " " ^ (string_of_expression e2)
      ^ " " ^ (string_of_expression e3) ^ ")"
-  | ELambda (s, e) -> "(lambda (" ^ s ^ ") " ^ (string_of_expression e) ^ ")"
+  | ELambda (sx, e) -> "(lambda (" ^ (List.fold_left (fun a x -> a^" "^x) "" sx) ^ ") " ^ (string_of_expression e) ^ ")"
   | ELet (s, e1, e2) -> "(let ("^s^" "^(string_of_expression e1)^") "^(string_of_expression e2)^")"
   | EListen e1 -> "(listen "^(string_of_expression e1)^")"
   | EList l -> "(list"^(List.fold_left (fun acc e -> acc ^ " " ^(string_of_expression e)) "" l)^")"
@@ -91,8 +91,7 @@ let rec string_of_expression = function
   | EHtml e -> "(html "^(string_of_expression e)^")"
   | EScript e -> "(script "^(string_of_expression e)^")"
   | EFromServer ident -> "(from-server "^ident^")"
-  | EApplication (e1, e2) -> 
-     "(" ^ (string_of_expression e1) ^ " " ^ (string_of_expression e2) ^ ")"
+  | EApplication (e1, ex) -> "(" ^ (string_of_expression e1) ^ " " ^ (List.fold_left (fun a x -> a^" "^(string_of_expression x)) "" ex) ^ ")"
 
 and string_of_value = function
   | VInteger n -> string_of_int n
@@ -121,10 +120,10 @@ and string_of_script = function
   | SIf (e1, e2, e3) -> "if (" ^ (string_of_script e1) ^ "){"
 			^ (string_of_script e2) ^ "} else {"
 			^ (string_of_script e3) ^ "}"
-  | SFunction (s, e1) -> "function("^s^"){"^(string_of_script e1)^"}"
+  | SFunction (sx, e1) -> "function("^(List.fold_left (fun a x -> a^", "^x) "" sx)^"){"^(string_of_script e1)^"}"
   | SStringAppend (e1, e2) -> (string_of_script e1)^".concat("^(string_of_script e2)^")"
   | SVar (s, e1) -> "var "^s^" = "^(string_of_script e1)^""
-  | SApplication (s, e1) -> s^"("^(string_of_script e1)^")"
+  | SApplication (s, ex) -> s^"("^(List.fold_left (fun a x -> a^(string_of_script x)) "" ex)^")"
   | SBlock(l) -> (List.fold_left (fun acc e -> acc ^ (string_of_script e)^";") "{" l) ^"}"
 
 let rec script_of_value = function
@@ -151,9 +150,9 @@ let rec script_of_expression env = function
 				script_of_expression env e2])
   | EStringAppend (e1, e2) -> SStringAppend (script_of_expression env e1,
 					     script_of_expression env e2)
-  | EApplication (e1, e2) ->
+  | EApplication (e1, ex) ->
      (match e1 with
-      | EIdent s -> SApplication (s, script_of_expression env e2)
+      | EIdent s -> SApplication (s, List.map (script_of_expression env) ex)
       | _ -> failwith "script_of_expression: call expects an identifer at functional position")
   | EFromServer ident -> script_of_value (lookup env ident)
   | _ -> failwith "script_of_expression: cannot compile"
@@ -202,26 +201,34 @@ let rec serve_client env client =
       (match Str.split_delim (Str.regexp "?") qs with
        | uri::arg::[] ->
 	  (match lookup env uri with
-	   | VClosure (parameter, body, env') ->
-	      (match Str.split_delim (Str.regexp "=") arg with
-	       | key::value::[] ->
-		  if key = parameter then
-		    (match eval (extend env' parameter (VString value)) body with
-		     | VString s as res ->
-			let headers = read_headers [] cin in
-			output_string cout ("HTTP/1.1 200 OK\n\n" ^ s) ; 
-			flush cout ;
-			(*Unix.close client ;
+	   | VClosure (parameters, body, env') ->
+	      (let args = Str.split_delim (Str.regexp "&") arg in
+	       (let env'' = 
+		  List.fold_left2
+		    (fun a arg parameter ->
+		     (match Str.split_delim (Str.regexp "=") arg with
+		      | key::value::[] ->
+			 if key = parameter then
+			   (extend a parameter (VString value))
+			 else failwith "eval EListen: query string parameter name does not match argument name of called service"
+		      | _ -> failwith "eval EListen: query string parameter is malformed, should be one key=value"))
+		    env'
+		    args
+		    parameters in
+		(match eval env'' body with
+		 | VString s as res ->
+		    let headers = read_headers [] cin in
+		    output_string cout ("HTTP/1.1 200 OK\n\n" ^ s) ; 
+		    flush cout ;
+		    (*Unix.close client ;
 			       Unix.close server ;*)
-			res
-		     | VInteger n as res ->
-			let headers = read_headers [] cin in
-			output_string cout ("HTTP/1.1 200 OK\n\n" ^ (string_of_int n)) ; 
-			flush cout ;
-			res
-		     | _ -> failwith "eval EListen: expects a string for query string parameter value")
-		  else failwith "eval EListen: query string parameter name does not match argument name of called service"
-	       | _ -> failwith "eval EListen: query string parameter is malformed, should be one key=value")
+		    res
+		 | VInteger n as res ->
+		    let headers = read_headers [] cin in
+		    output_string cout ("HTTP/1.1 200 OK\n\n" ^ (string_of_int n)) ; 
+		    flush cout ;
+		    res
+		 | _ -> failwith "eval EListen: expects a string for query string parameter value")))
 	   | _ -> failwith "eval EListen: uri does not match any function in the execution environment")
        | _ -> failwith "eval EListen: query string does not contain parameter, it is mandatory in this semantic")
    | _ -> failwith "eval EListen: http command line is malformed, should be:  <command> <query_string> <protocol>, ex: GET /hello?name=Alan  HTTP/1.1")
@@ -242,7 +249,9 @@ and eval env = function
 	(match (eval env e1, eval env e2) with
 	 | (VInteger n1, VInteger n2) -> (n1,n2)
 	 | (VString s1, VInteger n2) -> ((int_of_string s1),2)
-	 | _ -> failwith "+: Integer expected"))
+	 | (VInteger n1, VString s2) -> (n1,int_of_string s2)
+	 | (VString s1, VString s2) -> (int_of_string s1,int_of_string s2)
+	 | _ -> failwith "binary operator: Integer expected"))
   | EIf (e1, e2, e3) ->
      (match eval env e1 with
       | VBoolean false -> eval env e3
@@ -282,10 +291,17 @@ and eval env = function
   | EHtml e -> VString ("<html>"^(value_to_html (eval env e))^"</html>")
   | EScript e -> VScript (script_of_expression env e)
   | EFromServer _ -> failwith "eval EFromServer: cannot be executed on server. should be executed on client"
-  | EApplication (e1, e2) -> 
+  | EApplication (e1, ex) -> 
      (match eval env e1 with
-      | VClosure (s', e', env') ->
-	 let arg = eval env e2 in
-	 eval (extend env' s' arg) e'
+      | VClosure (s'x, e', env') ->
+	     eval  
+	       (List.fold_left2
+		  (fun env'' s' e ->
+		   let arg = eval env e in
+		   (extend env'' s' arg))
+		  env'
+		  s'x
+		  ex)
+	       e'
       | _ -> failwith "Not a closure")
 

@@ -26,7 +26,8 @@ expression:
 | LPAREN MULT expression expression RPAREN { Lispweb.EBinary (Lispweb.OMult, $3, $4) }
 | LPAREN DIV expression expression RPAREN { Lispweb.EBinary (Lispweb.ODiv, $3, $4) }
 | LPAREN IF expression expression expression RPAREN { Lispweb.EIf ($3, $4, $5) }
-| LPAREN LAMBDA LPAREN IDENT RPAREN expression RPAREN { Lispweb.ELambda ($4, $6) }
+| LPAREN LAMBDA LPAREN RPAREN expression RPAREN { Lispweb.ELambda ([], $5) }
+| LPAREN LAMBDA LPAREN parameters RPAREN expression RPAREN { Lispweb.ELambda ($4, $6) }
 | LPAREN LET LPAREN IDENT expression RPAREN expression RPAREN { Lispweb.ELet ($4, $5, $7) }
 | LPAREN LISTEN expression RPAREN { Lispweb.EListen ($3) }
 | LPAREN LIST RPAREN { Lispweb.EList ([]) }
@@ -45,4 +46,14 @@ expression:
 | LPAREN HTML expression RPAREN { Lispweb.EHtml ($3) }
 | LPAREN SCRIPT expression RPAREN { Lispweb.EScript ($3) }
 | LPAREN FROM_SERVER IDENT RPAREN { Lispweb.EFromServer ($3) }
-| LPAREN expression expression RPAREN { Lispweb.EApplication ($2, $3) }
+| LPAREN expression RPAREN { Lispweb.EApplication ($2, []) }
+| LPAREN expression arguments RPAREN { Lispweb.EApplication ($2, $3) }
+
+parameters:
+| IDENT { [$1] }
+| IDENT parameters { $1::$2 }
+
+arguments:
+| expression { [$1] }
+| expression arguments { $1::$2 }
+
