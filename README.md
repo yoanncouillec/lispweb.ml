@@ -37,6 +37,8 @@ In LispWeb
 -  the name of the URL is the name of a function
 -  a query parameter is a parameter of the function
 
+#### Incrementing service
+
 Let's declare a very simple service that increments an integer:
 
 ```scheme
@@ -62,6 +64,8 @@ http://localhost:9091/math/inc?a=41
 ![](inc.png)
 
 It will always answer 42 ;)
+
+#### Doubling service
 
 You could define the *doubling* service
 
