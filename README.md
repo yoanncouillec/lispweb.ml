@@ -40,10 +40,10 @@ In LispWeb
 Let's declare a very simple service that increments an integer:
 
 ```scheme
-(let (/inc (lambda (a) (+ a 1))) (listen 9091))
+(let (/math/inc (lambda (a) (+ a 1))) (listen 9091))
 ```
 
-There is no need for a different treatment for functions and services.
+There is no need for a *special* treatment for functions and services.
 A service is a function.
 
 Syntactically speaking, `/` is valid in Scheme which is the richest languages for identificators.
@@ -55,7 +55,7 @@ Unfortunatelly you can't name a function like `;-)`. What a shame.
 Copy/past in your browser
 
 ```
-http://localhost:9091/inc?a=41
+http://localhost:9091/math/inc?a=41
 ```
 ![](inc.png)
 

@@ -1,5 +1,3 @@
 (let (/inc (lambda (a)
-	     (lambda (b)
-	       (html
-		(+ a b)))))
-  (listen 9091))
+	      (+ a 1)))
+  (listen 9090))
