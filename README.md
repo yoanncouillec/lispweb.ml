@@ -84,17 +84,18 @@ If you try to compile and execute
 #include <stdio.h> /* C */
 char c = 'a';
 int f(){c = 'f';return 6;}
-int g(){c = 'f';return 7;}
+int g(){c = 'g';return 7;}
 void h(int x, int y){}
 int main() {h(f(),g());printf("%c\n",c);return 0;}
 ```
 
-It will display "f" because execute order is *right to left*.
+It will display `f` with gcc because execute order is *right to left*.
+It will display `g` with clang.
 
 Copy/paste 
 
 ```shell
-printf "#include <stdio.h>\nchar c='a';int f(){c='f';return 6;}int g(){c='f';return 7;}void h(int x,int y){}int main(){h(f(),g());printf(\"%%c\",c);return 0;}\n" | gcc -x c - & ./a.out
+printf "#include <stdio.h>\nchar c='a';int f(){c='f';return 6;}int g(){c='g';return 7;}void h(int x,int y){}int main(){h(f(),g());printf(\"%%c\",c);return 0;}\n" | gcc -x c - & ./a.out
 ```
 
 ## Demo
