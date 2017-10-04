@@ -49,7 +49,9 @@ A service is a function.
 Syntactically speaking, `/` is valid in Scheme which is the richest languages for identificators.
 
 Then you could name functions like `/api/v1/users`. 
+
 Or with the more exotic `#-@{]*&%$!`.
+
 Unfortunatelly you can't name a function like `;-)`. What a shame.
 
 Copy/past in your browser
@@ -60,6 +62,19 @@ http://localhost:9091/math/inc?a=41
 ![](inc.png)
 
 It will always answer 42 ;)
+
+You could define the *doubling* service
+
+```scheme
+(let (/* (lambda (a) (* a 2))) (listen 9091))
+```
+
+Copy/past in your browser
+
+```
+http://localhost:9091/*?a=41
+```
+![](mult.png)
 
 ## Functional
 
@@ -84,7 +99,9 @@ It will display `6`
 ## Parenthesis 
 
 Most people are frigthened by parenthesis while it is a big advantage. 
+
 It leaves no space for ambiguity.
+
 Do you know that in C, arguments of function are evaluated in reverse order?
 
 If you try to compile and execute
