@@ -7,7 +7,10 @@ rule token = parse
   | '(' { LPAREN }
   | ')' { RPAREN }
   | ''' { QUOTE }
-  | '+' { PLUS }   
+  | '+' { PLUS }
+  | '-' { MINUS }
+  | '*' { MULT }
+  | '/' { DIV }
   | "#t" { TRUE }
   | "#f" { FALSE }
   | "if" { IF }
@@ -24,4 +27,4 @@ rule token = parse
   | "from-server" { FROM_SERVER }
   | '\"' ('\\'* | [^'\"'])* '\"' { STRING (Lexing.lexeme lexbuf) }
   | ['0'-'9']+ { INT (int_of_string (Lexing.lexeme lexbuf)) }
-  | ['a'-'z''/']+ { IDENT (Lexing.lexeme lexbuf) }
+  | ['a'-'z''+''-''*''/''#''-''@''{'']''*''&''%''$''!']+ { IDENT (Lexing.lexeme lexbuf) }

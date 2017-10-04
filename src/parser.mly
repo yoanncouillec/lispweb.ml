@@ -1,6 +1,7 @@
 %token<int> INT
 %token<string> IDENT STRING
-%token LPAREN RPAREN LAMBDA LET LISTEN STRING_APPEND STRING_TO_INT INT_TO_STRING HTML SCRIPT FROM_SERVER TRUE FALSE IF QUOTE PLUS LIST TAG EOF
+%token LPAREN RPAREN LAMBDA LET LISTEN STRING_APPEND STRING_TO_INT INT_TO_STRING HTML SCRIPT FROM_SERVER TRUE FALSE IF QUOTE LIST TAG EOF
+%token PLUS MINUS MULT DIV
 %start start
 %type <Lispweb.expression> start
 
@@ -20,7 +21,10 @@ expression:
 | STRING { Lispweb.EString (String.sub ($1) 1 ((String.length $1) - 2)) }
 | TRUE { Lispweb.EBoolean (true) }
 | FALSE { Lispweb.EBoolean (false) }
-| LPAREN PLUS expression expression RPAREN { Lispweb.EPlus ($3, $4) }
+| LPAREN PLUS expression expression RPAREN { Lispweb.EBinary (Lispweb.OPlus, $3, $4) }
+| LPAREN MINUS expression expression RPAREN { Lispweb.EBinary (Lispweb.OMinus, $3, $4) }
+| LPAREN MULT expression expression RPAREN { Lispweb.EBinary (Lispweb.OMult, $3, $4) }
+| LPAREN DIV expression expression RPAREN { Lispweb.EBinary (Lispweb.ODiv, $3, $4) }
 | LPAREN IF expression expression expression RPAREN { Lispweb.EIf ($3, $4, $5) }
 | LPAREN LAMBDA LPAREN IDENT RPAREN expression RPAREN { Lispweb.ELambda ($4, $6) }
 | LPAREN LET LPAREN IDENT expression RPAREN expression RPAREN { Lispweb.ELet ($4, $5, $7) }

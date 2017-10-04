@@ -10,6 +10,8 @@ type token =
   | RPAREN
   | QUOTE
   | PLUS
+  | MULT
+  | MINUS
   | LPAREN
   | LISTEN
   | LIST
@@ -23,6 +25,7 @@ type token =
   | FROM_SERVER
   | FALSE
   | EOF
+  | DIV
 
 
 val start: (Lexing.lexbuf -> token) -> Lexing.lexbuf -> (Lispweb.expression)

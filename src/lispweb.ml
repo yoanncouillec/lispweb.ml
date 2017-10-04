@@ -1,12 +1,18 @@
 type ident = string
 
+type operator =
+  | OPlus
+  | OMinus
+  | OMult
+  | ODiv
+
 type expression = 
   | EInteger of int
   | EIdent of ident
   | EString of string
   | EQuote of expression
   | EBoolean of bool
-  | EPlus of expression * expression
+  | EBinary of operator * expression * expression
   | EIf of expression * expression * expression
   | ELambda of ident * expression
   | ELet of ident * expression * expression
@@ -26,7 +32,7 @@ type script =
   | SIdent of string
   | SString of string
   | SBoolean of bool
-  | SPlus of script * script
+  | SBinary of operator * script * script
   | SIf of script * script * script
   | SFunction of string * script
   | SVar of string * script
@@ -60,7 +66,12 @@ let rec string_of_expression = function
   | EString s -> "\"" ^ s ^ "\""
   | EQuote e -> "'" ^ (string_of_expression e)
   | EBoolean b -> string_of_bool b
-  | EPlus (e1, e2) -> "(+ "^(string_of_expression e1)^(string_of_expression e2)^")"
+  | EBinary (op, e1, e2) -> 
+     (match op with 
+      | OPlus -> "(+ "^(string_of_expression e1)^(string_of_expression e2)^")"
+      | OMinus -> "(- "^(string_of_expression e1)^(string_of_expression e2)^")"
+      | OMult -> "(* "^(string_of_expression e1)^(string_of_expression e2)^")"
+      | ODiv -> "(/ "^(string_of_expression e1)^(string_of_expression e2)^")")
   | EIf (e1, e2, e3) -> 
      "(if " ^ (string_of_expression e1) 
      ^ " " ^ (string_of_expression e2)
@@ -101,8 +112,12 @@ and string_of_script = function
   | SString (s) -> "\"" ^ s ^ "\""
   | SBoolean (true) -> "true"
   | SBoolean (false) -> "false"
-  | SPlus (e1, e2) -> "(" ^ "(" ^ (string_of_script e1) ^ ")" ^ "+"
-		      ^ "(" ^ (string_of_script e2) ^ ")" ^ ")"
+  | SBinary (op, e1, e2) -> 
+     (match op with
+      | OPlus -> "(" ^ "(" ^ (string_of_script e1) ^ ")" ^ "+"^ "(" ^ (string_of_script e2) ^ ")" ^ ")"
+      | OMinus -> "(" ^ "(" ^ (string_of_script e1) ^ ")" ^ "-"^ "(" ^ (string_of_script e2) ^ ")" ^ ")"
+      | OMult -> "(" ^ "(" ^ (string_of_script e1) ^ ")" ^ "*"^ "(" ^ (string_of_script e2) ^ ")" ^ ")"
+      | ODiv -> "(" ^ "(" ^ (string_of_script e1) ^ ")" ^ "/"^ "(" ^ (string_of_script e2) ^ ")" ^ ")")
   | SIf (e1, e2, e3) -> "if (" ^ (string_of_script e1) ^ "){"
 			^ (string_of_script e2) ^ "} else {"
 			^ (string_of_script e3) ^ "}"
@@ -127,7 +142,7 @@ let rec script_of_expression env = function
   | EIdent (s) -> SIdent (s)
   | EString (s) -> SString (s)
   | EBoolean (b) -> SBoolean (b)
-  | EPlus (a,b) -> SPlus (script_of_expression env a,script_of_expression env b)
+  | EBinary (op,a,b) -> SBinary (op, script_of_expression env a,script_of_expression env b)
   | EIf (a,b,c) -> SIf (script_of_expression env a, 
 			script_of_expression env b, 
 			script_of_expression env c)
@@ -217,11 +232,17 @@ and eval env = function
   | EString s -> VString s
   | EQuote e -> VQuote e
   | EBoolean b -> VBoolean b
-  | EPlus (e1, e2) ->
-     (match (eval env e1, eval env e2) with
-      | (VInteger n1, VInteger n2) -> VInteger (n1 + n2)
-      | (VString s1, VInteger n2) -> VInteger ((int_of_string s1) + n2)
-      | _ -> failwith "+: Integer expected")
+  | EBinary (op, e1, e2) ->
+     ((function (n1, n2) -> 
+       match op with
+       | OPlus -> VInteger (n1 + n2)
+       | OMinus -> VInteger (n1 - n2)
+       | OMult -> VInteger (n1 * n2)
+       | ODiv -> VInteger (n1 / n2))
+	(match (eval env e1, eval env e2) with
+	 | (VInteger n1, VInteger n2) -> (n1,n2)
+	 | (VString s1, VInteger n2) -> ((int_of_string s1),2)
+	 | _ -> failwith "+: Integer expected"))
   | EIf (e1, e2, e3) ->
      (match eval env e1 with
       | VBoolean false -> eval env e3

@@ -33,7 +33,7 @@ lispwebrepl: lispweb.cmo parser.cmi parser.cmo lexer.cmo lispwebrepl.cmo
 	ocamlc -c $^ -o $@
 
 test: lispwebeval
-	./$^ < test/inc.lw
+	./$^ < test/mult.lw
 
 clean:
 	rm -rf *.cm* lispwebeval lispwebrepl
