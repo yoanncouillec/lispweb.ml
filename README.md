@@ -4,7 +4,7 @@ LispWeb
 
 LispWeb is a functional web language with native support of data sources.
 
-It is an all-in-one language (a.k.a. multi-tier). 
+It is an *all-in-one* language (a.k.a. multi-tier). 
 
 It supports server code, client code and data sources code in only a single language.
 
@@ -42,6 +42,15 @@ Let's declare a very simple service that increments an integer:
 ```scheme
 (let (/inc (lambda (a) (+ a 1))) (listen 9091))
 ```
+
+There is no need for a different treatment for functions and services.
+A service is a function.
+
+Syntactically speaking, `/` is valid in Scheme which is the richest languages for identificators.
+
+Then you could name functions like `/api/v1/users`. 
+Or with the more exotic `#-@{]*&%$!`.
+Unfortunatelly you can't name a function like `;-)`. What a shame.
 
 Copy/past in your browser
 
@@ -89,7 +98,7 @@ void h(int x, int y){}
 int main() {h(f(),g());printf("%c\n",c);return 0;}
 ```
 
-It will display `f` with gcc because execute order is *right to left*.
+It will display `f` with gcc because execute order is *right-to-left*.
 It will display `g` with clang.
 
 Copy/paste 
