@@ -1,6 +1,6 @@
 LispWeb
 ============
-![Current Version](https://img.shields.io/badge/version-1.0.0--beta-green.svg)
+![Current Version](https://img.shields.io/badge/version-1.0.0--alpha-green.svg)
 
 LispWeb is a functional web language with native support of data sources.
 
