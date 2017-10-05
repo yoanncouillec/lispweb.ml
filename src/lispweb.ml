@@ -15,7 +15,7 @@ type expression =
   | EBinary of operator * expression * expression
   | EIf of expression * expression * expression
   | ELambda of ident list * expression
-  | ELet of ident * expression * expression
+  | ELet of (ident * expression) list * expression
   | EListen of expression
   | EList of expression list
   | ETag of expression * expression * expression list 
@@ -77,7 +77,7 @@ let rec string_of_expression = function
      ^ " " ^ (string_of_expression e2)
      ^ " " ^ (string_of_expression e3) ^ ")"
   | ELambda (sx, e) -> "(lambda (" ^ (List.fold_left (fun a x -> a^" "^x) "" sx) ^ ") " ^ (string_of_expression e) ^ ")"
-  | ELet (s, e1, e2) -> "(let ("^s^" "^(string_of_expression e1)^") "^(string_of_expression e2)^")"
+  | ELet (bx, e2) -> "(let ("^(List.fold_left (fun a (s, e1) -> "("^s^" "^(string_of_expression e1)^")"^a) "" bx)^") "^(string_of_expression e2)^")"
   | EListen e1 -> "(listen "^(string_of_expression e1)^")"
   | EList l -> "(list"^(List.fold_left (fun acc e -> acc ^ " " ^(string_of_expression e)) "" l)^")"
   | ETag (e, _, l) -> (* TODO *)
@@ -146,8 +146,8 @@ let rec script_of_expression env = function
 			script_of_expression env b, 
 			script_of_expression env c)
   | ELambda (s,body) -> SFunction(s,script_of_expression env body)
-  | ELet (s, e1, e2) -> SBlock ([SVar (s, script_of_expression env e1);
-				script_of_expression env e2])
+  | ELet (bx, e2) -> 
+     SBlock (List.fold_left (fun a (s, e1) -> (SVar (s, script_of_expression env e1))::a) [(script_of_expression env e2)] bx)
   | EStringAppend (e1, e2) -> SStringAppend (script_of_expression env e1,
 					     script_of_expression env e2)
   | EApplication (e1, ex) ->
@@ -257,7 +257,7 @@ and eval env = function
       | VBoolean false -> eval env e3
       | _ -> eval env e2)
   | ELambda (s, e) -> VClosure (s, e, env)
-  | ELet (s, e1, e2) -> eval (extend env s (eval env e1)) e2
+  | ELet (bx, e2) -> eval (List.fold_left (fun a (s, e1) -> extend a s (eval a e1)) env bx) e2
   | EListen e ->
      (match eval env e with
       | VInteger port ->

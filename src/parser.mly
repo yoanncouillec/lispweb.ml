@@ -28,7 +28,8 @@ expression:
 | LPAREN IF expression expression expression RPAREN { Lispweb.EIf ($3, $4, $5) }
 | LPAREN LAMBDA LPAREN RPAREN expression RPAREN { Lispweb.ELambda ([], $5) }
 | LPAREN LAMBDA LPAREN parameters RPAREN expression RPAREN { Lispweb.ELambda ($4, $6) }
-| LPAREN LET LPAREN IDENT expression RPAREN expression RPAREN { Lispweb.ELet ($4, $5, $7) }
+| LPAREN LET LPAREN RPAREN expression RPAREN { Lispweb.ELet ([], $5) }
+| LPAREN LET LPAREN bindings RPAREN expression RPAREN { Lispweb.ELet ($4, $6) }
 | LPAREN LISTEN expression RPAREN { Lispweb.EListen ($3) }
 | LPAREN LIST RPAREN { Lispweb.EList ([]) }
 | LPAREN LIST expressions RPAREN { Lispweb.EList ($3) }
@@ -48,6 +49,10 @@ expression:
 | LPAREN FROM_SERVER IDENT RPAREN { Lispweb.EFromServer ($3) }
 | LPAREN expression RPAREN { Lispweb.EApplication ($2, []) }
 | LPAREN expression arguments RPAREN { Lispweb.EApplication ($2, $3) }
+
+bindings:
+| LPAREN IDENT expression RPAREN { [($2, $3)] }
+| LPAREN IDENT expression RPAREN bindings { ($2, $3)::$5 }
 
 parameters:
 | IDENT { [$1] }
