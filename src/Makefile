@@ -1,10 +1,10 @@
 all: lispwebeval
 
 lispwebeval: lispweb.cmo parser.cmi parser.cmo lexer.cmo lispwebeval.cmo
-	ocamlc -o $@ str.cma unix.cma lispweb.cmo parser.cmo lexer.cmo lispwebeval.cmo
+	ocamlc -pp "camlp4 camlp4-options" -o $@ str.cma unix.cma lispweb.cmo parser.cmo lexer.cmo lispwebeval.cmo
 
 lispwebrepl: lispweb.cmo parser.cmi parser.cmo lexer.cmo lispwebrepl.cmo
-	ocamlc -o $@ str.cma unix.cma lispweb.cmo parser.cmo lexer.cmo lispwebrepl.cmo
+	ocamlc -pp "camlp4 camlp4-options" -o $@ str.cma unix.cma lispweb.cmo parser.cmo lexer.cmo lispwebrepl.cmo
 
 %.cmi: %.mli
 	ocamlc $^
@@ -33,7 +33,7 @@ lispwebrepl: lispweb.cmo parser.cmi parser.cmo lexer.cmo lispwebrepl.cmo
 	ocamlc -c $^ -o $@
 
 test: lispwebeval
-	./$^ < test/mult2.lw
+	./$^ < test/system.lw
 
 clean:
 	rm -rf *.cm* lispwebeval lispwebrepl

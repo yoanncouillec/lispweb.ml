@@ -10,6 +10,7 @@ type expression =
   | EInteger of int
   | EIdent of ident
   | EString of string
+  | EMakeString of expression
   | EQuote of expression
   | EBoolean of bool
   | EBinary of operator * expression * expression
@@ -26,6 +27,7 @@ type expression =
   | EScript of expression
   | EFromServer of ident
   | EApplication of expression * expression list
+  | EHostCall of string * expression
 
 type script = 
   | SInteger of int
@@ -43,6 +45,7 @@ type script =
 type environment = (string * value) list
 
 and value = 
+  | VUnit of unit
   | VInteger of int
   | VString of string
   | VQuote of expression
@@ -51,6 +54,7 @@ and value =
   | VTag of string * value * value list (* tagname attributes content *)
   | VClosure of string list * expression * environment
   | VScript of script
+  | VFile of Unix.file_descr
 
 let rec lookup env s =
   match env with
@@ -64,6 +68,7 @@ let rec string_of_expression = function
   | EInteger n -> string_of_int n
   | EIdent s -> s
   | EString s -> "\"" ^ s ^ "\""
+  | EMakeString e -> "(string " ^ (string_of_expression e) ^ ")"
   | EQuote e -> "'" ^ (string_of_expression e)
   | EBoolean b -> string_of_bool b
   | EBinary (op, e1, e2) -> 
@@ -92,8 +97,10 @@ let rec string_of_expression = function
   | EScript e -> "(script "^(string_of_expression e)^")"
   | EFromServer ident -> "(from-server "^ident^")"
   | EApplication (e1, ex) -> "(" ^ (string_of_expression e1) ^ " " ^ (List.fold_left (fun a x -> a^" "^(string_of_expression x)) "" ex) ^ ")"
+  | EHostCall (s, e) ->  "(hostcall" ^ s ^ " " ^ (string_of_expression e) ^ ")"
 
 and string_of_value = function
+  | VUnit _ -> "()"
   | VInteger n -> string_of_int n
   | VString s -> "\"" ^ s ^ "\""
   | VQuote e -> "'" ^ (string_of_expression e)
@@ -104,6 +111,7 @@ and string_of_value = function
      (List.fold_left (fun acc v -> acc ^ " " ^ (string_of_value v)) ("(tag \""^s^"\"") l) ^ ")"
   | VClosure (s, e, env) -> "#CLOSURE"
   | VScript e -> "(script "^(string_of_script e)^")"
+  | VFile f -> "#FILE"
 
 and string_of_script = function
   | SInteger (n) -> string_of_int n
@@ -127,6 +135,7 @@ and string_of_script = function
   | SBlock(l) -> (List.fold_left (fun acc e -> acc ^ (string_of_script e)^";") "{" l) ^"}"
 
 let rec script_of_value = function
+  | VUnit _ -> failwith "script_of_value: cannot compile value of type VUnit"
   | VInteger n -> SInteger n
   | VString s -> SString s
   | VQuote _ -> failwith "script_of_value: cannot compile value of type VQuote to script"
@@ -135,6 +144,7 @@ let rec script_of_value = function
   | VTag (_,_,_) -> failwith "script_of_value: cannot compile value of type VTag to script"
   | VClosure (s, e, env) -> failwith "script_of_value: cannot compile value of type VClosure to script. will be compiled to ScriptValueClosure in further version. need a compiler from value to script_value. then need to define script_value"
   | VScript s -> failwith "script_of_value: cannot compile value of type VScript to script"
+  | VFile _ -> failwith "script_of_value: cannot compile value of type VFile to script"
 
 let rec script_of_expression env = function
   | EInteger (n) -> SInteger (n)
@@ -233,10 +243,21 @@ let rec serve_client env client =
        | _ -> failwith "eval EListen: query string does not contain parameter, it is mandatory in this semantic")
    | _ -> failwith "eval EListen: http command line is malformed, should be:  <command> <query_string> <protocol>, ex: GET /hello?name=Alan  HTTP/1.1")
 
+and flag_of_string = function
+  | "O_CREAT" -> Unix.O_CREAT
+  | "O_RDWR" -> Unix.O_RDWR
+  | _ as s -> failwith ("flag_of_string: not managed: " ^ s)
+
+and perm_of_string = int_of_string
+
 and eval env = function
   | EInteger n -> VInteger n
   | EIdent s -> lookup env s
   | EString s -> VString s
+  | EMakeString e ->
+     (match eval env e with
+      | VInteger n -> VString (String.create n)
+      | _ -> failwith "eval: EMakeString: int expected")
   | EQuote e -> VQuote e
   | EBoolean b -> VBoolean b
   | EBinary (op, e1, e2) ->
@@ -248,9 +269,6 @@ and eval env = function
        | ODiv -> VInteger (n1 / n2))
 	(match (eval env e1, eval env e2) with
 	 | (VInteger n1, VInteger n2) -> (n1,n2)
-	 | (VString s1, VInteger n2) -> ((int_of_string s1),2)
-	 | (VInteger n1, VString s2) -> (n1,int_of_string s2)
-	 | (VString s1, VString s2) -> (int_of_string s1,int_of_string s2)
 	 | _ -> failwith "binary operator: Integer expected"))
   | EIf (e1, e2, e3) ->
      (match eval env e1 with
@@ -304,4 +322,25 @@ and eval env = function
 		  ex)
 	       e'
       | _ -> failwith "Not a closure")
+  | EHostCall (s, e) -> 
+     (match s with
+      | "Unix.openfile" -> 
+	 (match eval env e with
+	  | VList(VString(name)::VList(flags)::VString(perm)::[]) -> 
+	     VFile (Unix.openfile name (List.map (fun x -> match x with VString s -> flag_of_string s | _ -> failwith "EHostCall:openfile:flag:not a string") flags) (perm_of_string perm))
+	  | _ -> failwith "eval EHostCall: arguments error")
+      | "Unix.read" -> 
+	 (match eval env e with
+ 	  | VList(VFile(f)::VString(s)::VInteger(ofs)::VInteger(len)::[]) -> VInteger (Unix.read f s ofs len)
+	  | _ -> failwith "eval EHostCall: arguments error")
+      | "Unix.write" -> 
+	 (match eval env e with
+ 	  | VList(VFile(f)::VString(s)::VInteger(ofs)::VInteger(len)::[]) -> VInteger (Unix.write f s ofs len)
+	  | _ -> failwith "eval EHostCall: arguments error")
+      | "Unix.close" -> 
+	 (match eval env e with
+	  | VList(VFile(f)::[]) -> VUnit (Unix.close f)
+	  | _ -> failwith "eval EHostCall: arguments error")
+      | _ -> failwith "eval EHostCall: unknown host call")
 
+(* fun (VString name, VInteger mode) -> Unix.open name mode *)

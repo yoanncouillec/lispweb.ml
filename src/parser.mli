@@ -5,25 +5,27 @@ type token =
   | TAG
   | STRING_TO_INT
   | STRING_APPEND
-  | STRING of (string)
   | SCRIPT
   | RPAREN
   | QUOTE
   | PLUS
   | MULT
   | MINUS
+  | MAKE_STRING
   | LPAREN
   | LISTEN
   | LIST
   | LET
   | LAMBDA
   | INT_TO_STRING
-  | INT of (int)
   | IF
-  | IDENT of (string)
   | HTML
+  | HOSTCALL
   | FROM_SERVER
   | FALSE
+  | ER_STRING of (string)
+  | ER_INT of (int)
+  | ER_IDENT of (string)
   | EOF
   | DIV
 

@@ -25,6 +25,8 @@ rule token = parse
   | "html" { HTML }
   | "script" { SCRIPT }
   | "from-server" { FROM_SERVER }
-  | '\"' ('\\'* | [^'\"'])* '\"' { STRING (Lexing.lexeme lexbuf) }
-  | ['0'-'9']+ { INT (int_of_string (Lexing.lexeme lexbuf)) }
-  | ['a'-'z''+''-''*''/''#''-''@''{'']''*''&''%''$''!']+ { IDENT (Lexing.lexeme lexbuf) }
+  | "hostcall" { HOSTCALL }
+  | "make-string" { MAKE_STRING }
+  | '\"' ('\\'* | [^'\"'])* '\"' { ER_STRING (Lexing.lexeme lexbuf) }
+  | ['0'-'9']+ { ER_INT (int_of_string (Lexing.lexeme lexbuf)) }
+  | ['A'-'Z''a'-'z''+''-''*''/''#''-''@''{'']''*''&''%''$''!''.']+ { ER_IDENT (Lexing.lexeme lexbuf) }

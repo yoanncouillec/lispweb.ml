@@ -1,0 +1,6 @@
+(let ((f (hostcall Unix.openfile (list "tmp.tmp" (list "O_CREAT" "O_RDWR") "0o640")))
+      (buf (string 10)))
+  (list
+   (hostcall Unix.read (list f buf 0 4))
+   buf
+   (hostcall Unix.close (list f))))

@@ -1,0 +1,4 @@
+(defprimitive "posix"
+  (lambda (f)
+    (if (eq? "open")
+	(lambda (
