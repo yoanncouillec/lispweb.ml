@@ -19,6 +19,7 @@ rule token = parse
   | "listen" { LISTEN }
   | "list" { LIST }
   | "tag" { TAG }
+  | "begin" { BEGIN }
   | "string-append" { STRING_APPEND }
   | "string->int" { STRING_TO_INT }
   | "int->string" { INT_TO_STRING }

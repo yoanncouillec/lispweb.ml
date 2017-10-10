@@ -19,6 +19,7 @@ type expression =
   | ELet of (ident * expression) list * expression
   | EListen of expression
   | EList of expression list
+  | EBegin of expression list
   | ETag of expression * expression * expression list 
   | EStringAppend of expression * expression
   | EStringToInt of expression
@@ -85,6 +86,7 @@ let rec string_of_expression = function
   | ELet (bx, e2) -> "(let ("^(List.fold_left (fun a (s, e1) -> "("^s^" "^(string_of_expression e1)^")"^a) "" bx)^") "^(string_of_expression e2)^")"
   | EListen e1 -> "(listen "^(string_of_expression e1)^")"
   | EList l -> "(list"^(List.fold_left (fun acc e -> acc ^ " " ^(string_of_expression e)) "" l)^")"
+  | EBegin l -> "(begin"^(List.fold_left (fun acc e -> acc ^ " " ^(string_of_expression e)) "" l)^")"
   | ETag (e, _, l) -> (* TODO *)
      "(tag "^(string_of_expression e)^" "
      ^(List.fold_left (fun acc e -> acc^" "^(string_of_expression e)) "" l)
@@ -286,6 +288,7 @@ and eval env = function
 	 serve_client env (fst (Unix.accept server))
       | _ -> failwith "eval EListen: port should be of type integer")
   | EList l -> VList (List.fold_left (fun acc e -> acc@[(eval env e)]) [] l)
+  | EBegin l -> List.fold_left (fun acc e -> (eval env e)) (VUnit ()) l
   | ETag (tag, attributes, expressions) ->
      (match eval env tag with
       | VString s  -> 

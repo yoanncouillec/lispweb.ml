@@ -1,6 +1,6 @@
 %token<int> ER_INT
 %token<string> ER_IDENT ER_STRING
-%token LPAREN RPAREN LAMBDA LET LISTEN STRING_APPEND STRING_TO_INT INT_TO_STRING HTML SCRIPT FROM_SERVER TRUE FALSE IF QUOTE LIST TAG EOF HOSTCALL MAKE_STRING
+%token LPAREN RPAREN LAMBDA LET LISTEN STRING_APPEND STRING_TO_INT INT_TO_STRING HTML SCRIPT FROM_SERVER TRUE FALSE IF QUOTE LIST TAG EOF HOSTCALL MAKE_STRING BEGIN
 %token PLUS MINUS MULT DIV
 %start start
 %type <Lispweb.expression> start
@@ -34,6 +34,7 @@ expression:
 | LPAREN LISTEN expression RPAREN { Lispweb.EListen ($3) }
 | LPAREN LIST RPAREN { Lispweb.EList ([]) }
 | LPAREN LIST expressions RPAREN { Lispweb.EList ($3) }
+| LPAREN BEGIN expressions RPAREN { Lispweb.EBegin ($3) }
  (*
  (tag <tagname> <attributes> <expression> ...)
  (tag "html" (list) "lipsum")

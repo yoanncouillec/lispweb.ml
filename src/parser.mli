@@ -28,6 +28,7 @@ type token =
   | ER_IDENT of (string)
   | EOF
   | DIV
+  | BEGIN
 
 
 val start: (Lexing.lexbuf -> token) -> Lexing.lexbuf -> (Lispweb.expression)
