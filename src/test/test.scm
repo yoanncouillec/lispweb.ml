@@ -29,5 +29,9 @@
        (list
 	(inc (inc (inc 0)))
 	(dyn c))))
+   (dyn-let ((fact 'void))
+     (begin
+       (dyn-set! fact (lambda (x) (if (equal? 0 x) 1 (* ((dyn fact) (- x 1)) x))))
+       ((dyn fact) 3)))
    )
   )  
