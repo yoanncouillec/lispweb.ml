@@ -2,7 +2,7 @@
 %token<string> ER_IDENT ER_STRING
 %token LPAREN RPAREN LAMBDA LET LISTEN STRING_APPEND STRING_TO_INT INT_TO_STRING HTML SCRIPT FROM_SERVER TRUE FALSE IF QUOTE LIST TAG EOF HOSTCALL MAKE_STRING BEGIN
 %token DYNAMIC_LET DYNAMIC
-%token PLUS MINUS MULT DIV
+%token PLUS MINUS MULT DIV EQUAL
 %start start
 %type <Lispweb.expression> start
 
@@ -37,7 +37,15 @@ expression:
 | LPAREN LISTEN expression RPAREN { Lispweb.EListen ($3) }
 | LPAREN LIST RPAREN { Lispweb.EList ([]) }
 | LPAREN LIST expressions RPAREN { Lispweb.EList ($3) }
+| LPAREN EQUAL expression expression RPAREN { Lispweb.EEqual ($3,$4) }
 | LPAREN BEGIN expressions RPAREN { Lispweb.EBegin ($3) }
+ (*
+ (tag <tagname> <attributes> <expression> ...)
+ (tag "html" (list) "lipsum")
+ (tag "html" (list (list "onclick" (script (alert "click")))) "lipsum")
+ (tag "p" '(list) (tag "span" (list) "lipsum"))
+ (tag "p" '(list) (tag "span" (list) "lipsum") (tag "div" (list) "webum"))
+ *)
 | LPAREN TAG expression expression expressions RPAREN { Lispweb.ETag ($3, $4, $5) }
 | LPAREN STRING_APPEND expression expression RPAREN { Lispweb.EStringAppend ($3, $4) }
 | LPAREN STRING_TO_INT expression RPAREN { Lispweb.EStringToInt ($3) }
@@ -61,10 +69,3 @@ arguments:
 | expression { [$1] }
 | expression arguments { $1::$2 }
 
- (*
- (tag <tagname> <attributes> <expression> ...)
- (tag "html" (list) "lipsum")
- (tag "html" (list (list "onclick" (script (alert "click")))) "lipsum")
- (tag "p" '(list) (tag "span" (list) "lipsum"))
- (tag "p" '(list) (tag "span" (list) "lipsum") (tag "div" (list) "webum"))
- *)

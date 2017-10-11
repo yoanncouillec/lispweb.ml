@@ -26,6 +26,7 @@ type token =
   | ER_STRING of (string)
   | ER_INT of (int)
   | ER_IDENT of (string)
+  | EQUAL
   | EOF
   | DYNAMIC_LET
   | DYNAMIC

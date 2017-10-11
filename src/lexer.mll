@@ -11,6 +11,7 @@ rule token = parse
   | '-' { MINUS }
   | '*' { MULT }
   | '/' { DIV }
+  | "equal?" { EQUAL }
   | "#t" { TRUE }
   | "#f" { FALSE }
   | "if" { IF }

@@ -21,6 +21,7 @@ type expression =
   | EDynamic of ident
   | EListen of expression
   | EList of expression list
+  | EEqual of expression * expression
   | EBegin of expression list
   | ETag of expression * expression * expression list 
   | EStringAppend of expression * expression
@@ -96,6 +97,7 @@ let rec string_of_expression = function
   | EDynamic s -> "(dynamic "^s^")"
   | EListen e1 -> "(listen "^(string_of_expression e1)^")"
   | EList l -> "(list"^(List.fold_left (fun acc e -> acc ^ " " ^(string_of_expression e)) "" l)^")"
+  | EEqual (e1,e2) -> "(equal? "^(string_of_expression e1)^" "^(string_of_expression e2)^")"
   | EBegin l -> "(begin"^(List.fold_left (fun acc e -> acc ^ " " ^(string_of_expression e)) "" l)^")"
   | ETag (e, _, l) -> (* TODO *)
      "(tag "^(string_of_expression e)^" "
@@ -300,6 +302,10 @@ and eval env = function
 	 serve_client env (fst (Unix.accept server))
       | _ -> failwith "eval EListen: port should be of type integer")
   | EList l -> VList (List.fold_left (fun acc e -> acc@[(eval env e)]) [] l)
+  | EEqual (e1,e2)->
+     (match (eval env e1, eval env e2) with
+      | VInteger n1, VInteger n2 -> VBoolean (n1 = n2)
+      | _ -> failwith "eval: EEQual: not managed type")
   | EBegin l -> List.fold_left (fun acc e -> (eval env e)) (VUnit ()) l
   | ETag (tag, attributes, expressions) ->
      (match eval env tag with
