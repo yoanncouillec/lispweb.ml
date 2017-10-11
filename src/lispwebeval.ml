@@ -11,7 +11,7 @@ let parse env e =
   (eval env (Parser.start Lexer.token (Lexing.from_string e)))
 
 let rec populate_env env = function
-  | (id, e)::rest -> populate_env (extend env Static id (parse env e)) rest
+  | (id, e)::rest -> populate_env (extend env id (Static (parse env e))) rest
   | [] -> env
 
 let _ = 

@@ -1,7 +1,7 @@
 %token<int> ER_INT
 %token<string> ER_IDENT ER_STRING
 %token LPAREN RPAREN LAMBDA LET LISTEN STRING_APPEND STRING_TO_INT INT_TO_STRING HTML SCRIPT FROM_SERVER TRUE FALSE IF QUOTE LIST TAG EOF HOSTCALL MAKE_STRING BEGIN
-%token DYNAMIC_LET DYNAMIC
+%token DYNAMIC_LET DYNAMIC DYNAMIC_SET
 %token PLUS MINUS MULT DIV EQUAL
 %start start
 %type <Lispweb.expression> start
@@ -34,6 +34,7 @@ expression:
 | LPAREN LET LPAREN bindings RPAREN expression RPAREN { Lispweb.ELet ($4, $6) }
 | LPAREN DYNAMIC_LET LPAREN bindings RPAREN expression RPAREN { Lispweb.EDynamicLet ($4, $6) }
 | LPAREN DYNAMIC ER_IDENT RPAREN { Lispweb.EDynamic ($3) }
+| LPAREN DYNAMIC_SET ER_IDENT expression RPAREN { Lispweb.EDynamicSet ($3,$4) }
 | LPAREN LISTEN expression RPAREN { Lispweb.EListen ($3) }
 | LPAREN LIST RPAREN { Lispweb.EList ([]) }
 | LPAREN LIST expressions RPAREN { Lispweb.EList ($3) }

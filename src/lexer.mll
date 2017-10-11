@@ -19,6 +19,7 @@ rule token = parse
   | "let" { LET }
   | "dyn-let" { DYNAMIC_LET }
   | "dyn" { DYNAMIC }
+  | "dyn-set!" { DYNAMIC_SET }
   | "listen" { LISTEN }
   | "list" { LIST }
   | "tag" { TAG }

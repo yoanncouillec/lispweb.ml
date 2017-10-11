@@ -28,6 +28,7 @@ type token =
   | ER_IDENT of (string)
   | EQUAL
   | EOF
+  | DYNAMIC_SET
   | DYNAMIC_LET
   | DYNAMIC
   | DIV

@@ -19,6 +19,7 @@ type expression =
   | ELet of (ident * expression) list * expression
   | EDynamicLet of (ident * expression) list * expression
   | EDynamic of ident
+  | EDynamicSet of ident * expression
   | EListen of expression
   | EList of expression list
   | EEqual of expression * expression
@@ -58,21 +59,29 @@ type value =
   | VScript of script
   | VFile of Unix.file_descr
 
-and environment = (namespace * string * value) list
+and environment = (string * namespace) list
 
-and namespace = Dynamic | Static
+and namespace = Dynamic of value ref | Static of value
 
-let rec lookup (env:environment) (ns:namespace) (s:string) : value =
+let rec lookup_static (env:environment) (s:string) : value =
   match env with
-  | (ns', s',v') :: rest ->
-     (if ns = ns' 
-      then
-	(if s = s' then v' else lookup rest ns s)
-      else
-	lookup rest ns s)
+  | (s', ns') :: rest ->
+     (match ns' with
+      | Static v' ->
+	 (if s = s' then v' else lookup_static rest s)
+      | _ -> lookup_static rest s)
   | [] -> failwith ("No such binding: "^s)
 
-let extend (env:environment) (ns:namespace) (s:string) (v:value) = (ns, s, v) :: env
+let rec lookup_dynamic (env:environment) (s:string) : value ref =
+  match env with
+  | (s', ns') :: rest ->
+     (match ns' with
+      | Dynamic vr' ->
+	 (if s = s' then vr' else lookup_dynamic rest s)
+      | _ -> lookup_dynamic rest s)
+  | [] -> failwith ("No such binding: "^s)
+
+let extend (env:environment) (s:string) (ns:namespace) = (s,ns) :: env
 
 let rec string_of_expression = function
   | EInteger n -> string_of_int n
@@ -95,6 +104,7 @@ let rec string_of_expression = function
   | ELet (bx, e2) -> "(let ("^(List.fold_left (fun a (s, e1) -> "("^s^" "^(string_of_expression e1)^")"^a) "" bx)^") "^(string_of_expression e2)^")"
   | EDynamicLet (bx, e2) -> "(dynamic-let ("^(List.fold_left (fun a (s, e1) -> "("^s^" "^(string_of_expression e1)^")"^a) "" bx)^") "^(string_of_expression e2)^")"
   | EDynamic s -> "(dynamic "^s^")"
+  | EDynamicSet (s,e) -> "(dynamic-set! "^s^" "^(string_of_expression e)^")"
   | EListen e1 -> "(listen "^(string_of_expression e1)^")"
   | EList l -> "(list"^(List.fold_left (fun acc e -> acc ^ " " ^(string_of_expression e)) "" l)^")"
   | EEqual (e1,e2) -> "(equal? "^(string_of_expression e1)^" "^(string_of_expression e2)^")"
@@ -178,7 +188,7 @@ let rec script_of_expression env = function
      (match e1 with
       | EIdent s -> SApplication (s, List.map (script_of_expression env) ex)
       | _ -> failwith "script_of_expression: call expects an identifer at functional position")
-  | EFromServer ident -> script_of_value (lookup env Static ident)
+  | EFromServer ident -> script_of_value (lookup_static env ident)
   | _ -> failwith "script_of_expression: cannot compile"
 	       
 let rec value_to_html = function
@@ -224,7 +234,7 @@ let rec serve_client env client =
    | cmd::qs::prtcl::[] -> 
       (match Str.split_delim (Str.regexp "?") qs with
        | uri::arg::[] ->
-	  (match lookup env Static uri with
+	  (match lookup_static env uri with
 	   | VClosure (parameters, body, env') ->
 	      (let args = Str.split_delim (Str.regexp "&") arg in
 	       (let env'' = 
@@ -233,7 +243,7 @@ let rec serve_client env client =
 		     (match Str.split_delim (Str.regexp "=") arg with
 		      | key::value::[] ->
 			 if key = parameter then
-			   (extend a Static parameter (VString value))
+			   (extend a parameter (Static (VString value)))
 			 else failwith "eval EListen: query string parameter name does not match argument name of called service"
 		      | _ -> failwith "eval EListen: query string parameter is malformed, should be one key=value"))
 		    env'
@@ -266,7 +276,7 @@ and perm_of_string = int_of_string
 
 and eval env = function
   | EInteger n -> VInteger n
-  | EIdent s -> lookup env Static s
+  | EIdent s -> lookup_static env s
   | EString s -> VString s
   | EMakeString e ->
      (match eval env e with
@@ -289,9 +299,12 @@ and eval env = function
       | VBoolean false -> eval env e3
       | _ -> eval env e2)
   | ELambda (s, e) -> VClosure (s, e, env)
-  | ELet (bx, e2) -> eval (List.fold_left (fun a (s, e1) -> extend a Static s (eval a e1)) env bx) e2
-  | EDynamicLet (bx, e2) -> eval (List.fold_left (fun a (s, e1) -> extend a Dynamic s (eval a e1)) env bx) e2
-  | EDynamic s -> lookup env Dynamic s
+  | ELet (bx, e2) -> eval (List.fold_left (fun a (s, e1) -> extend a s (Static (eval a e1))) env bx) e2
+  | EDynamicLet (bx, e2) -> eval (List.fold_left (fun a (s, e1) -> extend a s (Dynamic (ref (eval a e1)))) env bx) e2
+  | EDynamic s -> !(lookup_dynamic env s)
+  | EDynamicSet (s,e) -> 
+     let vr = lookup_dynamic env s in
+     VUnit(vr := eval env e)
   | EListen e ->
      (match eval env e with
       | VInteger port ->
@@ -337,7 +350,7 @@ and eval env = function
 	       (List.fold_left2
 		  (fun env'' s' e ->
 		   let arg = eval env e in
-		   (extend env'' Static s' arg))
+		   (extend env'' s' (Static arg)))
 		  env'
 		  s'x
 		  ex)

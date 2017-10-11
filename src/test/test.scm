@@ -23,7 +23,9 @@
      (let ((fst (lambda (x y) (dyn x))))
        (fst 1 2)))
    (dyn-let ((c 0))
-     (let ((inc (lambda (x) (begin (+ x 1)))))
+     (let ((inc (lambda (x) 
+		  (begin (dyn-set! c (+ 1 (dyn c)))
+			 (+ x 1)))))
        (list
 	(inc (inc (inc 0)))
 	(dyn c))))
