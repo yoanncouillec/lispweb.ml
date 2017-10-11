@@ -33,5 +33,11 @@
      (begin
        (dyn-set! fact (lambda (x) (if (equal? 0 x) 1 (* ((dyn fact) (- x 1)) x))))
        ((dyn fact) 3)))
+   (dyn-let ((odd 'void)
+	     (even 'void))
+     (begin
+       (dyn-set! odd (lambda (n) (if (equal? 0 n) #f ((dyn even) (- n 1)))))
+       (dyn-set! even (lambda (n) (if (equal? 0 n) #t ((dyn odd) (- n 1)))))
+       (list ((dyn odd) 42) ((dyn even) 42))))
    )
   )  
