@@ -16,6 +16,8 @@ rule token = parse
   | "if" { IF }
   | "lambda" { LAMBDA }
   | "let" { LET }
+  | "dyn-let" { DYNAMIC_LET }
+  | "dyn" { DYNAMIC }
   | "listen" { LISTEN }
   | "list" { LIST }
   | "tag" { TAG }

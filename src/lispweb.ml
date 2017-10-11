@@ -17,6 +17,8 @@ type expression =
   | EIf of expression * expression * expression
   | ELambda of ident list * expression
   | ELet of (ident * expression) list * expression
+  | EDynamicLet of (ident * expression) list * expression
+  | EDynamic of ident
   | EListen of expression
   | EList of expression list
   | EBegin of expression list
@@ -43,9 +45,7 @@ type script =
   | SApplication of string * script list
   | SBlock of script list
 
-type environment = (string * value) list
-
-and value = 
+type value = 
   | VUnit of unit
   | VInteger of int
   | VString of string
@@ -57,13 +57,21 @@ and value =
   | VScript of script
   | VFile of Unix.file_descr
 
-let rec lookup env s =
+and environment = (namespace * string * value) list
+
+and namespace = Dynamic | Static
+
+let rec lookup (env:environment) (ns:namespace) (s:string) : value =
   match env with
-  | (s',v') :: rest ->
-     if s = s' then v' else lookup rest s
+  | (ns', s',v') :: rest ->
+     (if ns = ns' 
+      then
+	(if s = s' then v' else lookup rest ns s)
+      else
+	lookup rest ns s)
   | [] -> failwith ("No such binding: "^s)
 
-let extend env s v = (s, v) :: env
+let extend (env:environment) (ns:namespace) (s:string) (v:value) = (ns, s, v) :: env
 
 let rec string_of_expression = function
   | EInteger n -> string_of_int n
@@ -74,16 +82,18 @@ let rec string_of_expression = function
   | EBoolean b -> string_of_bool b
   | EBinary (op, e1, e2) -> 
      (match op with 
-      | OPlus -> "(+ "^(string_of_expression e1)^(string_of_expression e2)^")"
-      | OMinus -> "(- "^(string_of_expression e1)^(string_of_expression e2)^")"
-      | OMult -> "(* "^(string_of_expression e1)^(string_of_expression e2)^")"
-      | ODiv -> "(/ "^(string_of_expression e1)^(string_of_expression e2)^")")
+      | OPlus -> "(+ "^(string_of_expression e1)^" "^(string_of_expression e2)^")"
+      | OMinus -> "(- "^(string_of_expression e1)^" "^(string_of_expression e2)^")"
+      | OMult -> "(* "^(string_of_expression e1)^" "^(string_of_expression e2)^")"
+      | ODiv -> "(/ "^(string_of_expression e1)^" "^(string_of_expression e2)^")")
   | EIf (e1, e2, e3) -> 
      "(if " ^ (string_of_expression e1) 
      ^ " " ^ (string_of_expression e2)
      ^ " " ^ (string_of_expression e3) ^ ")"
   | ELambda (sx, e) -> "(lambda (" ^ (List.fold_left (fun a x -> a^" "^x) "" sx) ^ ") " ^ (string_of_expression e) ^ ")"
   | ELet (bx, e2) -> "(let ("^(List.fold_left (fun a (s, e1) -> "("^s^" "^(string_of_expression e1)^")"^a) "" bx)^") "^(string_of_expression e2)^")"
+  | EDynamicLet (bx, e2) -> "(dynamic-let ("^(List.fold_left (fun a (s, e1) -> "("^s^" "^(string_of_expression e1)^")"^a) "" bx)^") "^(string_of_expression e2)^")"
+  | EDynamic s -> "(dynamic "^s^")"
   | EListen e1 -> "(listen "^(string_of_expression e1)^")"
   | EList l -> "(list"^(List.fold_left (fun acc e -> acc ^ " " ^(string_of_expression e)) "" l)^")"
   | EBegin l -> "(begin"^(List.fold_left (fun acc e -> acc ^ " " ^(string_of_expression e)) "" l)^")"
@@ -166,7 +176,7 @@ let rec script_of_expression env = function
      (match e1 with
       | EIdent s -> SApplication (s, List.map (script_of_expression env) ex)
       | _ -> failwith "script_of_expression: call expects an identifer at functional position")
-  | EFromServer ident -> script_of_value (lookup env ident)
+  | EFromServer ident -> script_of_value (lookup env Static ident)
   | _ -> failwith "script_of_expression: cannot compile"
 	       
 let rec value_to_html = function
@@ -212,7 +222,7 @@ let rec serve_client env client =
    | cmd::qs::prtcl::[] -> 
       (match Str.split_delim (Str.regexp "?") qs with
        | uri::arg::[] ->
-	  (match lookup env uri with
+	  (match lookup env Static uri with
 	   | VClosure (parameters, body, env') ->
 	      (let args = Str.split_delim (Str.regexp "&") arg in
 	       (let env'' = 
@@ -221,7 +231,7 @@ let rec serve_client env client =
 		     (match Str.split_delim (Str.regexp "=") arg with
 		      | key::value::[] ->
 			 if key = parameter then
-			   (extend a parameter (VString value))
+			   (extend a Static parameter (VString value))
 			 else failwith "eval EListen: query string parameter name does not match argument name of called service"
 		      | _ -> failwith "eval EListen: query string parameter is malformed, should be one key=value"))
 		    env'
@@ -254,7 +264,7 @@ and perm_of_string = int_of_string
 
 and eval env = function
   | EInteger n -> VInteger n
-  | EIdent s -> lookup env s
+  | EIdent s -> lookup env Static s
   | EString s -> VString s
   | EMakeString e ->
      (match eval env e with
@@ -277,7 +287,9 @@ and eval env = function
       | VBoolean false -> eval env e3
       | _ -> eval env e2)
   | ELambda (s, e) -> VClosure (s, e, env)
-  | ELet (bx, e2) -> eval (List.fold_left (fun a (s, e1) -> extend a s (eval a e1)) env bx) e2
+  | ELet (bx, e2) -> eval (List.fold_left (fun a (s, e1) -> extend a Static s (eval a e1)) env bx) e2
+  | EDynamicLet (bx, e2) -> eval (List.fold_left (fun a (s, e1) -> extend a Dynamic s (eval a e1)) env bx) e2
+  | EDynamic s -> lookup env Dynamic s
   | EListen e ->
      (match eval env e with
       | VInteger port ->
@@ -319,7 +331,7 @@ and eval env = function
 	       (List.fold_left2
 		  (fun env'' s' e ->
 		   let arg = eval env e in
-		   (extend env'' s' arg))
+		   (extend env'' Static s' arg))
 		  env'
 		  s'x
 		  ex)
