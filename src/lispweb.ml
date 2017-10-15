@@ -63,6 +63,8 @@ and environment = (string * namespace) list
 
 and namespace = Dynamic of value ref | Static of value
 
+and continuation = value -> value
+
 let rec lookup_static (env:environment) (s:string) : value =
   match env with
   | (s', ns') :: rest ->
@@ -249,7 +251,7 @@ let rec serve_client env client =
 		    env'
 		    args
 		    parameters in
-		(match eval env'' body with
+		(match eval env'' (fun v -> v) body with
 		 | VString s as res ->
 		    let headers = read_headers [] cin in
 		    output_string cout ("HTTP/1.1 200 OK\n\n" ^ s) ; 
@@ -274,79 +276,113 @@ and flag_of_string = function
 
 and perm_of_string = int_of_string
 
-and eval env = function
-  | EInteger n -> VInteger n
-  | EIdent s -> lookup_static env s
-  | EString s -> VString s
+and eval (env:environment) (k:continuation) = function
+  | EInteger n -> k (VInteger n)
+  | EIdent s -> k (lookup_static env s)
+  | EString s -> k (VString s)
   | EMakeString e ->
-     (match eval env e with
-      | VInteger n -> VString (String.create n)
-      | _ -> failwith "eval: EMakeString: int expected")
-  | EQuote e -> VQuote e
-  | EBoolean b -> VBoolean b
+     (eval env
+	   (function
+	     | VInteger n -> k (VString (String.create n))
+	     | _ -> failwith "eval: EMakeString: int expected")
+	   e)
+  | EQuote e -> k (VQuote e)
+  | EBoolean b -> k (VBoolean b)
   | EBinary (op, e1, e2) ->
-     ((function (n1, n2) -> 
-       match op with
-       | OPlus -> VInteger (n1 + n2)
-       | OMinus -> VInteger (n1 - n2)
-       | OMult -> VInteger (n1 * n2)
-       | ODiv -> VInteger (n1 / n2))
-	(match (eval env e1, eval env e2) with
-	 | (VInteger n1, VInteger n2) -> (n1,n2)
-	 | _ -> failwith "binary operator: Integer expected"))
+     (eval env 
+	   (function 
+	     | VInteger n1 ->
+		(eval env 
+		      (function 
+			| VInteger n2 ->
+			   (match op with
+			    | OPlus -> k (VInteger (n1 + n2))
+			    | OMinus -> k (VInteger (n1 - n2))
+			    | OMult -> k (VInteger (n1 * n2))
+			    | ODiv -> k (VInteger (n1 / n2)))
+			| _ -> failwith "binary operator: Integer expected")
+		      e2)
+	     | _ -> failwith "binary operator: Integer expected")
+	   e1)
   | EIf (e1, e2, e3) ->
-     (match eval env e1 with
-      | VBoolean false -> eval env e3
-      | _ -> eval env e2)
-  | ELambda (s, e) -> VClosure (s, e, env)
-  | ELet (bx, e2) -> eval (List.fold_left (fun a (s, e1) -> extend a s (Static (eval a e1))) env bx) e2
-  | EDynamicLet (bx, e2) -> eval (List.fold_left (fun a (s, e1) -> extend a s (Dynamic (ref (eval a e1)))) env bx) e2
+     (eval env
+	   (function 
+	     | VBoolean false -> eval env k e3
+	     | _ -> eval env k e2)
+	   e1)
+  | ELambda (s, e) -> k (VClosure (s, e, env))
+  | ELet (bx, e2) -> 
+     eval (List.fold_left (fun env' (s1,e1) -> extend env' s1 (Static (eval env (fun v1 -> v1) e1))) env bx) k e2
+  | EDynamicLet (bx, e2) -> eval (List.fold_left (fun env' (s1,e1) -> extend env' s1 (Dynamic (ref (eval env (fun v1 -> v1) e1)))) env bx) k e2
   | EDynamic s -> !(lookup_dynamic env s)
   | EDynamicSet (s,e) -> 
      let vr = lookup_dynamic env s in
-     VUnit(vr := eval env e)
+     VUnit(vr := eval env k e)
   | EListen e ->
-     (match eval env e with
-      | VInteger port ->
-	 let server = Unix.socket Unix.PF_INET Unix.SOCK_STREAM 0 in
-	 let address = Unix.inet_addr_of_string "127.0.0.1" in 
-	 Unix.bind server (Unix.ADDR_INET(address, port));
-	 Unix.listen server 100;
-	 serve_client env (fst (Unix.accept server))
-      | _ -> failwith "eval EListen: port should be of type integer")
-  | EList l -> VList (List.fold_left (fun acc e -> acc@[(eval env e)]) [] l)
+     (eval env 
+	   (function
+	     | VInteger port ->
+		let server = Unix.socket Unix.PF_INET Unix.SOCK_STREAM 0 in
+		let address = Unix.inet_addr_of_string "127.0.0.1" in 
+		Unix.bind server (Unix.ADDR_INET(address, port));
+		Unix.listen server 100;
+		serve_client env (fst (Unix.accept server))
+	     | _ -> failwith "eval EListen: port should be of type integer")
+	   e)
+  | EList [] -> k (VList [])
+  | EList (e1::rest) -> 
+     (eval env (fun v1 ->
+		eval env (function 
+			   | VList vrest -> k (VList (v1::vrest))
+			   | _ -> failwith "eval EList: should be a value of type VList")
+		     (EList rest))
+	   e1)
   | EEqual (e1,e2)->
-     (match (eval env e1, eval env e2) with
-      | VInteger n1, VInteger n2 -> VBoolean (n1 = n2)
-      | _ -> failwith "eval: EEQual: not managed type")
-  | EBegin l -> List.fold_left (fun acc e -> (eval env e)) (VUnit ()) l
-  | ETag (tag, attributes, expressions) ->
-     (match eval env tag with
-      | VString s  -> 
-	 VTag (s, 
-	       eval env attributes,
-	       List.fold_left
-		 (fun acc e -> acc@[(eval env e)]) [] expressions)
-      | _ -> failwith "tag: expect a string as first argument")
-  | EStringAppend (e1, e2) -> 
-     (match (eval env e1, eval env e2) with
-      | (VString s1, VString s2) -> VString (s1^s2)
-      | _ -> failwith "eval EStringAppend: arguments should be evaluated to strings")
+     (eval env (function 
+		 | VInteger n1 -> 
+		    (eval env (function 
+				| VInteger n2 -> k (VBoolean (n1 = n2))
+				| _ -> failwith "eval Equal: integer expected")
+			  e2)
+		 | _ -> failwith "eval Equal: integer expected")
+	   e1)
+  | EBegin [] -> k (VUnit())
+  | EBegin (e1::rest) -> eval env (fun _ -> eval env (fun _ -> VUnit ()) (EBegin rest)) e1
+  (* | ETag (tag, attributes, expressions) -> *)
+  (*    (match eval env tag with *)
+  (*     | VString s  ->  *)
+  (* 	 VTag (s,  *)
+  (* 	       eval env attributes, *)
+  (* 	       List.fold_left *)
+  (* 		 (fun acc e -> acc@[(eval env e)]) [] expressions) *)
+  (*     | _ -> failwith "tag: expect a string as first argument") *)
+  | EStringAppend (e1,e2)->
+     (eval env 
+	   (function 
+	     | VString s1 -> 
+		(eval env (function 
+			    | VString s2 -> k (VString (s1^s2))
+			    | _ -> failwith "eval Equal: integer expected")
+		      e2)
+	     | _ -> failwith "eval Equal: integer expected")
+	   e1)
   | EStringToInt e ->
-     (match eval env e with
-      | VString s -> VInteger (int_of_string s)
-      | _ -> failwith "String expected")
+     (eval env (function
+		 | VString s -> k (VInteger (int_of_string s))
+		 | _ -> failwith "String expected")
+	   e)
   | EIntToString e ->
-     (match eval env e with
-      | VInteger s -> VString (string_of_int s)
-      | _ -> failwith "Integer expected")
-  | EHtml e -> VString ("<html>"^(value_to_html (eval env e))^"</html>")
-  | EScript e -> VScript (script_of_expression env e)
-  | EFromServer _ -> failwith "eval EFromServer: cannot be executed on server. should be executed on client"
+     (eval env (function 
+		 | VInteger s -> k (VString (string_of_int s))
+		 | _ -> failwith "Integer expected")
+	   e)
+  (* | EHtml e -> VString ("<html>"^(value_to_html (eval env e))^"</html>") *)
+  (* | EScript e -> VScript (script_of_expression env e) *)
+  (* | EFromServer _ -> failwith "eval EFromServer: cannot be executed on server. should be executed on client" *)
   | EApplication (e1, ex) -> 
-     (match eval env e1 with
-      | VClosure (s'x, e', env') ->
-	     eval  
+     (eval env e1 (function
+		    | VClosure (s'x, e', env') ->
+		       eval
 	       (List.fold_left2
 		  (fun env'' s' e ->
 		   let arg = eval env e in
