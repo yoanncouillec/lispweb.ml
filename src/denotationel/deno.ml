@@ -13,6 +13,10 @@ type expr =
   | ECatch of ident * expr
   | EThrow of ident * expr
   | EEqual of expr * expr
+  | ECar of expr
+  | ECdr of expr
+  | ECons of expr * expr
+  | EList of expr list
 
 type value = 
   | VUnit
@@ -20,6 +24,7 @@ type value =
   | VBool of bool
   | VClosure of env * ident * expr
   | VCont of cont
+  | VList of value list
 
 and env = (ident * value ref) list
 
@@ -32,7 +37,7 @@ and funct = value -> cont -> mem -> value
 let extend_env id r env = (id, r)::env
 
 let rec get_env id = function
-  | [] -> failwith "get_env: binding not found"
+  | [] -> failwith ("get_env: binding not found: "^id)
   | (id', r)::rest ->
      if id = id' then r else get_env id rest
 
@@ -44,6 +49,7 @@ let rec get_mem r = function
      if r = r' then v else get_mem r rest
 
 and eval e (env:env) (denv:env) (mem:mem) (cont:cont) =
+  (*(print_endline (string_of_expr e));*)
   match e with
   | EInt n -> cont (VInt n) mem
   | EBool b -> cont (VBool b) mem
@@ -71,8 +77,11 @@ and eval e (env:env) (denv:env) (mem:mem) (cont:cont) =
 	    | (VClosure (env', s, body)) ->
 	       eval e2 env denv mem'
 		    (fun v mem'' ->
-		     let (env'', mem''') = (extend_env s (ref v) env, extend_mem (ref v) v mem) in
-		     eval body env'' denv mem''' cont)
+		     eval body 
+			  (extend_env s (ref v) env')
+			  denv
+			  (extend_mem (ref v) v mem'')
+			  cont)
 	    | _ -> failwith "Not a closure"))
   | EBegin [] -> cont VUnit mem
   | EBegin (expression::[]) ->
@@ -94,15 +103,47 @@ and eval e (env:env) (denv:env) (mem:mem) (cont:cont) =
 	   eval e2 env denv mem'
 		(fun v' mem'' ->
 		 cont (VBool (v = v')) mem''))
-	  
-let string_of_value = function
+  | EList [] -> cont (VList []) mem
+  | EList (e::rest) ->
+     eval e env denv mem
+	  (fun v mem' ->
+	   eval (EList rest) env denv mem'
+		(fun vs mem'' ->
+		 match vs with 
+		 | VList vs ->
+		    cont (VList (v::vs)) mem''
+		 | _ -> failwith "Should only be a VList"))
+  | ECar e ->
+     eval e env denv mem
+	  (fun v mem' ->
+	   match v with
+	   | VList (hd::_) -> cont hd mem'
+	   | _ -> failwith "Should be a list")
+  | ECdr e ->
+     eval e env denv mem
+	  (fun v mem' ->
+	   match v with
+	   | VList (_::tl) -> cont (VList tl) mem'
+	   | _ -> failwith "Should be a list")
+  | ECons (e1, e2) ->
+     eval e1 env denv mem
+	  (fun v1 mem' ->
+	   eval e2 env denv mem'
+		(fun v2 mem'' ->
+		 match v2 with
+		 | VList v2 -> cont (VList (v1::v2)) mem''
+		 | _ -> cont (VList (v1::[v2])) mem''))
+
+and string_of_value = function
   | VUnit -> "()"
   | VInt n -> string_of_int n
   | VBool b -> string_of_bool b
   | VClosure _ -> "#CLOSURE"
   | VCont _ -> "#CONT"
+  | VList vs ->
+     "(list"^(List.fold_left (fun acc e -> acc^" "^(string_of_value e)) "" vs)^")"
 
-let rec string_of_expr = function
+and string_of_expr = function
   | EInt n -> string_of_int n
   | EBool b -> string_of_bool b
   | EVar s -> s
@@ -123,6 +164,10 @@ let rec string_of_expr = function
      "(throw ("^s^") "^(string_of_expr e)^")"
   | EEqual (e1, e2) ->
      "(equal? "^(string_of_expr e1)^" "^(string_of_expr e2)^")"
+  | EList _ -> "#LIST"
+  | ECar e -> "(car "^(string_of_expr e)^")"
+  | ECdr e -> "(cdr "^(string_of_expr e)^")"
+  | ECons (e1,e2) -> "(cons "^(string_of_expr e1)^" "^(string_of_expr e2)^")"
 
 let exec expected e = 
   let current = (eval e [] [] []
@@ -136,24 +181,24 @@ let exec expected e =
      (print_endline ("expected: "^(string_of_value expected)) ;
       print_endline ("current: "^(string_of_value current))))
 
-let _ =
-  exec (VInt 12) (EInt 12) ; 
-  exec (VBool true) (EBool true) ;
-  exec (VInt 12) (EIf (EBool true, (EInt 12), EInt 13)) ; 
-  exec (VInt 13) (EIf (EBool false, (EInt 12), EInt 13)) ; 
-  exec (VInt 12) (EIf (EApp (ELambda ("x", EVar "x"), EBool true), (EInt 12), EInt 13)) ; 
-  exec (VInt 13) (EIf (EApp (ELambda ("x", EVar "x"), EBool false), (EInt 12), EInt 13)) ; 
-  exec (VInt 12) (EApp (ELambda ("x", EVar "x"), EInt 12)) ;
-  exec (VInt 14) (EBegin [EInt 12; EInt 13; EInt 14]) ;
-  exec (VInt 12) (ELet ("x", EInt 12, EVar "x")) ;
-  exec (VInt 12) (ELet ("f", ELambda ("x", EVar "x"), EApp (EVar "f", EInt 12))) ;
-  exec (VInt 13) (ELet ("x", EInt 12, EBegin ([ESet("x", EInt 13);EVar "x"]))) ;
-  exec (VInt 12) (ECatch ("exn", (EThrow ("exn", (EInt 12))))) ;
-  exec (VInt 12) (ECatch ("exn", EBegin [EInt 11; (EThrow ("exn", (EInt 12))); EInt 13])) ;
-  exec (VInt 12) (ELet ("x", EInt 12, 
-			(ECatch ("exn", 
-				 EBegin [EInt 11; 
-					 (EThrow ("exn", (EVar "x"))); 
-					 EInt 13]))));
-  exec (VBool true) (EEqual (EInt 12, EInt 12)) ;
-  exec (VBool false) (EEqual (EInt 12, EInt 13)) ;
+(* let _ = *)
+(*   exec (VInt 12) (EInt 12) ;  *)
+(*   exec (VBool true) (EBool true) ; *)
+(*   exec (VInt 12) (EIf (EBool true, (EInt 12), EInt 13)) ;  *)
+(*   exec (VInt 13) (EIf (EBool false, (EInt 12), EInt 13)) ;  *)
+(*   exec (VInt 12) (EIf (EApp (ELambda ("x", EVar "x"), EBool true), (EInt 12), EInt 13)) ;  *)
+(*   exec (VInt 13) (EIf (EApp (ELambda ("x", EVar "x"), EBool false), (EInt 12), EInt 13)) ;  *)
+(*   exec (VInt 12) (EApp (ELambda ("x", EVar "x"), EInt 12)) ; *)
+(*   exec (VInt 14) (EBegin [EInt 12; EInt 13; EInt 14]) ; *)
+(*   exec (VInt 12) (ELet ("x", EInt 12, EVar "x")) ; *)
+(*   exec (VInt 12) (ELet ("f", ELambda ("x", EVar "x"), EApp (EVar "f", EInt 12))) ; *)
+(*   exec (VInt 13) (ELet ("x", EInt 12, EBegin ([ESet("x", EInt 13);EVar "x"]))) ; *)
+(*   exec (VInt 12) (ECatch ("exn", (EThrow ("exn", (EInt 12))))) ; *)
+(*   exec (VInt 12) (ECatch ("exn", EBegin [EInt 11; (EThrow ("exn", (EInt 12))); EInt 13])) ; *)
+(*   exec (VInt 12) (ELet ("x", EInt 12,  *)
+(* 			(ECatch ("exn",  *)
+(* 				 EBegin [EInt 11;  *)
+(* 					 (EThrow ("exn", (EVar "x")));  *)
+(* 					 EInt 13])))); *)
+(*   exec (VBool true) (EEqual (EInt 12, EInt 12)) ; *)
+(*   exec (VBool false) (EEqual (EInt 12, EInt 13)) ; *)

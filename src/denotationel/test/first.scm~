@@ -1,0 +1,5 @@
+(let (first (lambda (x) (lambda (y) x)))
+  (let (second (lambda (x) (lambda (y) y)))
+    (list
+     (first (list 1 2))
+     (second (list 1 2)))))

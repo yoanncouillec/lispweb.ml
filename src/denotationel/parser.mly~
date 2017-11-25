@@ -1,0 +1,39 @@
+%token<int> ER_INT
+%token<string> ER_IDENT
+%token LPAREN RPAREN LAMBDA LET TRUE FALSE IF LIST EOF BEGIN EQUAL QUOTE
+%start start
+%type <Deno.expr> start
+
+%%
+
+start: 
+| e = expression EOF { e }
+
+expressions:
+| expression { [$1] }
+| expression expressions { $1 :: $2 }
+
+expression:
+| n = ER_INT { Deno.EInt (n) }
+| ER_IDENT { Deno.EVar ($1) }
+| TRUE { Deno.EBool (true) }
+| FALSE { Deno.EBool (false) }
+| LPAREN IF expression expression expression RPAREN { Deno.EIf ($3, $4, $5) }
+| LPAREN LAMBDA LPAREN ER_IDENT RPAREN expression RPAREN { Deno.ELambda ($4, $6) }
+| LPAREN LET LPAREN ER_IDENT expression RPAREN expression RPAREN { Deno.ELet ($4, $5, $7) }
+| LPAREN EQUAL expression expression RPAREN { Deno.EEqual ($3,$4) }
+| LPAREN BEGIN expressions RPAREN { Deno.EBegin ($3) }
+| LPAREN expression expression RPAREN { Deno.EApp ($2, $3) }
+
+bindings:
+| LPAREN ER_IDENT expression RPAREN { [($2, $3)] }
+| LPAREN ER_IDENT expression RPAREN bindings { ($2, $3)::$5 }
+
+parameters:
+| ER_IDENT { [$1] }
+| ER_IDENT parameters { $1::$2 }
+
+arguments:
+| expression { [$1] }
+| expression arguments { $1::$2 }
+
