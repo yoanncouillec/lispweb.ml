@@ -12,6 +12,7 @@ type expr =
   | EBegin of expr list
   | ECatch of ident * expr
   | EThrow of ident * expr
+  | EEqual of expr * expr
 
 type value = 
   | VUnit
@@ -106,6 +107,16 @@ and eval e (env:env) (denv:env) (mem:mem) (cont:cont) =
 	  (fun vs mem' -> 
 	   (match !(get_env s denv) with
 	      VCont cont' -> cont' vs mem'))
+  | EEqual (e1, e2) ->
+     eval e1 env denv mem
+	  (fun vs mem' -> 
+	   match vs with v::[] -> 
+		      eval e2 env denv mem'
+			   (fun vs' mem'' ->
+			    match vs' with v'::[] ->
+					   cont [(VBool (v = v'))] mem''))
+						      
+				   
 	  
 let string_of_value = function
   | VUnit -> "()"
@@ -143,3 +154,5 @@ let _ =
 				 EBegin [EInt 11; 
 					 (EThrow ("exn", (EVar "x"))); 
 					 EInt 13]))));
+  exec (VBool true) (EEqual (EInt 12, EInt 12)) ;
+  exec (VBool false) (EEqual (EInt 12, EInt 13)) ;
