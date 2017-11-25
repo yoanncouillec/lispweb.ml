@@ -6,6 +6,7 @@ type expr =
   | EVar of ident
   | ESet of ident * expr
   | EIf of expr * expr * expr
+  | ELet of ident * expr * expr
   | ELambda of ident list * expr
   | EApp of expr * expr list
   | EBegin of expr list
@@ -38,42 +39,43 @@ let rec get_mem r = function
   | (r', v)::rest ->
      if r = r' then v else get_mem r rest
 
-let rec evalist es env cont mem = 
+let rec evalist es env mem cont = 
   match es with
   | [] -> failwith "evalist: empty"
-  | e::[] -> eval e env cont mem
+  | e::[] -> eval e env mem cont
   | e::rest -> 
-     eval e env 
+     eval e env mem
 	  (fun vs mem' -> 
 	   (match vs with
 	    | v::[] -> 
-	       evalist rest env (fun vs' mem'' -> cont (v::vs') mem'') mem')) 
-	  mem
+	       evalist rest env mem' (fun vs' mem'' -> cont (v::vs') mem''))) 
 
-and eval e (env:env) (cont:cont) (mem:mem) =
+and eval e (env:env) (mem:mem) (cont:cont) =
   match e with
   | EInt n -> cont [(VInt n)] mem
   | EBool b -> cont [(VBool b)] mem
   | EVar s -> cont [(get_mem (get_env s env) mem)] mem
   | ESet (s, e) -> 
-     eval e env 
+     eval e env mem
 	  (fun vs mem' -> 
 	   match vs with
 	   | v::[] -> cont [v] (extend_mem (ref v) v mem'))
-	  mem
   | EIf (a, b, c) -> 
-     eval e env 
-	  (fun v mem' -> 
-	   (match v with 
-	    | (VBool x)::[] -> if x then eval b env cont mem' else eval c env cont mem'
-	    | _ -> failwith "eval EIf: expecting a boolean")) mem
+     eval a env mem
+	  (fun vs mem' -> 
+	   (match vs with 
+	    | (VBool x)::[] -> if x then eval b env mem' cont else eval c env mem' cont
+	    | _ -> failwith "eval EIf: expecting a boolean"))
+  | ELet (s, expr, body) ->
+     eval expr env mem
+	  (fun vs mem' -> match vs with v::[] -> eval body (extend_env s (ref v) env) (extend_mem (ref v) v mem') cont)
   | ELambda (ss, e) -> cont [(VClosure (env, ss, e))] mem
   | EApp (e, es) ->
-     eval e env 
-	  (fun v mem' -> 
-	   (match v with
+     eval e env mem
+	  (fun vs mem' -> 
+	   (match vs with
 	    | (VClosure (env', ss, e'))::[] ->
-	       evalist es env 
+	       evalist es env mem'
 		       (fun vs mem'' ->
 			let (env'', mem''') = 
 			  (List.fold_left2 
@@ -84,9 +86,11 @@ and eval e (env:env) (cont:cont) (mem:mem) =
 			     (env', mem'')
 			     ss
 			     vs) in
-			eval e' env'' cont mem''')
-		       mem'))
-	  mem
+			eval e' env'' mem''' cont)))
+  | EBegin (expression::[]) ->
+     eval expression env mem cont
+  | EBegin (expression::rest) ->
+     eval expression env mem (fun vs mem' -> eval (EBegin rest) env mem' cont)
 
 let string_of_value = function
   | VUnit -> "()"
@@ -94,15 +98,27 @@ let string_of_value = function
   | VBool b -> string_of_bool b
   | VClosure _ -> "#CLOSURE"
 
-let exec e = 
-  print_endline 
-    (string_of_value 
-       (eval e 
-	     []
-	     (fun vs _ -> match vs with v::_ -> v) 
-	     []))
+let exec expected e = 
+  let current = (eval e [] []
+		      (fun vs _ -> match vs with v::_ -> v)) in
+  if expected = current then
+    print_endline "[OK]"
+  else
+    (print_endline ("[FAILED]");
+     print_endline ("expected: "^(string_of_value expected));
+     print_endline ("current: "^(string_of_value current)))
 
 let _ =
-  exec (EInt 12) ; 
-  exec (EBool true) ;
-  exec (EApp (ELambda (["x"], EVar "x"), [EInt 12])) ;
+  exec (VInt 12) (EInt 12) ; 
+  exec (VBool true) (EBool true) ;
+  exec (VInt 12) (ESet ("x", (EInt 12))) ; 
+  exec (VInt 12) (EIf (EBool true, (EInt 12), EInt 13)) ; 
+  exec (VInt 13) (EIf (EBool false, (EInt 12), EInt 13)) ; 
+  exec (VInt 12) (EIf (EApp (ELambda (["x"], EVar "x"), [EBool true]), (EInt 12), EInt 13)) ; 
+  exec (VInt 13) (EIf (EApp (ELambda (["x"], EVar "x"), [EBool false]), (EInt 12), EInt 13)) ; 
+  exec (VInt 12) (EApp (ELambda (["x"], EVar "x"), [EInt 12])) ;
+  exec (VInt 13) (EApp (ELambda (["x";"y"], EVar "y"), [EInt 12; EInt 13])) ;
+  exec (VInt 14) (EBegin [EInt 12; EInt 13; EInt 14]) ;
+  exec (VInt 12) (ELet ("x", EInt 12, EVar "x"));
+  exec (VInt 12) (ELet ("f", ELambda (["x"], EVar "x"), EApp (EVar "f", [EInt 12])));
+
