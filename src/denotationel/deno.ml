@@ -102,15 +102,39 @@ let string_of_value = function
   | VClosure _ -> "#CLOSURE"
   | VCont _ -> "#CONT"
 
+let rec string_of_expr = function
+  | EInt n -> string_of_int n
+  | EBool b -> string_of_bool b
+  | EVar s -> s
+  | ESet (s, e) -> "(set! "^s^(string_of_expr e)^")"
+  | EIf (e1, e2, e3) -> 
+     "(if "^(string_of_expr e1)^" "^(string_of_expr e2)^" "^(string_of_expr e3)^")"
+  | ELet (s, e, body) ->
+    "(let ("^s^" "^(string_of_expr e)^") "^(string_of_expr body)^")"
+  | ELambda (s, body) ->
+     "(lambda ("^s^") "^(string_of_expr body)^")"
+  | EApp (e1, e2) ->
+     "("^(string_of_expr e1)^" "^(string_of_expr e2)^")"
+  | EBegin es -> 
+     "(begin "^(List.fold_left (fun acc x -> acc^" "^(string_of_expr x)) "" es)^")"
+  | ECatch (s, e) ->
+     "(catch ("^s^") "^(string_of_expr e)^")"
+  | EThrow (s, e) ->
+     "(throw ("^s^") "^(string_of_expr e)^")"
+  | EEqual (e1, e2) ->
+     "(equal? "^(string_of_expr e1)^" "^(string_of_expr e2)^")"
+
 let exec expected e = 
   let current = (eval e [] [] []
 		      (fun v _ ->  v)) in
-  if expected = current then
-    print_endline "[OK]"
-  else
-    (print_endline ("[FAILED]");
-     print_endline ("expected: "^(string_of_value expected));
-     print_endline ("current: "^(string_of_value current)))
+  (if expected = current then
+     print_string "[OK] "
+   else
+     print_string ("[FAILED] ")) ;
+  print_endline ((string_of_expr e)^" -> "^(string_of_value current)) ;
+  (if expected = current then print_string "" else
+     (print_endline ("expected: "^(string_of_value expected)) ;
+      print_endline ("current: "^(string_of_value current))))
 
 let _ =
   exec (VInt 12) (EInt 12) ; 
