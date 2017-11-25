@@ -121,4 +121,3 @@ let _ =
   exec (VInt 14) (EBegin [EInt 12; EInt 13; EInt 14]) ;
   exec (VInt 12) (ELet ("x", EInt 12, EVar "x"));
   exec (VInt 12) (ELet ("f", ELambda (["x"], EVar "x"), EApp (EVar "f", [EInt 12])));
-
