@@ -1,8 +1,13 @@
 type ident = string
 
+type operator = OPlus | OMinus | OMult
+
 type expr =
   | EInt of int
+  | EBinary of operator * expr * expr
   | EBool of bool
+  | EString of string
+  | EQuote of expr
   | EVar of ident
   | ESet of ident * expr
   | EIf of expr * expr * expr
@@ -12,6 +17,8 @@ type expr =
   | EBegin of expr list
   | ECatch of ident * expr
   | EThrow of ident * expr
+  | EBlock of ident * expr
+  | EReturnFrom of ident * expr
   | ECallcc of ident * expr
   | EEqual of expr * expr
   | ECar of expr
@@ -23,9 +30,11 @@ type value =
   | VUnit
   | VInt of int
   | VBool of bool
+  | VString of string
   | VClosure of env * ident * expr
   | VCont of cont
   | VList of value list
+  | VQuote of expr
 
 and env = (ident * value ref) list
 
@@ -51,11 +60,28 @@ let rec get_mem r mem =
     | (r', v)::rest ->
        if r == r' then v else get_mem r rest
 
+and apply_bin_op op v1 v2 = 
+  match (v1, v2) with
+  | (VInt n1, VInt n2) ->
+     (match op with
+      | OPlus -> VInt (n1 + n2)
+      | OMinus -> VInt (n1 - n2)
+      | OMult -> VInt (n1 * n2))
+  | _ -> failwith "Should be integers"
+
 and eval e (env:env) (denv:env) (mem:mem) (cont:cont) =
   (*(print_endline ("evaluate: "^(string_of_expr e)));*)
   match e with
   | EInt n -> cont (VInt n) mem
+  | EBinary (op, e1, e2) ->
+     eval e1 env denv mem
+	  (fun v1 mem' ->
+	   eval e2 env denv mem'
+		(fun v2 mem'' ->
+		 cont (apply_bin_op op v1 v2) mem''))
   | EBool b -> cont (VBool b) mem
+  | EString s -> cont (VString s) mem
+  | EQuote e -> cont (VQuote e) mem
   | EVar s -> cont (get_mem (get_env s env) mem) mem
   | ESet (s, e) -> 
      eval e env denv mem
@@ -100,9 +126,18 @@ and eval e (env:env) (denv:env) (mem:mem) (cont:cont) =
      eval expression env (extend_env s addr denv) (extend_mem addr !addr mem) cont
   | EThrow (s, expression) ->
      eval expression env denv mem
-	  (fun vs mem' -> 
+	  (fun v mem' -> 
 	   (match !(get_env s denv) with
-	    | VCont cont' -> cont' vs mem'
+	    | VCont cont' -> cont' v mem'
+	    | _ -> failwith "Not a continuation"))
+  | EBlock (s, expression) -> 
+     let addr = ref (VCont cont) in
+     eval expression (extend_env s addr env) denv (extend_mem addr !addr mem) cont
+  | EReturnFrom (s, expression) ->
+     eval expression env denv mem
+	  (fun v mem' -> 
+	   (match !(get_env s env) with
+	    | VCont cont' -> cont' v mem'
 	    | _ -> failwith "Not a continuation"))
   | ECallcc (s, expression) ->
      let addr = ref (VCont cont) in
@@ -148,6 +183,8 @@ and string_of_value = function
   | VUnit -> "()"
   | VInt n -> string_of_int n
   | VBool b -> string_of_bool b
+  | VString s -> "\"" ^ s ^ "\""
+  | VQuote e -> "'" ^ (string_of_expr e)
   | VClosure (_, s, body)-> "#CLOSURE (lambda("^s^") "^(string_of_expr body)^")"
   | VCont _ -> "#CONT"
   | VList vs ->
@@ -155,7 +192,14 @@ and string_of_value = function
 
 and string_of_expr = function
   | EInt n -> string_of_int n
+  | EBinary (op, e1, e2) ->
+     "("^(match op with
+	  | OPlus -> "+"
+	  | OMult -> "*"
+	  | OMinus -> "-")^" "^(string_of_expr e1)^" "^(string_of_expr e2)^")"
   | EBool b -> string_of_bool b
+  | EString s -> "\"" ^ s ^ "\""
+  | EQuote e -> "'" ^ (string_of_expr e)
   | EVar s -> s
   | ESet (s, e) -> "(set! "^s^(string_of_expr e)^")"
   | EIf (e1, e2, e3) -> 
@@ -172,9 +216,13 @@ and string_of_expr = function
      "(catch ("^s^") "^(string_of_expr e)^")"
   | EThrow (s, e) ->
      "(throw ("^s^") "^(string_of_expr e)^")"
+  | EBlock (s, e) ->
+     "(block ("^s^") "^(string_of_expr e)^")"
+  | EReturnFrom (s, e) ->
+     "(return-from ("^s^") "^(string_of_expr e)^")"
   | EEqual (e1, e2) ->
      "(equal? "^(string_of_expr e1)^" "^(string_of_expr e2)^")"
-  | EList es -> "(list "^(List.fold_left (fun acc e -> acc^" "^(string_of_expr e)) "" es)^")"
+  | EList es -> "(list"^(List.fold_left (fun acc e -> acc^" "^(string_of_expr e)) "" es)^")"
   | ECar e -> "(car "^(string_of_expr e)^")"
   | ECdr e -> "(cdr "^(string_of_expr e)^")"
   | ECons (e1,e2) -> "(cons "^(string_of_expr e1)^" "^(string_of_expr e2)^")"

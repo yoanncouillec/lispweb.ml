@@ -3,13 +3,21 @@ exception Error
 type token = 
   | TRUE
   | THROW
+  | SET
   | RPAREN
+  | RETURNFROM
+  | QUOTE
+  | PLUS
+  | MULT
+  | MINUS
   | LPAREN
   | LIST
+  | LETREC
   | LET
   | LAMBDA
   | IF
   | FALSE
+  | ER_STRING of (string)
   | ER_INT of (int)
   | ER_IDENT of (string)
   | EQUAL
@@ -19,6 +27,7 @@ type token =
   | CATCH
   | CAR
   | CALLCC
+  | BLOCK
   | BEGIN
 
 

@@ -1,0 +1,2 @@
+(catch e
+       (throw e 12))
