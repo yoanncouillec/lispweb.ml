@@ -12,6 +12,7 @@ type expr =
   | EBegin of expr list
   | ECatch of ident * expr
   | EThrow of ident * expr
+  | ECallcc of ident * expr
   | EEqual of expr * expr
   | ECar of expr
   | ECdr of expr
@@ -36,20 +37,22 @@ and funct = value -> cont -> mem -> value
 
 let extend_env id r env = (id, r)::env
 
-let rec get_env id = function
-  | [] -> failwith ("get_env: binding not found: "^id)
-  | (id', r)::rest ->
-     if id = id' then r else get_env id rest
-
+let rec get_env id env =
+    match env with
+    | [] -> failwith ("get_env: binding not found: "^id)
+    | (id', r)::rest ->
+       if id = id' then r else get_env id rest
+				       
 let extend_mem r v mem = (r, v)::mem
 
-let rec get_mem r = function
-  | [] -> failwith "get_mem: binding not found"
-  | (r', v)::rest ->
-     if r = r' then v else get_mem r rest
+let rec get_mem r mem =
+    match mem with
+    | [] -> failwith "get_mem: binding not found"
+    | (r', v)::rest ->
+       if r == r' then v else get_mem r rest
 
 and eval e (env:env) (denv:env) (mem:mem) (cont:cont) =
-  (*(print_endline (string_of_expr e));*)
+  (*(print_endline ("evaluate: "^(string_of_expr e)));*)
   match e with
   | EInt n -> cont (VInt n) mem
   | EBool b -> cont (VBool b) mem
@@ -67,8 +70,9 @@ and eval e (env:env) (denv:env) (mem:mem) (cont:cont) =
 	    | _ -> failwith "eval EIf: expecting a boolean"))
   | ELet (s, expr, body) ->
      eval expr env denv mem
-	  (fun v mem' -> 
-	   eval body (extend_env s (ref v) env) denv (extend_mem (ref v) v mem') cont)
+	  (fun v mem' ->
+	   let addr = ref v in
+	   eval body (extend_env s addr env) denv (extend_mem addr v mem') cont)
   | ELambda (s, e) -> cont (VClosure (env, s, e)) mem
   | EApp (e1, e2) ->
      eval e1 env denv mem
@@ -77,11 +81,14 @@ and eval e (env:env) (denv:env) (mem:mem) (cont:cont) =
 	    | (VClosure (env', s, body)) ->
 	       eval e2 env denv mem'
 		    (fun v mem'' ->
+		     let addr = ref v in
 		     eval body 
-			  (extend_env s (ref v) env')
+			  (extend_env s addr env')
 			  denv
-			  (extend_mem (ref v) v mem'')
+			  (extend_mem addr v mem'')
 			  cont)
+	    | VCont k ->
+	       eval e2 env denv mem' k
 	    | _ -> failwith "Not a closure"))
   | EBegin [] -> cont VUnit mem
   | EBegin (expression::[]) ->
@@ -97,6 +104,9 @@ and eval e (env:env) (denv:env) (mem:mem) (cont:cont) =
 	   (match !(get_env s denv) with
 	    | VCont cont' -> cont' vs mem'
 	    | _ -> failwith "Not a continuation"))
+  | ECallcc (s, expression) ->
+     let addr = ref (VCont cont) in
+     eval expression (extend_env s addr env) denv (extend_mem addr !addr mem) cont
   | EEqual (e1, e2) ->
      eval e1 env denv mem
 	  (fun v mem' -> 
@@ -138,7 +148,7 @@ and string_of_value = function
   | VUnit -> "()"
   | VInt n -> string_of_int n
   | VBool b -> string_of_bool b
-  | VClosure _ -> "#CLOSURE"
+  | VClosure (_, s, body)-> "#CLOSURE (lambda("^s^") "^(string_of_expr body)^")"
   | VCont _ -> "#CONT"
   | VList vs ->
      "(list"^(List.fold_left (fun acc e -> acc^" "^(string_of_value e)) "" vs)^")"
@@ -164,10 +174,11 @@ and string_of_expr = function
      "(throw ("^s^") "^(string_of_expr e)^")"
   | EEqual (e1, e2) ->
      "(equal? "^(string_of_expr e1)^" "^(string_of_expr e2)^")"
-  | EList _ -> "#LIST"
+  | EList es -> "(list "^(List.fold_left (fun acc e -> acc^" "^(string_of_expr e)) "" es)^")"
   | ECar e -> "(car "^(string_of_expr e)^")"
   | ECdr e -> "(cdr "^(string_of_expr e)^")"
   | ECons (e1,e2) -> "(cons "^(string_of_expr e1)^" "^(string_of_expr e2)^")"
+  | ECallcc (s, e) -> "(call/cc "^s^" "^(string_of_expr e)^")"
 
 let exec expected e = 
   let current = (eval e [] [] []

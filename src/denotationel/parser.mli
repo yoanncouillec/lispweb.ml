@@ -18,6 +18,7 @@ type token =
   | CDR
   | CATCH
   | CAR
+  | CALLCC
   | BEGIN
 
 

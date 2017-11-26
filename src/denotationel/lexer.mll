@@ -19,5 +19,6 @@ rule token = parse
   | "begin" { BEGIN }
   | "throw" { THROW }  
   | "catch" { CATCH }  
+  | "call/cc" { CALLCC }  
   | ['0'-'9']+ { ER_INT (int_of_string (Lexing.lexeme lexbuf)) }
   | ['A'-'Z''a'-'z''+''-''*''/''#''-''@''{'']''*''&''%''$''!''.''?']+ { ER_IDENT (Lexing.lexeme lexbuf) }

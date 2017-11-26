@@ -2,7 +2,7 @@
 %token<string> ER_IDENT
 %token LPAREN RPAREN LAMBDA LET TRUE FALSE IF EOF BEGIN EQUAL
 %token CAR CDR CONS LIST
-%token CATCH THROW
+%token CATCH THROW CALLCC
 %start start
 %type <Deno.expr> start
 
@@ -22,6 +22,7 @@ expression:
 | FALSE { Deno.EBool (false) }
 | LPAREN CATCH ER_IDENT expression RPAREN { Deno.ECatch($3,$4) }
 | LPAREN THROW ER_IDENT expression RPAREN { Deno.EThrow($3,$4) }
+| LPAREN CALLCC ER_IDENT expression RPAREN { Deno.ECallcc($3,$4) }
 | LPAREN CAR expression RPAREN { Deno.ECar($3) }
 | LPAREN CDR expression  RPAREN { Deno.ECdr($3) }
 | LPAREN CONS expression expression RPAREN { Deno.ECons($3,$4) }
