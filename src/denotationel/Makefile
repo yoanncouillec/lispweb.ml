@@ -1,5 +1,5 @@
 BINS=lispwebeval
-DEPS=lexer.cmo parser.cmo expr.cmo value.cmo host.cmo deno.cmo lispwebeval.cmo
+DEPS=lexer.cmo parser.cmo env.cmo mem.cmo expr.cmo value.cmo host.cmo deno.cmo eval.cmo pretty.cmo exec.cmo lispwebeval.cmo
 
 all: $(BINS)
 

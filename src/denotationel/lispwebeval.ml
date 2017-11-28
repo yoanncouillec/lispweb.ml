@@ -1,4 +1,5 @@
-open Deno
+open Pretty
+open Eval
 
 let rec string_of_channel channel accu = 
   try

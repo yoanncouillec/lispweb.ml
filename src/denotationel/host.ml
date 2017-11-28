@@ -15,6 +15,3 @@ let unix_openfile_exec = function
 
 let functions = 
   [("Unix.openfile", unix_openfile_exec)]
-
-let string_of_vhost = function
-  | VFile _ -> "#FILE"
