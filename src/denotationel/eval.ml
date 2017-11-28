@@ -3,6 +3,7 @@ open Value
 open Mem
 open Env
 open Host
+open Pretty
 
 let rec apply_bin_op op v1 v2 = 
   match (v1, v2) with
@@ -25,6 +26,7 @@ let rec eval e (env:env) (denv:env) (mem:mem) (cont:cont) =
 		 cont (apply_bin_op op v1 v2) mem''))
   | EBool b -> cont (VBool b) mem
   | EString s -> cont (VString s) mem
+  | EChar c -> cont (VChar c) mem
   | EQuote e -> cont (VQuote e) mem
   | EVar s -> cont (get_mem (get_env s env) mem) mem
   | ESet (s, e) -> 
@@ -125,5 +127,5 @@ let rec eval e (env:env) (denv:env) (mem:mem) (cont:cont) =
   | EHostCall (s, e) ->
      eval e env denv mem
 	  (fun v mem' ->
-	   VHost ((List.assoc s functions) v))
+	   cont ((List.assoc s functions) v) mem')
 

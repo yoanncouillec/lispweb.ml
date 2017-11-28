@@ -1,9 +1,9 @@
 %token<int> ER_INT
-%token<string> ER_IDENT ER_STRING
+%token<string> ER_IDENT ER_STRING ER_CHAR
 %token LPAREN RPAREN LAMBDA LET LETREC 
 %token TRUE FALSE IF EOF BEGIN EQUAL SET QUOTE
 %token CAR CDR CONS LIST
-%token CATCH THROW CALLCC BLOCK RETURNFROM
+%token CATCH THROW CALLCC BLOCK RETURNFROM HOSTCALL
 %token PLUS MINUS MULT
 %start start
 %type <Expr.expr> start
@@ -20,6 +20,7 @@ expressions:
 expression:
 | n = ER_INT { Expr.EInt (n) }
 | ER_STRING { Expr.EString (String.sub ($1) 1 ((String.length $1) - 2)) }
+| ER_CHAR { Expr.EChar (String.get $1 1) }
 | ER_IDENT { Expr.EVar ($1) }
 | QUOTE expression { Expr.EQuote ($2) }
 | TRUE { Expr.EBool (true) }
@@ -44,4 +45,5 @@ expression:
 | LPAREN SET ER_IDENT expression RPAREN { Expr.ESet($3, $4) }
 | LPAREN EQUAL expression expression RPAREN { Expr.EEqual ($3,$4) }
 | LPAREN BEGIN expressions RPAREN { Expr.EBegin ($3) }
+| LPAREN HOSTCALL ER_IDENT expression RPAREN { Expr.EHostCall ($3,$4) }
 | LPAREN expression expression RPAREN { Expr.EApp ($2, $3) }

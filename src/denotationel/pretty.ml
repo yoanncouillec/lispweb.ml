@@ -1,20 +1,18 @@
 open Value
 open Expr
 
-let string_of_vhost = function
-  | VFile _ -> "#FILE"
-
 let rec string_of_value = function
   | VUnit -> "()"
   | VInt n -> string_of_int n
   | VBool b -> string_of_bool b
   | VString s -> "\"" ^ s ^ "\""
+  | VChar c -> "'" ^ (String.make 1 c) ^ "'"
   | VQuote e -> "'" ^ (string_of_expr e)
   | VClosure (_, s, body)-> "#CLOSURE (lambda("^s^") "^(string_of_expr body)^")"
   | VCont _ -> "#CONT"
   | VList vs ->
      "(list"^(List.fold_left (fun acc e -> acc^" "^(string_of_value e)) "" vs)^")"
-  | VHost vh -> string_of_vhost vh
+  | VFile _ -> "#FILE"
 
 and string_of_expr = function
   | EInt n -> string_of_int n
@@ -25,6 +23,7 @@ and string_of_expr = function
 	  | OMinus -> "-")^" "^(string_of_expr e1)^" "^(string_of_expr e2)^")"
   | EBool b -> string_of_bool b
   | EString s -> "\"" ^ s ^ "\""
+  | EChar c -> "'" ^ (String.make 1 c) ^ "'"
   | EQuote e -> "'" ^ (string_of_expr e)
   | EVar s -> s
   | ESet (s, e) -> "(set! "^s^(string_of_expr e)^")"
@@ -53,4 +52,4 @@ and string_of_expr = function
   | ECdr e -> "(cdr "^(string_of_expr e)^")"
   | ECons (e1,e2) -> "(cons "^(string_of_expr e1)^" "^(string_of_expr e2)^")"
   | ECallcc (s, e) -> "(call/cc "^s^" "^(string_of_expr e)^")"
-  | EHostCall (s, e) ->  "(hostcall" ^ s ^ " " ^ (string_of_expr e) ^ ")"
+  | EHostCall (s, e) ->  "(hostcall " ^ s ^ " " ^ (string_of_expr e) ^ ")"
