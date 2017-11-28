@@ -31,4 +31,4 @@ type token =
   | BEGIN
 
 
-val start: (Lexing.lexbuf -> token) -> Lexing.lexbuf -> (Deno.expr)
+val start: (Lexing.lexbuf -> token) -> Lexing.lexbuf -> (Expr.expr)

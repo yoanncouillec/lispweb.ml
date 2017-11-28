@@ -1,48 +1,6 @@
-type ident = string
-
-type operator = OPlus | OMinus | OMult
-
-type expr =
-  | EInt of int
-  | EBinary of operator * expr * expr
-  | EBool of bool
-  | EString of string
-  | EQuote of expr
-  | EVar of ident
-  | ESet of ident * expr
-  | EIf of expr * expr * expr
-  | ELet of ident * expr * expr
-  | ELambda of ident * expr
-  | EApp of expr * expr
-  | EBegin of expr list
-  | ECatch of ident * expr
-  | EThrow of ident * expr
-  | EBlock of ident * expr
-  | EReturnFrom of ident * expr
-  | ECallcc of ident * expr
-  | EEqual of expr * expr
-  | ECar of expr
-  | ECdr of expr
-  | ECons of expr * expr
-  | EList of expr list
-
-type value = 
-  | VUnit
-  | VInt of int
-  | VBool of bool
-  | VString of string
-  | VClosure of env * ident * expr
-  | VCont of cont
-  | VList of value list
-  | VQuote of expr
-
-and env = (ident * value ref) list
-
-and mem = (value ref * value) list
-
-and cont = value  -> mem -> value
-
-and funct = value -> cont -> mem -> value
+open Value
+open Expr
+open Host
 
 let extend_env id r env = (id, r)::env
 
@@ -178,6 +136,10 @@ and eval e (env:env) (denv:env) (mem:mem) (cont:cont) =
 		 match v2 with
 		 | VList v2 -> cont (VList (v1::v2)) mem''
 		 | _ -> cont (VList (v1::[v2])) mem''))
+  | EHostCall (s, e) ->
+     eval e env denv mem
+	  (fun v mem' ->
+	   VHost ((List.assoc s functions) v))
 
 and string_of_value = function
   | VUnit -> "()"
@@ -189,6 +151,7 @@ and string_of_value = function
   | VCont _ -> "#CONT"
   | VList vs ->
      "(list"^(List.fold_left (fun acc e -> acc^" "^(string_of_value e)) "" vs)^")"
+  | VHost vh -> string_of_vhost vh
 
 and string_of_expr = function
   | EInt n -> string_of_int n
@@ -227,6 +190,7 @@ and string_of_expr = function
   | ECdr e -> "(cdr "^(string_of_expr e)^")"
   | ECons (e1,e2) -> "(cons "^(string_of_expr e1)^" "^(string_of_expr e2)^")"
   | ECallcc (s, e) -> "(call/cc "^s^" "^(string_of_expr e)^")"
+  | EHostCall (s, e) ->  "(hostcall" ^ s ^ " " ^ (string_of_expr e) ^ ")"
 
 let exec expected e = 
   let current = (eval e [] [] []

@@ -1,10 +1,10 @@
-all: lispwebeval
+BINS=lispwebeval
+DEPS=lexer.cmo parser.cmo expr.cmo value.cmo host.cmo deno.cmo lispwebeval.cmo
 
-lispwebeval: deno.cmo parser.cmi parser.cmo lexer.cmo lispwebeval.cmo
-	ocamlc -pp "camlp4 camlp4-options" -o $@ str.cma unix.cma deno.cmo parser.cmo lexer.cmo lispwebeval.cmo
+all: $(BINS)
 
-lispwebrepl: lispweb.cmo parser.cmi parser.cmo lexer.cmo lispwebrepl.cmo
-	ocamlc -pp "camlp4 camlp4-options" -o $@ str.cma unix.cma lispweb.cmo parser.cmo lexer.cmo lispwebrepl.cmo
+lispwebeval: parser.cmi $(DEPS)
+	ocamlc -pp "camlp4 camlp4-options" -o $@ str.cma unix.cma $(DEPS)
 
 %.cmi: %.mli
 	ocamlc $^
@@ -36,7 +36,7 @@ test: lispwebeval
 	./$^ < test/test.scm
 
 clean:
-	rm -rf *.cm* lispwebeval lispwebrepl
+	rm -rf lispwebeval lispwebrepl *.cmo lexer.ml parser.ml
 
 mrproper: clean
 	rm -rf *~

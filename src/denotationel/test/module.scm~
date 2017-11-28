@@ -1,0 +1,2 @@
+(export foo (lambda (x) (+ x 1)))
+ 

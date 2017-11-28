@@ -1,0 +1,15 @@
+
+and flag_of_string_value = function
+  | VString "O_CREAT" -> Unix.O_CREAT
+  | VString "O_RDWR" -> Unix.O_RDWR
+  | _ -> failwith "flag_of_string_value: not managed"
+
+and unix_openfile_exec = function
+  | VList(VString(name)::VList(flags)::VString(perm)::[]) -> 
+     VHost (VFile (Unix.openfile
+		     name 
+		     (List.map flag_of_string_value flags)
+		     (int_of_string perm)))
+
+and hostfun = 
+  [("Unix.openfile", unix_openfile_exec)]
