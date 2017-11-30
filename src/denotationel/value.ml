@@ -11,6 +11,9 @@ type value =
   | VList of value list
   | VQuote of expr
   | VFile of Unix.file_descr
+  | VInetAddr of Unix.inet_addr
+  | VSockAddr of Unix.sockaddr
+  | VShutdownCommand of Unix.shutdown_command
 		
  and env = (string * value ref) list
 

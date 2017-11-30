@@ -35,7 +35,95 @@ module Unix = struct
     | VList([]) -> 
        VFile(Unix.stdout)
     | _ -> failwith "unix_stdout"
-		    
+
+  module Socket = struct
+
+    let domain_of_string = function
+      | "PF_UNIX" -> Unix.PF_UNIX
+      | "PF_INET" -> Unix.PF_INET
+      | "PF_INET6" -> Unix.PF_INET6
+      | _ -> failwith "domain_of_string"
+
+    let socket_type_of_string = function
+      | "SOCK_STREAM" -> Unix.SOCK_STREAM
+      | "SOCK_DGRAM" -> Unix.SOCK_DGRAM
+      | "SOCK_RAW" -> Unix.SOCK_RAW
+      | "SOCK_SEQPACKET" -> Unix.SOCK_SEQPACKET
+      | _ -> failwith "domain_of_string"
+
+    let shutdown_command_of_string = function
+      | "SHUTDOWN_SEND" -> Unix.SHUTDOWN_SEND
+      | "SHUTDOWN_RECEIVE" -> Unix.SHUTDOWN_RECEIVE
+      | "SHUTDOWN_ALL" -> Unix.SHUTDOWN_ALL
+      | _ -> failwith "domain_of_string"
+
+    let unix_inet_addr_any = function
+      | VList([]) ->
+	 VInetAddr(Unix.inet_addr_any)
+      | _ -> failwith "unix_inet_addr_any"
+		      
+    let unix_inet_addr_loopback = function
+      | VList([]) ->
+	 VInetAddr(Unix.inet_addr_loopback)
+      | _ -> failwith "unix_inet_addr_loopback"
+		      
+    let unix_inet6_addr_any = function
+      | VList([]) ->
+	 VInetAddr(Unix.inet6_addr_any)
+      | _ -> failwith "unix_inet6_addr_any"
+		      
+    let unix_inet6_addr_loopback = function
+      | VList([]) ->
+	 VInetAddr(Unix.inet6_addr_loopback)
+      | _ -> failwith "unix_inet6_addr_loopback"
+		      
+    let unix_addr_unix = function
+      | VList(VString(name)::[]) ->
+	 VSockAddr(Unix.ADDR_UNIX name)
+      | _ -> failwith "unix_addr_unix"
+		      
+    let unix_addr_inet = function
+      | VList(VInetAddr(addr)::VInt(port)::[]) ->
+	 VSockAddr(Unix.ADDR_INET(addr, port))
+      | _ -> failwith "unix_addr_inet"
+		      
+    let unix_socket = function
+      | VList(VString(domain)::VString(stype)::VInt(protocol)::[]) ->
+	 (VFile (Unix.socket (domain_of_string domain) (socket_type_of_string stype) protocol))
+      | _ -> failwith "unix_socket"
+
+    let unix_connect = function
+      | VList(VFile(fd)::VSockAddr(saddr)::[]) ->
+	 Unix.connect fd saddr;
+	 VUnit
+      | _ -> failwith "unix_connect"
+
+    let unix_bind = function
+      | VList(VFile(fd)::VSockAddr(saddr)::[]) ->
+	 Unix.bind fd saddr;
+	 VUnit
+      | _ -> failwith "unix_bind"
+
+    let unix_accept = function
+      | VList(VFile(fd)::[]) ->
+	 let (fd,saddr) = Unix.accept fd in
+	 VList(VFile(fd)::VSockAddr(saddr)::[])
+      | _ -> failwith "unix_accept"
+
+    let unix_listen = function
+      | VList(VFile(fd)::VInt(n)::[]) ->
+	 Unix.listen fd n ;
+	 VUnit
+      | _ -> failwith "unix_accept"
+
+    let unix_shutdown = function
+      | VList(VFile(fd)::VShutdownCommand(sc)::[]) ->
+	 Unix.shutdown fd sc;
+	 VUnit
+      | _ -> failwith "unix_accept"
+
+  end
+
 end
 		
 module String = struct
@@ -59,6 +147,20 @@ let functions =
     ("Unix.read", Unix.unix_read);
     ("Unix.write", Unix.unix_write);
     ("Unix.stdout", Unix.unix_stdout);
+
+    ("Unix.inet_addr_any", Unix.Socket.unix_inet_addr_any);
+    ("Unix.inet_addr_loopback", Unix.Socket.unix_inet_addr_loopback);
+    ("Unix.inet6_addr_any", Unix.Socket.unix_inet6_addr_any);
+    ("Unix.inet6_addr_loopback", Unix.Socket.unix_inet6_addr_loopback);
+    ("Unix.addr_unix", Unix.Socket.unix_addr_unix);
+    ("Unix.addr_inet", Unix.Socket.unix_addr_inet);
+    ("Unix.socket", Unix.Socket.unix_socket);
+    ("Unix.connect", Unix.Socket.unix_connect);
+    ("Unix.bind", Unix.Socket.unix_bind);
+    ("Unix.accept", Unix.Socket.unix_accept);
+    ("Unix.listen", Unix.Socket.unix_listen);
+    ("Unix.shutdown", Unix.Socket.unix_shutdown);
+
     ("String.make", String.string_make);
     ("String.length", String.string_length)
   ]

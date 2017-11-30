@@ -1,0 +1,7 @@
+(let (server (hostcall "Unix.socket" (hostcall
+
+
+  let server = Unix.socket Unix.PF_INET Unix.SOCK_STREAM 0 in
+  let address = Unix.inet_addr_of_string "127.0.0.1" in
+  Unix.bind server (Unix.ADDR_INET(address, port));
+  server

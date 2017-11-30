@@ -13,6 +13,9 @@ let rec string_of_value = function
   | VList vs ->
      "(list"^(List.fold_left (fun acc e -> acc^" "^(string_of_value e)) "" vs)^")"
   | VFile _ -> "#FILE"
+  | VInetAddr _ -> "#INETADDR"
+  | VSockAddr _ -> "#SOCKADDR"
+  | VShutdownCommand _ -> "#SHUTDOWNCOMMAND"
 
 and string_of_expr = function
   | EInt n -> string_of_int n
