@@ -17,7 +17,7 @@ let _ =
     (* let env = List.fold_left (fun env tag -> extend env tag (parse env ("(lambda (l"^tag^") (tag \""^tag^"\" l"^tag^"))"))) env tags in *)
     (* let env = populate_env env [("id","(lambda (x) x)"); *)
     (* 				("idd","(lambda (x) (id x))")] in *)
-    let value = eval expression [] [] [] (fun x _ -> x) in
+    let value = eval expression [] [] [] [] (fun x _ _ -> x) in
     print_string (string_of_value value) ; print_newline ()
   with 
   | Failure m -> print_string "! " ; print_endline m

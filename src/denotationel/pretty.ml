@@ -34,12 +34,14 @@ and string_of_expr = function
      "(if "^(string_of_expr e1)^" "^(string_of_expr e2)^" "^(string_of_expr e3)^")"
   | ELet (s, e, body) ->
     "(let ("^s^" "^(string_of_expr e)^") "^(string_of_expr body)^")"
+  | EDefine (s, e) ->
+    "(define "^s^" "^(string_of_expr e)^")"
   | ELambda (s, body) ->
      "(lambda ("^s^") "^(string_of_expr body)^")"
   | EApp (e1, e2) ->
      "("^(string_of_expr e1)^" "^(string_of_expr e2)^")"
   | EBegin es -> 
-     "(begin "^(List.fold_left (fun acc x -> acc^" "^(string_of_expr x)) "" es)^")"
+     "(begin"^(List.fold_left (fun acc x -> acc^" "^(string_of_expr x)) "" es)^")"
   | ECatch (s, e) ->
      "(catch ("^s^") "^(string_of_expr e)^")"
   | EThrow (s, e) ->

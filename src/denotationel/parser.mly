@@ -1,6 +1,6 @@
 %token<int> ER_INT
 %token<string> ER_IDENT ER_STRING ER_CHAR
-%token LPAREN RPAREN LAMBDA LET LETREC 
+%token LPAREN RPAREN LAMBDA LET LETREC DEFINE
 %token TRUE FALSE IF EOF BEGIN EQUAL SET QUOTE
 %token CAR CDR CONS LIST
 %token CATCH THROW CALLCC BLOCK RETURNFROM HOSTCALL
@@ -41,6 +41,7 @@ expression:
 | LPAREN IF expression expression expression RPAREN { Expr.EIf ($3, $4, $5) }
 | LPAREN LAMBDA LPAREN ER_IDENT RPAREN expression RPAREN { Expr.ELambda ($4, $6) }
 | LPAREN LET LPAREN ER_IDENT expression RPAREN expression RPAREN { Expr.ELet ($4, $5, $7) }
+| LPAREN DEFINE ER_IDENT expression RPAREN { Expr.EDefine ($3, $4) }
 | LPAREN LETREC LPAREN ER_IDENT expression RPAREN expression RPAREN { Expr.ELet ($4, Expr.EInt 0, Expr.ELet ($4^"-rec-tmp", $5, Expr.EBegin([Expr.ESet($4,Expr.EVar ($4^"-rec-tmp"));$7]))) }
 | LPAREN SET ER_IDENT expression RPAREN { Expr.ESet($3, $4) }
 | LPAREN EQUAL expression expression RPAREN { Expr.EEqual ($3,$4) }

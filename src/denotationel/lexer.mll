@@ -13,6 +13,7 @@ rule token = parse
   | "if" { IF }
   | "lambda" { LAMBDA }
   | "let" { LET }
+  | "define" { DEFINE }
   | "letrec" { LETREC }
   | "set!" { SET }
   | "list" { LIST }
@@ -32,4 +33,4 @@ rule token = parse
   | ''' ['A'-'Z''a'-'z''0'-'9'] ''' { ER_CHAR (Lexing.lexeme lexbuf) }
   | '\"' ('\\'* | [^'\"'])* '\"' { ER_STRING (Lexing.lexeme lexbuf) }
   | ['0'-'9']+ { ER_INT (int_of_string (Lexing.lexeme lexbuf)) }
-  | ['A'-'Z''a'-'z''+''-''*''/''#''-''@''{'']''*''&''%''$''!''.''?''_']+ { ER_IDENT (Lexing.lexeme lexbuf) }
+  | ['A'-'Z''a'-'z']['A'-'Z''a'-'z''+''-''*''/''#''-''@''{'']''*''&''%''$''!''.''?''_''0'-'9']* { ER_IDENT (Lexing.lexeme lexbuf) }

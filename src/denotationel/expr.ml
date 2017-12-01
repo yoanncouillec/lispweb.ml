@@ -11,6 +11,7 @@ type expr =
   | ESet of string * expr
   | EIf of expr * expr * expr
   | ELet of string * expr * expr
+  | EDefine of string * expr
   | ELambda of string * expr
   | EApp of expr * expr
   | EBegin of expr list

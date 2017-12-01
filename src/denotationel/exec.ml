@@ -2,8 +2,8 @@ open Pretty
 open Eval
 
 let exec expected e = 
-  let current = (eval e [] [] []
-		      (fun v _ ->  v)) in
+  let current = (eval e [] [] [] []
+		      (fun v _ _ ->  v)) in
   (if expected = current then
      print_string "[OK] "
    else

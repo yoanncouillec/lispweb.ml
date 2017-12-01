@@ -19,4 +19,4 @@ type value =
 
  and mem = (value ref * value) list
 			       
- and cont = value  -> mem -> value
+ and cont = value  -> env -> mem -> value
