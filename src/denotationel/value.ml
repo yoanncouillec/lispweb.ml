@@ -6,7 +6,7 @@ type value =
   | VBool of bool
   | VString of string
   | VChar of char
-  | VClosure of env * string * expr
+  | VClosure of env * expr
   | VCont of cont
   | VList of value list
   | VQuote of expr

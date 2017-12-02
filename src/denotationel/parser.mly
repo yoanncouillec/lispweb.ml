@@ -39,12 +39,19 @@ expression:
 | LPAREN LIST RPAREN { Expr.EList([]) }
 | LPAREN LIST expressions RPAREN { Expr.EList($3) }
 | LPAREN IF expression expression expression RPAREN { Expr.EIf ($3, $4, $5) }
-| LPAREN LAMBDA LPAREN ER_IDENT RPAREN expression RPAREN { Expr.ELambda ($4, $6) }
+| LPAREN LAMBDA LPAREN RPAREN expression RPAREN { Expr.EThunk $5 }
+| LPAREN LAMBDA LPAREN idents RPAREN expression RPAREN { List.fold_left (fun a b -> Expr.ELambda(b,a)) (Expr.ELambda (List.hd ((List.rev $4)), $6)) (List.tl (List.rev $4)) }
 | LPAREN LET LPAREN ER_IDENT expression RPAREN expression RPAREN { Expr.ELet ($4, $5, $7) }
 | LPAREN DEFINE ER_IDENT expression RPAREN { Expr.EDefine ($3, $4) }
 | LPAREN LETREC LPAREN ER_IDENT expression RPAREN expression RPAREN { Expr.ELet ($4, Expr.EInt 0, Expr.ELet ($4^"-rec-tmp", $5, Expr.EBegin([Expr.ESet($4,Expr.EVar ($4^"-rec-tmp"));$7]))) }
 | LPAREN SET ER_IDENT expression RPAREN { Expr.ESet($3, $4) }
 | LPAREN EQUAL expression expression RPAREN { Expr.EEqual ($3,$4) }
 | LPAREN BEGIN expressions RPAREN { Expr.EBegin ($3) }
-| LPAREN HOSTCALL ER_IDENT expression RPAREN { Expr.EHostCall ($3,$4) }
-| LPAREN expression expression RPAREN { Expr.EApp ($2, $3) }
+| LPAREN HOSTCALL ER_IDENT RPAREN { Expr.EHostCall ($3,Expr.EList []) }
+| LPAREN HOSTCALL ER_IDENT expressions RPAREN { Expr.EHostCall ($3,Expr.EList $4) }
+| LPAREN expression RPAREN { Expr.EThunkApp $2 }
+| LPAREN expression expressions RPAREN { List.fold_left (fun a b -> Expr.EApp(a,b)) (Expr.EApp ($2, List.hd $3)) (List.tl $3)}
+
+idents:
+| ER_IDENT { [$1] }
+| ER_IDENT idents { $1::$2 }

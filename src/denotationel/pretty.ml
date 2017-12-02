@@ -8,7 +8,7 @@ let rec string_of_value = function
   | VString s -> "\"" ^ s ^ "\""
   | VChar c -> "'" ^ (String.make 1 c) ^ "'"
   | VQuote e -> "'" ^ (string_of_expr e)
-  | VClosure (_, s, body)-> "#CLOSURE (lambda("^s^") "^(string_of_expr body)^")"
+  | VClosure (_, e)-> "#CLOSURE"^(string_of_expr e)^")"
   | VCont _ -> "#CONT"
   | VList vs ->
      "(list"^(List.fold_left (fun acc e -> acc^" "^(string_of_value e)) "" vs)^")"
@@ -38,6 +38,10 @@ and string_of_expr = function
     "(define "^s^" "^(string_of_expr e)^")"
   | ELambda (s, body) ->
      "(lambda ("^s^") "^(string_of_expr body)^")"
+  | EThunk (body) ->
+     "(lambda () "^(string_of_expr body)^")"
+  | EThunkApp e ->
+     "("^(string_of_expr e)^")"
   | EApp (e1, e2) ->
      "("^(string_of_expr e1)^" "^(string_of_expr e2)^")"
   | EBegin es -> 

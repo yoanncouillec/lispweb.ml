@@ -90,7 +90,7 @@ module Unix = struct
     let unix_socket = function
       | VList(VString(domain)::VString(stype)::VInt(protocol)::[]) ->
 	 (VFile (Unix.socket (domain_of_string domain) (socket_type_of_string stype) protocol))
-      | _ -> failwith "unix_socket"
+      | _ -> failwith "unix_socket: arguments are wrong"
 
     let unix_connect = function
       | VList(VFile(fd)::VSockAddr(saddr)::[]) ->

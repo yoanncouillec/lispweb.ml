@@ -60,12 +60,20 @@ let rec eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 	  (fun v genv' mem' -> 
 	   let addr = ref v in
 	   cont VUnit (extend_env s addr genv') (extend_mem addr v mem'))
-  | ELambda (s, e) -> cont (VClosure (env, s, e)) genv mem
+  | ELambda (_, _) as e -> cont (VClosure (env, e)) genv mem
+  | EThunk _ as e -> cont (VClosure (env, e)) genv mem
+  | EThunkApp e ->
+     eval e genv env denv mem
+	  (fun v genv' mem' -> 
+	   (match v with
+	    | (VClosure (env', EThunk (body))) ->
+	       eval body genv' env denv mem' cont
+	    | _ -> failwith "eval EThunkApp: should be a thunk"))
   | EApp (e1, e2) ->
      eval e1 genv env denv mem
 	  (fun v genv' mem' -> 
 	   (match v with
-	    | (VClosure (env', s, body)) ->
+	    | (VClosure (env', ELambda (s, body))) ->
 	       eval e2 genv' env denv mem'
 		    (fun v genv'' mem'' ->
 		     let addr = ref v in
