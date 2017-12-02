@@ -8,17 +8,24 @@ let rec string_of_channel channel accu =
   with
   | End_of_file -> accu
 
-let _ = 
-  let lexbuf = Lexing.from_string (string_of_channel stdin "") in
-  try
-    let expression = Parser.start Lexer.token lexbuf in
-    print_string (string_of_expr expression) ; print_newline () ;
-    (* let tags = ["head";"body";"div";"span";"form";"input";"button"] in *)
-    (* let env = List.fold_left (fun env tag -> extend env tag (parse env ("(lambda (l"^tag^") (tag \""^tag^"\" l"^tag^"))"))) env tags in *)
-    (* let env = populate_env env [("id","(lambda (x) x)"); *)
-    (* 				("idd","(lambda (x) (id x))")] in *)
-    let value = eval expression [] [] [] [] (fun x _ _ -> x) in
-    print_string (string_of_value value) ; print_newline ()
-  with 
-  | Failure m -> print_string "! " ; print_endline m
-  | Parsing.Parse_error -> print_endline "! Parse error"
+let expr_of_filename filename = 
+  let lexbuf = Lexing.from_string (string_of_channel (open_in filename) "") in
+    Parser.start Lexer.token lexbuf
+
+let rec evalist es genv env denv mem cont = 
+  match es with
+  | [] -> failwith "evalist: empty"
+  | e::[] -> 
+     print_endline (string_of_expr e) ;
+     eval e genv env denv mem cont
+  | e::rest -> 
+     print_endline (string_of_expr e) ;
+     eval e genv env denv mem
+	  (fun _ genv' mem' -> 
+	   evalist rest genv' env denv mem'
+		   (fun v genv'' mem'' -> 
+		    cont v genv'' mem''))
+let _ =					 
+  let expressions = List.map expr_of_filename (List.tl (Array.to_list Sys.argv)) in
+  evalist expressions [] [] [] []
+	  (fun v _ _ -> print_endline (string_of_value v) ; v)
