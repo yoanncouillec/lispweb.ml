@@ -11,7 +11,7 @@
 %%
 
 start: 
-| e = expression EOF { e }
+| e = expressions EOF { Expr.EList e }
 
 expressions:
 | expression { [$1] }

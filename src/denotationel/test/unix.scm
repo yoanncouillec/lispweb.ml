@@ -3,8 +3,6 @@
   (bind server sockaddr)
   (listen server 10)
   (let* ((client (car (accept server)))
-	(ic (in_channel_of_descr client))
-	(s (input_line ic)))
+	 (ic (in_channel_of_descr client))
+	 (s (input_line ic)))
     (write client s 0 (- (length s) 1))))
-
-

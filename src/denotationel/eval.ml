@@ -34,7 +34,7 @@ let rec eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
       | EnvNotFound _ -> 
 	 (match get_env s genv with
 	  | EnvAddr addr -> cont (get_mem addr mem) genv mem
-	  | EnvNotFound id -> failwith ("binding not found"^id)))
+	  | EnvNotFound id -> failwith ("binding not found: "^id)))
   | ESet (s, e) -> 
      eval e genv env denv mem
 	  (fun v genv' mem' -> 
@@ -43,7 +43,7 @@ let rec eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 	    | EnvNotFound _ -> 
 	       (match get_env s genv with
 		| EnvAddr addr -> cont v genv' (extend_mem addr v mem')
-		| EnvNotFound id -> failwith ("binding not found"^id))))
+		| EnvNotFound id -> failwith ("binding not found: "^id))))
   | EIf (a, b, c) -> 
      eval a genv env denv mem
 	  (fun v genv' mem' -> 
