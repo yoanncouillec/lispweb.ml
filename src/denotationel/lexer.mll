@@ -13,6 +13,7 @@ rule token = parse
   | "if" { IF }
   | "lambda" { LAMBDA }
   | "let" { LET }
+  | "let*" { LETSTAR }
   | "define" { DEFINE }
   | "letrec" { LETREC }
   | "set!" { SET }

@@ -14,6 +14,8 @@ type value =
   | VInetAddr of Unix.inet_addr
   | VSockAddr of Unix.sockaddr
   | VShutdownCommand of Unix.shutdown_command
+  | VInChannel of in_channel
+  | VOutChannel of out_channel
 		
  and env = (string * value ref) list
 

@@ -114,15 +114,52 @@ module Unix = struct
       | VList(VFile(fd)::VInt(n)::[]) ->
 	 Unix.listen fd n ;
 	 VUnit
-      | _ -> failwith "unix_accept"
+      | _ -> failwith "unix_listen"
 
     let unix_shutdown = function
-      | VList(VFile(fd)::VShutdownCommand(sc)::[]) ->
-	 Unix.shutdown fd sc;
+      | VList(VFile(fd)::VString(sc)::[]) ->
+	 Unix.shutdown fd (shutdown_command_of_string sc);
 	 VUnit
-      | _ -> failwith "unix_accept"
+      | _ -> failwith "unix_shutdown"
+
+    let unix_in_channel_of_descr = function
+      | VList(VFile(fd)::[]) ->
+	 VInChannel(Unix.in_channel_of_descr fd);
+      | _ -> failwith "unix_in_channel_of_descr"
+
+    let unix_out_channel_of_descr = function
+      | VList(VFile(fd)::[]) ->
+	 VOutChannel(Unix.out_channel_of_descr fd);
+      | _ -> failwith "unix_out_channel_of_descr"
 
   end
+
+end
+
+module Pervasives = struct
+
+  let pervasives_input_line = function
+    | VList(VInChannel(ic)::[]) ->
+       VString(input_line ic);
+    | _ -> failwith "pervasives_input_line"
+
+  let pervasives_output_string = function
+    | VList(VOutChannel(oc)::VString(s)::[]) ->
+       output_string oc s ;
+       VUnit
+    | _ -> failwith "pervasives_output_string"
+
+  let pervasives_flush = function
+    | VList(VOutChannel(oc)::[]) ->
+       flush oc ;
+       VUnit
+    | _ -> failwith "pervasives_flush"
+
+  let pervasives_close_out = function
+    | VList(VOutChannel(oc)::[]) ->
+       close_out oc ;
+       VUnit
+    | _ -> failwith "pervasives_close_out"
 
 end
 		
@@ -147,7 +184,6 @@ let functions =
     ("Unix.read", Unix.unix_read);
     ("Unix.write", Unix.unix_write);
     ("Unix.stdout", Unix.unix_stdout);
-
     ("Unix.inet_addr_any", Unix.Socket.unix_inet_addr_any);
     ("Unix.inet_addr_loopback", Unix.Socket.unix_inet_addr_loopback);
     ("Unix.inet6_addr_any", Unix.Socket.unix_inet6_addr_any);
@@ -161,6 +197,15 @@ let functions =
     ("Unix.listen", Unix.Socket.unix_listen);
     ("Unix.shutdown", Unix.Socket.unix_shutdown);
 
+    ("Unix.in_channel_of_descr", Unix.Socket.unix_in_channel_of_descr);
+    ("Unix.out_channel_of_descr", Unix.Socket.unix_out_channel_of_descr);
+    ("Pervasives.input_line", Pervasives.pervasives_input_line);
+    ("Pervasives.output_string", Pervasives.pervasives_output_string);
+    ("Pervasives.flush", Pervasives.pervasives_flush);
+    ("Pervasives.close_out", Pervasives.pervasives_close_out);
+
     ("String.make", String.string_make);
     ("String.length", String.string_length)
+
+      
   ]

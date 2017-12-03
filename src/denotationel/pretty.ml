@@ -16,6 +16,8 @@ let rec string_of_value = function
   | VInetAddr _ -> "#INETADDR"
   | VSockAddr _ -> "#SOCKADDR"
   | VShutdownCommand _ -> "#SHUTDOWNCOMMAND"
+  | VInChannel _ -> "#INCHANNEL"
+  | VOutChannel _ -> "#OUTCHANNEL"
 
 and string_of_expr = function
   | EInt n -> string_of_int n
