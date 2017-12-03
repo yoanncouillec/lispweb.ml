@@ -183,8 +183,18 @@ module String = struct
   let length = function
     |  VList(VString(s)::[]) ->
 	VInt(String.length s)
-    | _ -> failwith "string_length"		    
+    | _ -> failwith "string_length"
 		    
+  let get = function
+    |  VList(VString(s)::VInt(n)::[]) ->
+	VChar(String.get s n)
+    | _ -> failwith "string_get"
+		    		    
+  let sub = function
+    |  VList(VString(s)::VInt(ofs)::VInt(len)::[]) ->
+	VString(String.sub s ofs len)
+    | _ -> failwith "string_sub"
+		    		    
 end
 
 let functions = 
@@ -218,5 +228,7 @@ let functions =
     ("Unix.shutdown", Socket.shutdown);
 
     ("String.make", String.make);
-    ("String.length", String.length)
+    ("String.length", String.length);
+    ("String.get", String.get);
+    ("String.sub", String.sub)
   ]

@@ -1,6 +1,22 @@
+(define inet_addr_any
+  (lambda ()
+    (hostcall Unix.inet_addr_any)))
+
 (define inet_addr_loopback
   (lambda ()
     (hostcall Unix.inet_addr_loopback)))
+
+(define inet6_addr_any
+  (lambda ()
+    (hostcall Unix.inet6_addr_any)))
+
+(define inet6_addr_loopback
+  (lambda ()
+    (hostcall Unix.inet6_addr_loopback)))
+
+(define addr_unix
+  (lambda (addr port)
+    (hostcall Unix.addr_unix addr port)))
 
 (define addr_inet
   (lambda (addr port)
