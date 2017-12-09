@@ -25,6 +25,12 @@ let rec eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 		(fun v2 genv'' mem'' ->
 		 cont (apply_bin_op op v1 v2) genv'' mem''))
   | EBool b -> cont (VBool b) genv mem
+  | ENot e ->
+     eval e genv env denv mem
+	  (fun v genv' mem' ->
+	   match v with
+	   | VBool b -> cont (VBool (not b)) genv' mem'
+	   | _ -> failwith ("eval ENot: boolean expected: "^(string_of_value v)))
   | EString s -> cont (VString s) genv mem
   | EChar c -> cont (VChar c) genv mem
   | EQuote e -> cont (VQuote e) genv mem
@@ -139,13 +145,13 @@ let rec eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 	  (fun v genv' mem' ->
 	   match v with
 	   | VList (hd::_) -> cont hd genv' mem'
-	   | _ -> failwith "Should be a list")
+	   | _ -> failwith ("Eval ECar: Should be a list: "^(string_of_value v)))
   | ECdr e ->
      eval e genv env denv mem
 	  (fun v genv' mem' ->
 	   match v with
 	   | VList (_::tl) -> cont (VList tl) genv' mem'
-	   | _ -> failwith "Should be a list")
+	   | _ -> failwith ("Eval ECdr: Should be a list: "^(string_of_value v)))
   | ECons (e1, e2) ->
      eval e1 genv env denv mem
 	  (fun v1 genv' mem' ->

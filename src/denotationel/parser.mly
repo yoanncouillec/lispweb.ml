@@ -1,7 +1,7 @@
 %token<int> ER_INT
 %token<string> ER_IDENT ER_STRING ER_CHAR
 %token LPAREN RPAREN LAMBDA LET LETREC DEFINE LETSTAR
-%token TRUE FALSE IF EOF BEGIN EQUAL SET QUOTE
+%token TRUE FALSE IF EOF BEGIN EQUAL SET QUOTE NOT
 %token CAR CDR CONS LIST
 %token CATCH THROW CALLCC BLOCK RETURNFROM HOSTCALL
 %token PLUS MINUS MULT
@@ -25,6 +25,7 @@ expression:
 | QUOTE expression { Expr.EQuote ($2) }
 | TRUE { Expr.EBool (true) }
 | FALSE { Expr.EBool (false) }
+| LPAREN NOT expression RPAREN { Expr.ENot ($3) }
 | LPAREN PLUS expression expression RPAREN { Expr.EBinary(Expr.OPlus,$3,$4) }
 | LPAREN MINUS expression expression RPAREN { Expr.EBinary(Expr.OMinus,$3,$4) }
 | LPAREN MULT expression expression RPAREN { Expr.EBinary(Expr.OMult,$3,$4) }
@@ -42,7 +43,7 @@ expression:
 | LPAREN LAMBDA LPAREN RPAREN expression RPAREN { Expr.EThunk $5 }
 | LPAREN LAMBDA LPAREN idents RPAREN expression RPAREN { List.fold_left (fun a b -> Expr.ELambda(b,a)) (Expr.ELambda (List.hd ((List.rev $4)), $6)) (List.tl (List.rev $4)) }
 | LPAREN LET LPAREN ER_IDENT expression RPAREN expressions RPAREN { Expr.ELet ($4, $5, Expr.EList $7) }
-| LPAREN LETSTAR LPAREN bindings RPAREN expressions RPAREN { List.fold_left (fun a b -> Expr.ELet (fst b, snd b, a)) (Expr.ELet (fst (List.hd (List.rev $4)), snd (List.hd (List.rev $4)), Expr.EList $6)) (List.tl (List.rev $4)) }
+| LPAREN LETSTAR LPAREN bindings RPAREN expressions RPAREN { List.fold_left (fun a b -> Expr.ELet (fst b, snd b, a)) (Expr.ELet (fst (List.hd (List.rev $4)), snd (List.hd (List.rev $4)), Expr.EBegin $6)) (List.tl (List.rev $4)) }
 | LPAREN DEFINE ER_IDENT expression RPAREN { Expr.EDefine ($3, $4) }
 | LPAREN LETREC LPAREN ER_IDENT expression RPAREN expression RPAREN { Expr.ELet ($4, Expr.EInt 0, Expr.ELet ($4^"-rec-tmp", $5, Expr.EBegin([Expr.ESet($4,Expr.EVar ($4^"-rec-tmp"));$7]))) }
 | LPAREN SET ER_IDENT expression RPAREN { Expr.ESet($3, $4) }

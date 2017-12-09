@@ -4,6 +4,7 @@ type expr =
   | EInt of int
   | EBinary of operator * expr * expr
   | EBool of bool
+  | ENot of expr
   | EChar of char
   | EString of string
   | EQuote of expr

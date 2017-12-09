@@ -27,6 +27,7 @@ and string_of_expr = function
 	  | OMult -> "*"
 	  | OMinus -> "-")^" "^(string_of_expr e1)^" "^(string_of_expr e2)^")"
   | EBool b -> string_of_bool b
+  | ENot e -> "(not "^(string_of_expr e)^")"
   | EString s -> "\"" ^ s ^ "\""
   | EChar c -> "'" ^ (String.make 1 c) ^ "'"
   | EQuote e -> "'" ^ (string_of_expr e)

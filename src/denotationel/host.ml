@@ -195,6 +195,11 @@ module String = struct
 	VString(String.sub s ofs len)
     | _ -> failwith "string_sub"
 		    		    
+  let concat = function
+    |  VList(VString(s)::VList(l)::[]) ->
+	VString(String.concat s (List.map (function VString s' -> s'|_ -> failwith "Should be a string") l))
+    | _ -> failwith "string_concat"
+		    		    
 end
 
 let functions = 
@@ -230,5 +235,6 @@ let functions =
     ("String.make", String.make);
     ("String.length", String.length);
     ("String.get", String.get);
-    ("String.sub", String.sub)
+    ("String.sub", String.sub);
+    ("String.concat", String.concat)
   ]
