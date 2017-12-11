@@ -1,5 +1,5 @@
 %token<int> ER_INT
-%token<string> ER_IDENT ER_STRING ER_CHAR
+%token<string> ER_IDENT ER_STRING ER_CHAR ER_CHAR_ESC
 %token LPAREN RPAREN LAMBDA LET LETREC DEFINE LETSTAR
 %token TRUE FALSE IF EOF BEGIN EQUAL SET QUOTE NOT
 %token CAR CDR CONS LIST
@@ -21,6 +21,7 @@ expression:
 | n = ER_INT { Expr.EInt (n) }
 | ER_STRING { Expr.EString (String.sub ($1) 1 ((String.length $1) - 2)) }
 | ER_CHAR { Expr.EChar (String.get $1 1) }
+| ER_CHAR_ESC { Expr.EChar (match $1 with "'\\n'" -> '\n'|_->failwith "ER_CHAR_ESC") }
 | ER_IDENT { Expr.EVar ($1) }
 | QUOTE expression { Expr.EQuote ($2) }
 | TRUE { Expr.EBool (true) }

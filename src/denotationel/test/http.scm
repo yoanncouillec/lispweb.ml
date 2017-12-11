@@ -1,2 +1,4 @@
-(http-parse-first-line (openfile "test/http.txt" (list "O_RDONLY") "0o660"))
-(catch error (http-parse-first-line (openfile "test/http_err.txt" (list "O_RDONLY") "0o660")))
+(let* ((fd (openfile "test/http.txt" (list "O_RDONLY") "0o660")))
+  (http-parse-method (read-line fd))
+  (http-parse-header (read-line fd)))
+

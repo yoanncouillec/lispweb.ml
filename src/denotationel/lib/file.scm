@@ -10,11 +10,20 @@
   (lambda (fd buff ofs len)
     (hostcall Unix.read fd buff ofs len)))
 
-(define read-one-char
+(define read-char
   (lambda (fd)
     (let* ((s (make-empty-string 1)))
       (read fd s 0 1)
       (get-char s 0))))
+
+(define read-line
+  (lambda (fd)
+    (let* ((c (read-char fd)))
+      (if (equal? c '\n')
+	  (list)
+	  (cons c (read-line fd))))))
+
+      
 
 (define read-one-line
   (lambda (fd)
