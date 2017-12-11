@@ -17,7 +17,7 @@
 # rm parser.ml lexer.ml
 
 BINS=lispwebeval
-DEPS=expr.cmo value.cmo env.cmo mem.cmo host.cmo pretty.cmo eval.cmo exec.cmo
+DEPS=expr.cmo value.cmo env.cmo mem.cmo pretty.cmo host.cmo eval.cmo exec.cmo
 
 
 all: $(BINS)

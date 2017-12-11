@@ -1,3 +1,6 @@
 * TODO Toward a multi-tiers language
+** TODO library http
+** TODO library html
+** TODO quote/script/etc.
 
 * TODO Improve library system

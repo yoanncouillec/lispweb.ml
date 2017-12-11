@@ -1,8 +1,11 @@
 open Value
+open Pretty
 
 module File = struct
   
   let flag_of_string_value = function
+    | VString "O_RDONLY" -> Unix.O_RDONLY
+    | VString "O_WRONLY" -> Unix.O_WRONLY
     | VString "O_CREAT" -> Unix.O_CREAT
     | VString "O_RDWR" -> Unix.O_RDWR
     | _ -> failwith "flag_of_string_value: not managed"
@@ -22,9 +25,20 @@ module File = struct
     | _ -> failwith "unix_close"
 		    
   let unix_read = function
-    | VList(VFile(fd)::VString(buff)::VInt(ofs)::VInt(len)::[]) -> 
-       VInt(Unix.read fd buff ofs len)
-    | _ -> failwith "unix_read"
+    | VList(VFile(fd)::rest) ->
+       (match rest with
+	| VString(buff)::rest ->
+	   (match rest with
+	    | VInt(ofs)::rest->
+	       (match rest with 
+		| VInt(len)::rest -> 
+		   (match rest with 
+		    | [] -> VInt(Unix.read fd buff ofs len)
+		    | _ -> failwith "unix_read: wrong number of arguments: 4 expected")
+		| _ -> failwith "unix_read: 4th argument must be an integer")
+	    | _ -> failwith ("unix_read: 3th argument must be an integer: "^(string_of_value (List.hd rest))))
+	| _ -> failwith "unix_read: 2nd argument must be a string")
+    | _ -> failwith "unix_read: 1st argument must be a file descriptor"
 		    
   let unix_write = function
     | VList(VFile(fd)::VString(buff)::VInt(ofs)::VInt(len)::[]) -> 

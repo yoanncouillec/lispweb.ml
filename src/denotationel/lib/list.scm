@@ -40,3 +40,9 @@
 	       (b (split c (car (cdr a)))))
 	  (cons (car a) b))
 	(list))))
+
+(define map
+  (lambda (f l)
+    (if (pair? l)
+	(cons (f (car l)) (map f (cdr l)))
+	(list))))

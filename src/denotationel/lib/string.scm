@@ -2,6 +2,10 @@
   (lambda (n c)
     (hostcall String.make n c)))
 
+(define make-empty-string
+  (lambda (n)
+    (hostcall String.make n 'a')))
+
 (define string->list
   (lambda (s)
     (if (equal? 1 (string-length s))
@@ -22,6 +26,10 @@
   (lambda (s n)
     (hostcall String.get s n)))
     
+(define sub-string
+  (lambda (s ofs len)
+    (hostcall String.sub s ofs len)))
+
 (define sub-string
   (lambda (s ofs len)
     (hostcall String.sub s ofs len)))

@@ -8,7 +8,17 @@
 
 (define read
   (lambda (fd buff ofs len)
-    (hostcall Unix.read fd buff read len)))
+    (hostcall Unix.read fd buff ofs len)))
+
+(define read-one-char
+  (lambda (fd)
+    (let* ((s (make-empty-string 1)))
+      (read fd s 0 1)
+      (get-char s 0))))
+
+(define read-one-line
+  (lambda (fd)
+    (hostcall Pervasives.input_line (hostcall Unix.in_channel_of_descr fd))))
 
 (define write
   (lambda (fd buff ofs len)
