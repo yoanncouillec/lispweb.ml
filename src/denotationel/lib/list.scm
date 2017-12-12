@@ -46,3 +46,29 @@
     (if (pair? l)
 	(cons (f (car l)) (map f (cdr l)))
 	(list))))
+
+(define trim-left
+  (lambda (e l)
+    (if (equal? (car l) e)
+	(trim-left e (cdr l))
+	l)))
+
+(define append
+  (lambda (l1 l2)
+    (if (pair? l1)
+	(cons (car l1) (append (cdr l1) l2))
+	l2)))
+
+(define reverse
+  (lambda (l)
+    (if (pair? l)
+	(append (reverse (cdr l)) (list (car l)))
+	(list))))
+
+(define trim-right
+  (lambda (e l)
+    (reverse (trim-left e (reverse l)))))
+
+(define trim
+  (lambda (e l)
+    (trim-right e (trim-left e l))))

@@ -5,3 +5,8 @@
 (first-slice 3 (list 1 2 3 4 5))
 (split-into-2 3 (list 1 2 3 4 5))
 (split 3 (list 1 2 3 4 5 2 6 7 8 9 3 1 2 3 4 5))
+(trim-left ' ' (string->list "   coucou   "))
+(append (list 1 2 3) (list 4 5 6))
+(reverse (list 1 2 3 4 5))
+(trim-right ' ' (string->list "   coucou   "))
+(trim ' ' (string->list "   coucou   "))
