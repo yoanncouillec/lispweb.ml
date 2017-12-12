@@ -33,6 +33,7 @@ and string_of_expr = function
   | EQuote e -> "'" ^ (string_of_expr e)
   | EVar s -> s
   | ESet (s, e) -> "(set! "^s^(string_of_expr e)^")"
+  | ELoad e -> "(load "^(string_of_expr e)^")"
   | EIf (e1, e2, e3) -> 
      "(if "^(string_of_expr e1)^" "^(string_of_expr e2)^" "^(string_of_expr e3)^")"
   | ELet (s, e, body) ->

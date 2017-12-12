@@ -29,6 +29,7 @@ rule token = parse
   | "return-from" { RETURNFROM }  
   | "call/cc" { CALLCC }
   | "hostcall" { HOSTCALL }
+  | "load" { LOAD }
   | "+" { PLUS }
   | "-" { MINUS }
   | "*" { MULT }

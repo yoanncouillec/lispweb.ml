@@ -5,6 +5,17 @@ open Env
 open Host
 open Pretty
 
+let rec string_of_channel channel accu = 
+  try
+    let line = input_line channel in
+    string_of_channel channel (accu^line)
+  with
+  | End_of_file -> accu
+
+let expr_of_filename filename = 
+  let lexbuf = Lexing.from_string (string_of_channel (open_in filename) "") in
+  Parser.start Lexer.token lexbuf
+
 let rec apply_bin_op op v1 v2 = 
   match (v1, v2) with
   | (VInt n1, VInt n2) ->
@@ -164,4 +175,10 @@ let rec eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
      eval e genv env denv mem
 	  (fun v genv' mem' ->
 	   cont ((List.assoc s functions) v) genv' mem')
-
+  | ELoad e ->
+    eval e genv env denv mem
+    (fun v genv' mem' ->
+     match v with
+       | VString s ->
+	   eval (expr_of_filename (s)) genv' env denv mem' cont
+       | _ -> failwith "eval ELoad: should be a string")

@@ -29,3 +29,5 @@ type expr =
   | ECons of expr * expr
   | EList of expr list
   | EHostCall of string * expr
+  | ELoad of expr
+

@@ -1,3 +1,4 @@
+(load "lib/list.scm")
 (length (list))
 (length (list 1 2 3))
 (catch not-found (index-of 'x' (list 2 2 2 2 2 'x' 2 2 2)))
@@ -5,8 +6,9 @@
 (first-slice 3 (list 1 2 3 4 5))
 (split-into-2 3 (list 1 2 3 4 5))
 (split 3 (list 1 2 3 4 5 2 6 7 8 9 3 1 2 3 4 5))
-(trim-left ' ' (string->list "   coucou   "))
+(trim-left 0 (list 0 0 0 1 1 1 0 0 0))
 (append (list 1 2 3) (list 4 5 6))
 (reverse (list 1 2 3 4 5))
-(trim-right ' ' (string->list "   coucou   "))
-(trim ' ' (string->list "   coucou   "))
+(trim-right 0 (list 0 0 0 1 1 1 0 0 0))
+(trim 0 (list 0 0 0 1 1 1 0 0 0))
+

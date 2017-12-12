@@ -17,13 +17,12 @@
 # rm parser.ml lexer.ml
 
 BINS=lispwebeval
-DEPS=expr.cmo value.cmo env.cmo mem.cmo pretty.cmo host.cmo eval.cmo exec.cmo
-
+DEPS=expr.cmo value.cmo env.cmo mem.cmo pretty.cmo host.cmo parser.cmo lexer.cmo eval.cmo exec.cmo
 
 all: $(BINS)
 
-lispwebeval: $(DEPS) parser.cmo lexer.cmo lispwebeval.cmo
-	ocamlc -pp "camlp4 camlp4-options" -o $@ str.cma unix.cma $(DEPS) parser.cmo lexer.cmo lispwebeval.cmo
+lispwebeval: $(DEPS) lispwebeval.cmo
+	ocamlc -pp "camlp4 camlp4-options" -o $@ str.cma unix.cma $(DEPS) lispwebeval.cmo
 
 parser.cmo:parser.ml
 	ocamlc parser.mli

@@ -1,3 +1,5 @@
+(load "lib/string.scm")
+
 (define http-parse-method
   (lambda (l)
     (let* ((fst-line (map list->string (split ' ' l)))

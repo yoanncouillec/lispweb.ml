@@ -1,3 +1,5 @@
+(load "lib/list.scm")
+
 (define make-string
   (lambda (n c)
     (hostcall String.make n c)))

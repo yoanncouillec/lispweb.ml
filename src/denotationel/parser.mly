@@ -1,6 +1,6 @@
 %token<int> ER_INT
 %token<string> ER_IDENT ER_STRING ER_CHAR ER_CHAR_ESC
-%token LPAREN RPAREN LAMBDA LET LETREC DEFINE LETSTAR
+%token LPAREN RPAREN LAMBDA LET LETREC DEFINE LETSTAR LOAD
 %token TRUE FALSE IF EOF BEGIN EQUAL SET QUOTE NOT
 %token CAR CDR CONS LIST
 %token CATCH THROW CALLCC BLOCK RETURNFROM HOSTCALL
@@ -26,6 +26,7 @@ expression:
 | QUOTE expression { Expr.EQuote ($2) }
 | TRUE { Expr.EBool (true) }
 | FALSE { Expr.EBool (false) }
+| LPAREN LOAD expression RPAREN { Expr.ELoad $3 }
 | LPAREN NOT expression RPAREN { Expr.ENot ($3) }
 | LPAREN PLUS expression expression RPAREN { Expr.EBinary(Expr.OPlus,$3,$4) }
 | LPAREN MINUS expression expression RPAREN { Expr.EBinary(Expr.OMinus,$3,$4) }
