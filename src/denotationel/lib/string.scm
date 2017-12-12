@@ -11,7 +11,7 @@
 (define string->list
   (lambda (s)
     (if (equal? 1 (string-length s))
-	(get-char s 0)
+	(list (get-char s 0))
 	(cons (get-char s 0) (string->list (sub-string s 1 (- (string-length s) 1)))))))
 
 (define list->string

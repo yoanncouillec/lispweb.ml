@@ -197,7 +197,7 @@ module String = struct
   let length = function
     |  VList(VString(s)::[]) ->
 	VInt(String.length s)
-    | _ -> failwith "string_length"
+    | _ -> failwith "string_length: wrong arguments"
 		    
   let get = function
     |  VList(VString(s)::VInt(n)::[]) ->

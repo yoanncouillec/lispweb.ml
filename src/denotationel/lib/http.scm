@@ -16,7 +16,14 @@
 
 (define http-parse-headers
   (lambda (fd)
-    (let* ((header (read-one-line fd)))
-      (if (equal? "" header)
+    (let* ((l (read-line fd)))
+      (if (equal? (list) l)
+	  l
+	  (cons (map list->string (split ':' l)) (http-parse-headers fd))))))
+
+(define read-all
+  (lambda (fd)
+    (let* ((s (make-empty-string 1)))
+      (if (equal? (read fd s 0 1) 0)
 	  (list)
-	  (cons (map list->string (split ' ' (string->list header))) (http-parse-headers fd))))))
+	  (cons s (read-all fd))))))

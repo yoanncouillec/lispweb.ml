@@ -13,8 +13,9 @@
 (define read-char
   (lambda (fd)
     (let* ((s (make-empty-string 1)))
-      (read fd s 0 1)
-      (get-char s 0))))
+      (if (equal? (read fd s 0 1) 0)
+	  (throw error 'eof)
+	  (get-char s 0)))))
 
 (define read-line
   (lambda (fd)
