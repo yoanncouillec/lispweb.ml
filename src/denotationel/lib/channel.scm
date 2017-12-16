@@ -18,10 +18,22 @@
   (lambda (channel s)
     (hostcall Pervasives.output_string channel s)))
 
+(define output-newline
+  (lambda (out)
+    (output-char out '\n')))
+
 (define output-line
   (lambda (channel s)
     (output-string channel s)
     (output-char channel '\n')))
+
+(define output-lines
+  (lambda (out lines)
+    (if (pair? lines)
+	(begin 
+	  (output-line out (car lines))
+	  (output-lines out (cdr lines)))
+	(list))))
 
 (define close-out
   (lambda (channel)

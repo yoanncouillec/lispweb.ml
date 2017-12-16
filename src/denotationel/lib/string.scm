@@ -39,3 +39,7 @@
 (define char->string
   (lambda (c)
     (hostcall String.char_to_string c)))
+
+(define concat
+  (lambda (sep l)
+    (hostcall String.concat sep l)))
