@@ -17,3 +17,7 @@
 (define print-newline
   (lambda ()
     (hostcall Pervasives.print_newline)))
+
+(define int->string
+  (lambda (n)
+    (hostcall Pervasives.string_of_int n)))

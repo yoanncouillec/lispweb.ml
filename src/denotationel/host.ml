@@ -3,6 +3,11 @@ open Pretty
 
 module Pervasives = struct
 
+  let string_of_int = function
+    | VList(VInt(n)::[]) -> 
+       VString(Pervasives.string_of_int n)
+    | _ -> failwith "error"
+
   (******)
   (* IO *)
   (******)
@@ -306,6 +311,8 @@ end
 
 let functions = 
   [
+    ("Pervasives.string_of_int", Pervasives.string_of_int);
+
     ("Pervasives.stdin", Pervasives.stdin);
     ("Pervasives.stdout", Pervasives.stdout);
     ("Pervasives.stderr", Pervasives.stderr);

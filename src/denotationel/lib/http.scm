@@ -41,25 +41,27 @@
 	  (cons s (read-all fd))))))
 
 (define serve
-  (lambda (in out)
-    (http-parse-method in)
-    (http-parse-headers-light in)
-    (output-string out "hello")
-    (flush out)))
+  (lambda (in out service)
+    (let* ((first-line (http-parse-method in))
+	   (method (car first-line))
+	   (path (car (cdr first-line)))
+	   (protocol (car (cdr (cdr first-line))))
+	   (headers (http-parse-headers-light in)))
+    (service out method path protocol headers))))
     
 (define http-server
-  (lambda (port)
+  (lambda (port service)
     (let* ((server (socket "PF_INET" "SOCK_STREAM" 0))
 	   (sockaddr (addr_inet (inet_addr_loopback) port)))
       (bind server sockaddr)
       (listen server 10)
-      (accept-client server))))
+      (accept-client server service))))
 
 (define accept-client
-  (lambda (server)
+  (lambda (server service)
     (let* ((client (car (accept server)))
 	   (in (in_channel_of_descr client))
 	   (out (out_channel_of_descr client)))
-      (serve in out)
+      (serve in out service)
       (close-out out)
-      (accept-client server))))
+      (accept-client server service))))
