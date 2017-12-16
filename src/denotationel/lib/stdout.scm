@@ -10,7 +10,7 @@
   (lambda (s)
     (hostcall Pervasives.print_string s)))
 
-(define print-endline
+(define print-line
   (lambda (s)
     (hostcall Pervasives.print_endline s)))
 

@@ -7,12 +7,10 @@
 
 (define echo
   (lambda (in out l)
-    (let* ((s (input-line in))
-	   (s (sub-string s 0 (- (string-length s) 1))))
-      (print-endline s)
-      (output-string out s)
-      (output-char out '\n')
-      (cflush out)
+    (let* ((s (input-line in)))
+      (print-line s)
+      (output-line out s)
+      (flush out)
       (if (equal? "quit" s)
 	  (reverse l)
 	  (echo in out (cons s l))))))
@@ -28,4 +26,4 @@
 	     (out (out_channel_of_descr client)))
 	(echo in out (list))))))
 
-(echo-server 8082)
+(echo-server 8081)

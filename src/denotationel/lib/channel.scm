@@ -6,7 +6,7 @@
   (lambda (s)
     (hostcall Pervasives.open_out_bin s)))
 
-(define cflush
+(define flush
   (lambda (channel)
     (hostcall Pervasives.flush channel)))
 
@@ -17,6 +17,11 @@
 (define output-string
   (lambda (channel s)
     (hostcall Pervasives.output_string channel s)))
+
+(define output-line
+  (lambda (channel s)
+    (output-string channel s)
+    (output-char channel '\n')))
 
 (define close-out
   (lambda (channel)
@@ -36,7 +41,8 @@
 
 (define input-line
   (lambda (channel)
-    (hostcall Pervasives.input_line channel)))
+    (let* ((s (hostcall Pervasives.input_line channel)))
+      (sub-string s 0 (- (string-length s) 1)))))
 
 (define close-in
   (lambda (channel)
