@@ -1,7 +1,7 @@
 open Expr
 
 type value = 
-  | VUnit
+  | VUnit of unit
   | VInt of int
   | VBool of bool
   | VString of string
@@ -14,8 +14,8 @@ type value =
   | VInetAddr of Unix.inet_addr
   | VSockAddr of Unix.sockaddr
   | VShutdownCommand of Unix.shutdown_command
-  | VInChannel of in_channel
-  | VOutChannel of out_channel
+  | VChannelIn of in_channel
+  | VChannelOut of out_channel
 		
  and env = (string * value ref) list
 

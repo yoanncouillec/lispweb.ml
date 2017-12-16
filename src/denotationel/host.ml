@@ -1,8 +1,139 @@
 open Value
 open Pretty
 
-module File = struct
+module Pervasives = struct
+
+  (******)
+  (* IO *)
+  (******)
+
+  let stdin = function
+    | VList([]) -> 
+       VChannelIn(Pervasives.stdin)
+    | _ -> failwith "error"
+
+  let stdout = function
+    | VList([]) -> 
+       VChannelOut(Pervasives.stdout)
+    | _ -> failwith "error"
+
+  let stderr = function
+    | VList([]) -> 
+       VChannelOut(Pervasives.stderr)
+    | _ -> failwith "error"
+
+  (* Output functions on standard output *)
+		    
+  let print_char = function
+    | VList(VChar(c)::[]) ->
+       VUnit (Pervasives.print_char c)
+    | _ -> failwith "print_char"
+
+  let print_string = function
+    | VList(VString(s)::[]) ->
+       VUnit (Pervasives.print_string s)
+    | _ -> failwith "print_string"
+
+  let print_endline = function
+    | VList(VString(s)::[]) ->
+       VUnit (Pervasives.print_endline s)
+    | _ -> failwith "print_endline"
+
+  let print_newline = function
+    | VList([]) ->
+       VUnit (Pervasives.print_newline())
+    | _ -> failwith "print_newline"
+
+  (* Input functions on standard input *)
+
+  let read_line = function
+    | VList([]) ->
+       VString (Pervasives.read_line())
+    | _ -> failwith "read_line"
+
+  let read_int = function
+    | VList([]) ->
+       VInt (Pervasives.read_int())
+    | _ -> failwith "read_int"
+
+  (* General output functions *)
+
+  let open_out = function
+    | VList(VString(s)::[]) ->
+       VChannelOut (Pervasives.open_out s)
+    | _ -> failwith "open_out"
+		    
+  let open_out_bin = function
+    | VList(VString(s)::[]) ->
+       VChannelOut (Pervasives.open_out_bin s)
+    | _ -> failwith "open_out_bin"
+
+  let flush = function
+    | VList(VChannelOut(oc)::[]) ->
+       VUnit (Pervasives.flush oc)
+    | _ -> failwith "flush"
+
+  let output_char = function
+    | VList(VChannelOut(oc)::VChar(c)::[]) ->
+       VUnit (Pervasives.output_char oc c)
+    | _ -> failwith "output_char"
+
+  let output_string = function
+    | VList(VChannelOut(oc)::VString(s)::[]) ->
+       VUnit (Pervasives.output_string oc s)
+    | _ -> failwith "output_string"
+
+  let close_out = function
+    | VList(VChannelOut(oc)::[]) ->
+       VUnit (Pervasives.close_out oc)
+    | _ -> failwith "close_out"
+		    
+  (* General input functions *)		    
+
+  let open_in = function
+    | VList(VString(s)::[]) ->
+       VChannelIn (Pervasives.open_in s)
+    | _ -> failwith "open_in"
+
+  let open_in_bin = function
+    | VList(VString(s)::[]) ->
+       VChannelIn (Pervasives.open_in_bin s)
+    | _ -> failwith "open_in_bin"
+
+  let input_char = function
+    | VList(VChannelIn(ic)::[]) ->
+       VChar(Pervasives.input_char ic);
+    | _ -> failwith "input_char"
+		    
+  let input_line = function
+    | VList(VChannelIn(ic)::[]) ->
+       VString(Pervasives.input_line ic);
+    | _ -> failwith "input_line"
+		    
+  let close_in = function
+    | VList(VChannelIn(c)::[]) ->
+       VUnit (Pervasives.close_in c)
+    | _ -> failwith "close_in"
+
+end
+		
+module Unix = struct
   
+  let stdin = function
+    | VList([]) -> 
+       VFile(Unix.stdin)
+    | _ -> failwith "unix_stdin"
+		    
+  let stdout = function
+    | VList([]) -> 
+       VFile(Unix.stdout)
+    | _ -> failwith "unix_stdout"
+		    
+  let stderr = function
+    | VList([]) -> 
+       VFile(Unix.stderr)
+    | _ -> failwith "unix_stderr"
+
   let flag_of_string_value = function
     | VString "O_RDONLY" -> Unix.O_RDONLY
     | VString "O_WRONLY" -> Unix.O_WRONLY
@@ -10,7 +141,7 @@ module File = struct
     | VString "O_RDWR" -> Unix.O_RDWR
     | _ -> failwith "flag_of_string_value: not managed"
 		    
-  let unix_openfile = function
+  let openfile = function
     | VList(VString(name)::VList(flags)::VString(perm)::[]) -> 
        (VFile (Unix.openfile
 		 name 
@@ -18,13 +149,12 @@ module File = struct
 		 (int_of_string perm)))
     | _ -> failwith "unix_openfile"
 		    
-  let unix_close = function
+  let close = function
     | VList(VFile(fd)::[]) -> 
-       Unix.close fd;
-       VUnit
+       VUnit (Unix.close fd)
     | _ -> failwith "unix_close"
 		    
-  let unix_read = function
+  let read = function
     | VList(VFile(fd)::rest) ->
        (match rest with
 	| VString(buff)::rest ->
@@ -40,67 +170,21 @@ module File = struct
 	| _ -> failwith "unix_read: 2nd argument must be a string")
     | _ -> failwith "unix_read: 1st argument must be a file descriptor"
 		    
-  let unix_write = function
+  let write = function
     | VList(VFile(fd)::VString(buff)::VInt(ofs)::VInt(len)::[]) -> 
        VInt(Unix.write fd buff ofs len)
     | _ -> failwith "unix_write"
 		    
-  let unix_stdin = function
-    | VList([]) -> 
-       VFile(Unix.stdin)
-    | _ -> failwith "unix_stdin"
-		    
-  let unix_stdout = function
-    | VList([]) -> 
-       VFile(Unix.stdout)
-    | _ -> failwith "unix_stdout"
-		    
-  let unix_stderr = function
-    | VList([]) -> 
-       VFile(Unix.stderr)
-    | _ -> failwith "unix_stderr"
-		    
-end
-
-module Channel = struct
-  
   let in_channel_of_descr = function
     | VList(VFile(fd)::[]) ->
-       VInChannel(Unix.in_channel_of_descr fd);
+       VChannelIn(Unix.in_channel_of_descr fd);
     | _ -> failwith "in_channel_of_descr"
 		    
   let out_channel_of_descr = function
     | VList(VFile(fd)::[]) ->
-       VOutChannel(Unix.out_channel_of_descr fd);
+       VChannelOut(Unix.out_channel_of_descr fd);
     | _ -> failwith "out_channel_of_descr"
 		    
-  let input_line = function
-    | VList(VInChannel(ic)::[]) ->
-       VString(input_line ic);
-    | _ -> failwith "input_line"
-		    
-  let output_string = function
-    | VList(VOutChannel(oc)::VString(s)::[]) ->
-       output_string oc s ;
-       VUnit
-    | _ -> failwith "output_string"
-		    
-  let flush = function
-    | VList(VOutChannel(oc)::[]) ->
-       flush oc ;
-       VUnit
-    | _ -> failwith "flush"
-		    
-  let close_out = function
-    | VList(VOutChannel(oc)::[]) ->
-       close_out oc ;
-       VUnit
-    | _ -> failwith "close_out"
-		    
-end
-
-module Socket = struct
-  
   let domain_of_string = function
     | "PF_UNIX" -> Unix.PF_UNIX
     | "PF_INET" -> Unix.PF_INET
@@ -157,14 +241,12 @@ module Socket = struct
 		    
   let connect = function
     | VList(VFile(fd)::VSockAddr(saddr)::[]) ->
-       Unix.connect fd saddr;
-       VUnit
+       VUnit (Unix.connect fd saddr)
     | _ -> failwith "unix_connect"
 		    
   let bind = function
     | VList(VFile(fd)::VSockAddr(saddr)::[]) ->
-       Unix.bind fd saddr;
-       VUnit
+       VUnit (Unix.bind fd saddr)
     | _ -> failwith "unix_bind"
 		    
   let accept = function
@@ -175,18 +257,16 @@ module Socket = struct
 		    
   let listen = function
     | VList(VFile(fd)::VInt(n)::[]) ->
-       Unix.listen fd n ;
-       VUnit
+       VUnit (Unix.listen fd n)
     | _ -> failwith "unix_listen"
 		    
   let shutdown = function
     | VList(VFile(fd)::VString(sc)::[]) ->
-       Unix.shutdown fd (shutdown_command_of_string sc);
-       VUnit
+       VUnit (Unix.shutdown fd (shutdown_command_of_string sc))
     | _ -> failwith "unix_shutdown"
-		    
+
 end
-		
+
 module String = struct
   
   let make = function
@@ -216,39 +296,68 @@ module String = struct
 		    		    
 end
 
+module Char = struct
+  
+  let char_to_string = function
+    | VList(VChar(c)::[]) ->
+       VString(Char.escaped c)
+    | _ -> failwith "char_to_string"
+end
+
 let functions = 
   [
-    ("Unix.openfile", File.unix_openfile);
-    ("Unix.close", File.unix_close);
-    ("Unix.read", File.unix_read);
-    ("Unix.write", File.unix_write);
-    ("Unix.stdin", File.unix_stdin);
-    ("Unix.stdout", File.unix_stdout);
-    ("Unix.stderr", File.unix_stderr);
+    ("Pervasives.stdin", Pervasives.stdin);
+    ("Pervasives.stdout", Pervasives.stdout);
+    ("Pervasives.stderr", Pervasives.stderr);
 
-    ("Unix.in_channel_of_descr", Channel.in_channel_of_descr);
-    ("Unix.out_channel_of_descr", Channel.out_channel_of_descr);
-    ("Pervasives.input_line", Channel.input_line);
-    ("Pervasives.output_string", Channel.output_string);
-    ("Pervasives.flush", Channel.flush);
-    ("Pervasives.close_out", Channel.close_out);
+    ("Pervasives.print_char", Pervasives.print_char);
+    ("Pervasives.print_string", Pervasives.print_string);
+    ("Pervasives.print_endline", Pervasives.print_endline);
+    ("Pervasives.print_newline", Pervasives.print_newline);
 
-    ("Unix.inet_addr_any", Socket.inet_addr_any);
-    ("Unix.inet_addr_loopback", Socket.inet_addr_loopback);
-    ("Unix.inet6_addr_any", Socket.inet6_addr_any);
-    ("Unix.inet6_addr_loopback", Socket.inet6_addr_loopback);
-    ("Unix.addr_unix", Socket.addr_unix);
-    ("Unix.addr_inet", Socket.addr_inet);
-    ("Unix.socket", Socket.socket);
-    ("Unix.connect", Socket.connect);
-    ("Unix.bind", Socket.bind);
-    ("Unix.accept", Socket.accept);
-    ("Unix.listen", Socket.listen);
-    ("Unix.shutdown", Socket.shutdown);
+    ("Pervasives.read_line", Pervasives.read_line);
+    ("Pervasives.read_int", Pervasives.read_int);
+
+    ("Pervasives.open_out", Pervasives.open_out);
+    ("Pervasives.open_out_bin", Pervasives.open_out_bin);
+    ("Pervasives.flush", Pervasives.flush);
+    ("Pervasives.output_char", Pervasives.output_char);
+    ("Pervasives.output_string", Pervasives.output_string);
+    ("Pervasives.close_out", Pervasives.close_out);
+
+    ("Pervasives.open_in", Pervasives.open_in);
+    ("Pervasives.open_in_bin", Pervasives.open_in_bin);
+    ("Pervasives.input_char", Pervasives.input_char);
+    ("Pervasives.input_line", Pervasives.input_line);
+    ("Pervasives.close_in", Pervasives.close_in);
+
+    ("Unix.openfile", Unix.openfile);
+    ("Unix.close", Unix.close);
+    ("Unix.read", Unix.read);
+    ("Unix.write", Unix.write);
+    ("Unix.stdin", Unix.stdin);
+    ("Unix.stdout", Unix.stdout);
+    ("Unix.stderr", Unix.stderr);
+    ("Unix.in_channel_of_descr", Unix.in_channel_of_descr);
+    ("Unix.out_channel_of_descr", Unix.out_channel_of_descr);
+    ("Unix.inet_addr_any", Unix.inet_addr_any);
+    ("Unix.inet_addr_loopback", Unix.inet_addr_loopback);
+    ("Unix.inet6_addr_any", Unix.inet6_addr_any);
+    ("Unix.inet6_addr_loopback", Unix.inet6_addr_loopback);
+    ("Unix.addr_unix", Unix.addr_unix);
+    ("Unix.addr_inet", Unix.addr_inet);
+    ("Unix.socket", Unix.socket);
+    ("Unix.connect", Unix.connect);
+    ("Unix.bind", Unix.bind);
+    ("Unix.accept", Unix.accept);
+    ("Unix.listen", Unix.listen);
+    ("Unix.shutdown", Unix.shutdown);
 
     ("String.make", String.make);
     ("String.length", String.length);
     ("String.get", String.get);
     ("String.sub", String.sub);
-    ("String.concat", String.concat)
+    ("String.concat", String.concat);
+
+    ("Char.char_to_string", Char.char_to_string)
   ]

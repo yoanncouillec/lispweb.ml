@@ -55,7 +55,7 @@ parser.cmo:parser.ml
 	ocamlc -c $^ -o $@
 
 test: lispwebeval
-	./$^ < test/test.scm
+	./$^ test.scm
 
 clean:
 	rm -rf lispwebeval lispwebrepl *.cmo lexer.ml parser.ml *.cmi parser.mli

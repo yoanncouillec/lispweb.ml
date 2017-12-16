@@ -1,8 +1,10 @@
 (load "lib/string.scm")
+(load "lib/socket.scm")
+(load "lib/channel.scm")
 
 (define http-parse-method
   (lambda (l)
-    (let* ((fst-line (map list->string (split ' ' l)))
+    (let* ((fst-line (map list->string (split ' ' (string->list (input-line l)))))
 	   (method (car fst-line))
 	   (path (car (cdr fst-line)))
 	   (protocol (car (cdr (cdr fst-line)))))
@@ -11,15 +13,15 @@
 	  (throw error 'wrong-http-first-line)))))
 
 (define http-parse-header
-  (lambda (l)
-    (map list->string (split ':' l))))
+  (lambda (in)
+    (map list->string (split ':' (string->list (input-line in))))))
 
 (define http-parse-headers
-  (lambda (fd)
-    (let* ((l (read-line fd)))
+  (lambda (in)
+    (let* ((l (input-line in)))
       (if (equal? (list) l)
 	  l
-	  (cons (map list->string (split ':' l)) (http-parse-headers fd))))))
+	  (cons (map list->string (split ':' l)) (http-parse-headers in))))))
 
 (define read-all
   (lambda (fd)
@@ -27,3 +29,16 @@
       (if (equal? (read fd s 0 1) 0)
 	  (list)
 	  (cons s (read-all fd))))))
+
+(define http-server
+  (lambda (port)
+    (let* ((server (socket "PF_INET" "SOCK_STREAM" 0))
+	   (sockaddr (addr_inet (inet_addr_loopback) port)))
+      (bind server sockaddr)
+      (listen server 10)
+      (let* ((client (car (accept server)))
+	     (in (in_channel_of_descr client))
+	     (out (out_channel_of_descr client)))
+	(list
+	 (http-parse-method in)
+	 (http-parse-header in))))))

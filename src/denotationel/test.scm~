@@ -1,0 +1,6 @@
+(load "test/channel.scm")
+(load "test/socket.scm")
+(load "test/list.scm")
+(load "test/http.scm")
+(load "test/string.scm")
+(load "test/file.scm")

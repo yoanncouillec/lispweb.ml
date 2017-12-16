@@ -1,39 +1,3 @@
-(define openfile
-  (lambda (name flags perm)
-    (hostcall Unix.openfile name flags perm)))
-
-(define close
-  (lambda (fd)
-    (hostcall Unix.close fd)))
-
-(define read
-  (lambda (fd buff ofs len)
-    (hostcall Unix.read fd buff ofs len)))
-
-(define read-char
-  (lambda (fd)
-    (let* ((s (make-empty-string 1)))
-      (if (equal? (read fd s 0 1) 0)
-	  (throw error 'eof)
-	  (get-char s 0)))))
-
-(define read-line
-  (lambda (fd)
-    (let* ((c (read-char fd)))
-      (if (equal? c '\n')
-	  (list)
-	  (cons c (read-line fd))))))
-
-      
-
-(define read-one-line
-  (lambda (fd)
-    (hostcall Pervasives.input_line (hostcall Unix.in_channel_of_descr fd))))
-
-(define write
-  (lambda (fd buff ofs len)
-    (hostcall Unix.write fd buff ofs len)))
-
 (define stdin
   (lambda ()
     (hostcall Unix.stdin)))
@@ -46,3 +10,26 @@
   (lambda ()
     (hostcall Unix.stderr)))
        
+(define openfile
+  (lambda (name flags perm)
+    (hostcall Unix.openfile name flags perm)))
+
+(define close
+  (lambda (fd)
+    (hostcall Unix.close fd)))
+
+(define read
+  (lambda (fd buff ofs len)
+    (hostcall Unix.read fd buff ofs len)))
+
+(define write
+  (lambda (fd buff ofs len)
+    (hostcall Unix.write fd buff ofs len)))
+
+(define in_channel_of_descr
+  (lambda (fd)
+    (hostcall Unix.in_channel_of_descr fd)))
+
+(define out_channel_of_descr
+  (lambda (fd)
+    (hostcall Unix.out_channel_of_descr fd)))

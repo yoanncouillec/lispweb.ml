@@ -2,7 +2,7 @@ open Value
 open Expr
 
 let rec string_of_value = function
-  | VUnit -> "()"
+  | VUnit _ -> "()"
   | VInt n -> string_of_int n
   | VBool b -> string_of_bool b
   | VString s -> "\"" ^ s ^ "\""
@@ -16,8 +16,8 @@ let rec string_of_value = function
   | VInetAddr _ -> "#INETADDR"
   | VSockAddr _ -> "#SOCKADDR"
   | VShutdownCommand _ -> "#SHUTDOWNCOMMAND"
-  | VInChannel _ -> "#INCHANNEL"
-  | VOutChannel _ -> "#OUTCHANNEL"
+  | VChannelIn _ -> "#INCHANNEL"
+  | VChannelOut _ -> "#OUTCHANNEL"
 
 and string_of_expr = function
   | EInt n -> string_of_int n

@@ -1,0 +1,3 @@
+(define stdout
+  (lambda ()
+    (hostcall Pervasives.stdout)))
