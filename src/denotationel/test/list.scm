@@ -11,4 +11,6 @@
 (reverse (list 1 2 3 4 5))
 (trim-right 0 (list 0 0 0 1 1 1 0 0 0))
 (trim 0 (list 0 0 0 1 1 1 0 0 0))
-
+(car (list 1 2 3))
+(cdr (list 1 2 3))
+(car (cdr (cdr (list "html" (list) "child"))))
