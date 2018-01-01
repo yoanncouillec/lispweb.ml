@@ -65,3 +65,15 @@
       (serve in out service)
       (close-out out)
       (accept-client server service))))
+
+(define http-send-response
+  (lambda (out code type content)
+    (output-lines
+     out
+     (list
+      (concat " " (list "HTTP/1.1" code "OK"))
+      (concat " " (list "Content-Length:" (int->string (string-length content))))
+      (concat " " (list "Content-Type:" type))))
+    (output-newline out)
+    (output-string out content)))
+
