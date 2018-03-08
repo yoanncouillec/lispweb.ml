@@ -25,6 +25,10 @@ let rec apply_bin_op op v1 v2 =
       | OMult -> VInt (n1 * n2))
   | _ -> failwith "Should be integers"
 
+(* let rec eval_quasi_quote e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
+ *   match e with 
+ *   | EInt n -> *)
+
 let rec eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
   (*(print_endline ("evaluate: "^(string_of_expr e)));*)
   match e with
@@ -44,7 +48,9 @@ let rec eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 	   | _ -> failwith ("eval ENot: boolean expected: "^(string_of_value v)))
   | EString s -> cont (VString s) genv mem
   | EChar c -> cont (VChar c) genv mem
-  | EQuote e -> cont (VQuote e) genv mem
+  | EQuote e -> cont (VExpr e) genv mem
+(*  | EQuasiQuote e -> eval_quasi_quote e genv env denv mem cont *)
+  | EUnQuote e -> failwith "eval EUnQuote: must be inside a quasiquote"
   | EVar s -> 
      (match get_env s env with
       | EnvAddr addr -> cont (get_mem addr mem) genv mem
@@ -79,6 +85,7 @@ let rec eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 	   let addr = ref v in
 	   cont (VUnit()) (extend_env s addr genv') (extend_mem addr v mem'))
   | ELambda (_, _) as e -> cont (VClosure (env, e)) genv mem
+  | ELambdaDot (_, _) as e -> cont (VClosure (env, e)) genv mem
   | EThunk _ as e -> cont (VClosure (env, e)) genv mem
   | EThunkApp e ->
      eval e genv env denv mem
@@ -103,6 +110,25 @@ let rec eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 			  cont)
 	    | VCont k ->
 	       eval e2 genv' env denv mem' k
+	    (* | VClosure (env', ELambdaDot (s, body)) as ldot -> *)
+	    (*    eval e2 genv' env denv mem' *)
+	    (* 	    (fun v genv'' mem'' -> *)
+	    (* 	     (match get_env s env with *)
+	    (* 	      | EnvAddr addr ->  *)
+	    (* 		 (match (get_mem addr mem'') with *)
+	    (* 		  | VList vs -> *)
+	    (* 		     addr := VList (vs @ [v]) ; *)
+	    (* 		     cont ldot genv'' mem'' *)
+	    (* 		  | _ -> failwith "eval EApp-ELambdaDot: VList expected") *)
+	    (* 	      | EnvNotFound _ -> *)
+	    (* 		 let addr = ref (VList ([v])) in *)
+	    (* 		 cont *)
+	    (* 		 eval body  *)
+	    (* 		      genv'' *)
+	    (* 		      (extend_env s addr env') *)
+	    (* 		      denv *)
+	    (* 		      (extend_mem addr v mem'') *)
+	    (* 		      cont))        *)
 	    | _ -> failwith "Not a closure"))
   | EBegin [] -> cont (VUnit()) genv mem
   | EBegin (expression::[]) ->

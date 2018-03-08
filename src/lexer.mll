@@ -6,32 +6,37 @@ rule token = parse
   | [' ' '\t' '\n'] { token lexbuf }
   | '(' { LPAREN }
   | ')' { RPAREN }
-  | ''' { QUOTE }
-  | '+' { PLUS }
-  | '-' { MINUS }
-  | '*' { MULT }
-  | '/' { DIV }
+  | "quote" { QUOTE }
+  | "quasiquote" { QUASIQUOTE }
+  | "unquote" { UNQUOTE }
   | "equal?" { EQUAL }
   | "#t" { TRUE }
   | "#f" { FALSE }
   | "if" { IF }
   | "lambda" { LAMBDA }
   | "let" { LET }
-  | "dyn-let" { DYNAMIC_LET }
-  | "dyn" { DYNAMIC }
-  | "dyn-set!" { DYNAMIC_SET }
-  | "listen" { LISTEN }
+  | "let*" { LETSTAR }
+  | "define" { DEFINE }
+  | "letrec" { LETREC }
+  | "set!" { SET }
   | "list" { LIST }
-  | "tag" { TAG }
+  | "car" { CAR }
+  | "cdr" { CDR }
+  | "cons" { CONS }
+  | "not" { NOT }
   | "begin" { BEGIN }
-  | "string-append" { STRING_APPEND }
-  | "string->int" { STRING_TO_INT }
-  | "int->string" { INT_TO_STRING }
-  | "html" { HTML }
-  | "script" { SCRIPT }
-  | "from-server" { FROM_SERVER }
+  | "throw" { THROW }  
+  | "catch" { CATCH }  
+  | "block" { BLOCK }  
+  | "return-from" { RETURNFROM }  
+  | "call/cc" { CALLCC }
   | "hostcall" { HOSTCALL }
-  | "make-string" { MAKE_STRING }
+  | "load" { LOAD }
+  | "+" { PLUS }
+  | "-" { MINUS }
+  | "*" { MULT }
+  | ''' ['A'-'Z''a'-'z''0'-'9'' '':'] ''' { ER_CHAR (Lexing.lexeme lexbuf) }
+  | ''' '\\'['A'-'Z''a'-'z''0'-'9'' '] ''' { ER_CHAR_ESC (Lexing.lexeme lexbuf) }
   | '\"' ('\\'* | [^'\"'])* '\"' { ER_STRING (Lexing.lexeme lexbuf) }
   | ['0'-'9']+ { ER_INT (int_of_string (Lexing.lexeme lexbuf)) }
-  | ['A'-'Z''a'-'z''+''-''*''/''#''-''@''{'']''*''&''%''$''!''.']+ { ER_IDENT (Lexing.lexeme lexbuf) }
+  | ['A'-'Z''a'-'z''<']['A'-'Z''a'-'z''+''-''*''/''#''-''@''{'']''*''&''%''$''!''?''_''0'-'9''>''.']* { ER_IDENT (Lexing.lexeme lexbuf) }

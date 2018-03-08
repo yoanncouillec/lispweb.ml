@@ -1,5 +1,0 @@
-(let (/button (lambda (name) 
-		(html
-		 (tag "body" (list)
-		      (tag "button" (list (list "onclick" (script (alert "coucou")))) "Click")))))
-  (listen 8081))

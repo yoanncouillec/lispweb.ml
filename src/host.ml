@@ -122,7 +122,7 @@ module Pervasives = struct
 
 end
 		
-module Unix = struct
+module LUnix = struct
   
   let stdin = function
     | VList([]) -> 
@@ -168,7 +168,7 @@ module Unix = struct
 	       (match rest with 
 		| VInt(len)::rest -> 
 		   (match rest with 
-		    | [] -> VInt(Unix.read fd buff ofs len)
+		    | [] -> VInt(Unix.read fd (Bytes.of_string buff) ofs len)
 		    | _ -> failwith "unix_read: wrong number of arguments: 4 expected")
 		| _ -> failwith "unix_read: 4th argument must be an integer")
 	    | _ -> failwith ("unix_read: 3th argument must be an integer: "^(string_of_value (List.hd rest))))
@@ -177,7 +177,7 @@ module Unix = struct
 		    
   let write = function
     | VList(VFile(fd)::VString(buff)::VInt(ofs)::VInt(len)::[]) -> 
-       VInt(Unix.write fd buff ofs len)
+       VInt(Unix.write fd (Bytes.of_string buff) ofs len)
     | _ -> failwith "unix_write"
 		    
   let in_channel_of_descr = function
@@ -308,6 +308,18 @@ module Char = struct
        VString(Char.escaped c)
     | _ -> failwith "char_to_string"
 end
+                
+(* module Thread = struct
+ *   
+ *   let create = function
+ *     | VList(args) ->
+ *        (match List.length args with
+ *         | 2 ->
+ *            (match List.nth args 0 with
+ *             | VClosure(env,expr) ->
+ *                let arg = List.nth args 1 in
+ *                VThread(Thread.create)))
+ * end *)
 
 let functions = 
   [
@@ -338,27 +350,27 @@ let functions =
     ("Pervasives.input_line", Pervasives.input_line);
     ("Pervasives.close_in", Pervasives.close_in);
 
-    ("Unix.openfile", Unix.openfile);
-    ("Unix.close", Unix.close);
-    ("Unix.read", Unix.read);
-    ("Unix.write", Unix.write);
-    ("Unix.stdin", Unix.stdin);
-    ("Unix.stdout", Unix.stdout);
-    ("Unix.stderr", Unix.stderr);
-    ("Unix.in_channel_of_descr", Unix.in_channel_of_descr);
-    ("Unix.out_channel_of_descr", Unix.out_channel_of_descr);
-    ("Unix.inet_addr_any", Unix.inet_addr_any);
-    ("Unix.inet_addr_loopback", Unix.inet_addr_loopback);
-    ("Unix.inet6_addr_any", Unix.inet6_addr_any);
-    ("Unix.inet6_addr_loopback", Unix.inet6_addr_loopback);
-    ("Unix.addr_unix", Unix.addr_unix);
-    ("Unix.addr_inet", Unix.addr_inet);
-    ("Unix.socket", Unix.socket);
-    ("Unix.connect", Unix.connect);
-    ("Unix.bind", Unix.bind);
-    ("Unix.accept", Unix.accept);
-    ("Unix.listen", Unix.listen);
-    ("Unix.shutdown", Unix.shutdown);
+    ("Unix.openfile", LUnix.openfile);
+    ("Unix.close", LUnix.close);
+    ("Unix.read", LUnix.read);
+    ("Unix.write", LUnix.write);
+    ("Unix.stdin", LUnix.stdin);
+    ("Unix.stdout", LUnix.stdout);
+    ("Unix.stderr", LUnix.stderr);
+    ("Unix.in_channel_of_descr", LUnix.in_channel_of_descr);
+    ("Unix.out_channel_of_descr", LUnix.out_channel_of_descr);
+    ("Unix.inet_addr_any", LUnix.inet_addr_any);
+    ("Unix.inet_addr_loopback", LUnix.inet_addr_loopback);
+    ("Unix.inet6_addr_any", LUnix.inet6_addr_any);
+    ("Unix.inet6_addr_loopback", LUnix.inet6_addr_loopback);
+    ("Unix.addr_unix", LUnix.addr_unix);
+    ("Unix.addr_inet", LUnix.addr_inet);
+    ("Unix.socket", LUnix.socket);
+    ("Unix.connect", LUnix.connect);
+    ("Unix.bind", LUnix.bind);
+    ("Unix.accept", LUnix.accept);
+    ("Unix.listen", LUnix.listen);
+    ("Unix.shutdown", LUnix.shutdown);
 
     ("String.make", String.make);
     ("String.length", String.length);

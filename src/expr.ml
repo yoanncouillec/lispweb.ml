@@ -8,6 +8,8 @@ type expr =
   | EChar of char
   | EString of string
   | EQuote of expr
+  | EQuasiQuote of expr
+  | EUnQuote of expr
   | EVar of string
   | ESet of string * expr
   | EIf of expr * expr * expr
@@ -16,6 +18,7 @@ type expr =
   | EThunk of expr
   | EThunkApp of expr
   | ELambda of string * expr
+  | ELambdaDot of string * expr
   | EApp of expr * expr
   | EBegin of expr list
   | ECatch of string * expr

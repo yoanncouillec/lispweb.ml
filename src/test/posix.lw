@@ -1,2 +1,0 @@
-(let ((f ((posix (quote open)) "tmp.tmp" (posix (quote O_RDWR)) 0666)))
-  (posix (quote close)))

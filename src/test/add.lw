@@ -1,5 +1,0 @@
-(let (/add (lambda (a)
-	     (lambda (b)
-	       (html
-		(+ a b)))))
-  (listen 9091))

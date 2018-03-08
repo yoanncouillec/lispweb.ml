@@ -9,13 +9,14 @@ type value =
   | VClosure of env * expr
   | VCont of cont
   | VList of value list
-  | VQuote of expr
+  | VExpr of expr
   | VFile of Unix.file_descr
   | VInetAddr of Unix.inet_addr
   | VSockAddr of Unix.sockaddr
   | VShutdownCommand of Unix.shutdown_command
   | VChannelIn of in_channel
   | VChannelOut of out_channel
+  | VThread of Thread.t
 		
  and env = (string * value ref) list
 

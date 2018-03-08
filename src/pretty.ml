@@ -7,7 +7,7 @@ let rec string_of_value = function
   | VBool b -> string_of_bool b
   | VString s -> "\"" ^ s ^ "\""
   | VChar c -> "'" ^ (String.make 1 c) ^ "'"
-  | VQuote e -> "'" ^ (string_of_expr e)
+  | VExpr e -> "'" ^ (string_of_expr e)
   | VClosure (_, e)-> "#CLOSURE"^(string_of_expr e)^")"
   | VCont _ -> "#CONT"
   | VList vs ->
@@ -30,7 +30,9 @@ and string_of_expr = function
   | ENot e -> "(not "^(string_of_expr e)^")"
   | EString s -> "\"" ^ s ^ "\""
   | EChar c -> "'" ^ (String.make 1 c) ^ "'"
-  | EQuote e -> "'" ^ (string_of_expr e)
+  | EQuote e -> "(quote" ^ (string_of_expr e) ^")"
+  | EQuasiQuote e -> "(quasiquote" ^ (string_of_expr e) ^")"
+  | EUnQuote e -> "(unquote" ^ (string_of_expr e) ^")"
   | EVar s -> s
   | ESet (s, e) -> "(set! "^s^(string_of_expr e)^")"
   | ELoad e -> "(load "^(string_of_expr e)^")"
@@ -42,6 +44,8 @@ and string_of_expr = function
     "(define "^s^" "^(string_of_expr e)^")"
   | ELambda (s, body) ->
      "(lambda ("^s^") "^(string_of_expr body)^")"
+  | ELambdaDot (s, body) ->
+     "(lambda (. "^s^") "^(string_of_expr body)^")"
   | EThunk (body) ->
      "(lambda () "^(string_of_expr body)^")"
   | EThunkApp e ->

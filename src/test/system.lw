@@ -1,6 +1,0 @@
-(let ((f (hostcall Unix.openfile (list "tmp.tmp" (list "O_CREAT" "O_RDWR") "0o640")))
-      (buf (make-string 10)))
-  (begin
-   (hostcall Unix.read (list f buf 0 4))
-   (hostcall Unix.close (list f))
-   buf))

@@ -61,7 +61,7 @@ Copy/past in your browser
 ```
 http://localhost:9091/math/inc?a=41
 ```
-![](inc.png)
+![](images/inc.png)
 
 It will always answer 42 ;)
 
@@ -78,7 +78,7 @@ Copy/past in your browser
 ```
 http://localhost:9091/*?a=41
 ```
-![](mult.png)
+![](images/mult.png)
 
 ## Functional
 
