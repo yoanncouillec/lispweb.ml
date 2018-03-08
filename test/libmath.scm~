@@ -1,0 +1,3 @@
+(define inc (lambda (x) (+ x 1)))
+
+(defin dec (lambda (x) (- x 1))))

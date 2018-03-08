@@ -6,9 +6,9 @@ rule token = parse
   | [' ' '\t' '\n'] { token lexbuf }
   | '(' { LPAREN }
   | ')' { RPAREN }
-  | "quote" { QUOTE }
-  | "quasiquote" { QUASIQUOTE }
-  | "unquote" { UNQUOTE }
+  | '\'' { CQUOTE }
+  | "`" { CQUASIQUOTE }
+  | "," { CUNQUOTE }
   | "equal?" { EQUAL }
   | "#t" { TRUE }
   | "#f" { FALSE }

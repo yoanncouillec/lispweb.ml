@@ -5,7 +5,7 @@
 %token CAR CDR CONS LIST
 %token CATCH THROW CALLCC BLOCK RETURNFROM HOSTCALL
 %token PLUS MINUS MULT
-%token QUOTE QUASIQUOTE UNQUOTE
+%token CQUOTE CQUASIQUOTE CUNQUOTE
 %start start
 %type <Expr.expr> start
 
@@ -24,9 +24,9 @@ expression:
 | ER_CHAR { Expr.EChar (String.get $1 1) }
 | ER_CHAR_ESC { Expr.EChar (match $1 with "'\\n'" -> '\n'|_->failwith "ER_CHAR_ESC") }
 | ER_IDENT { Expr.EVar ($1) }
-| QUOTE expression { Expr.EQuote ($2) }
-| QUASIQUOTE expression { Expr.EQuasiQuote ($2) }
-| UNQUOTE expression { Expr.EUnQuote ($2) }
+| CQUOTE expression { Expr.EQuote ($2) }
+| CQUASIQUOTE expression { Expr.EQuasiQuote ($2) }
+| CUNQUOTE expression { Expr.EUnQuote ($2) }
 | TRUE { Expr.EBool (true) }
 | FALSE { Expr.EBool (false) }
 | LPAREN LOAD expression RPAREN { Expr.ELoad $3 }

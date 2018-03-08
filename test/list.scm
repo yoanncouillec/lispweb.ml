@@ -1,4 +1,5 @@
 (load "lib/list.scm")
+
 (length (list))
 (length (list 1 2 3))
 (catch not-found (index-of 'x' (list 2 2 2 2 2 'x' 2 2 2)))

@@ -1,2 +1,0 @@
-(http-parse-first-line (openfile "test/http.txt" (list "O_RDONLY") "0o660"))
-
