@@ -20,7 +20,10 @@ type value =
   | VSslProtocol of Ssl.protocol
   | VSslSocket of Ssl.socket
   | VSslCertificate of Ssl.certificate
-		
+  | VSslCipher of Ssl.cipher
+  | VBytes of Bytes.t
+  | VHostEntry of Unix.host_entry	
+	
  and env = (string * value ref) list
 
  and mem = (value ref * value) list

@@ -1,0 +1,5 @@
+(load "lib/list.scm")
+
+(define bytes-of-string
+  (lambda (s)
+    (hostcall Bytes.bytes_of_string s)))

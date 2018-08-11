@@ -22,6 +22,14 @@
   (lambda (addr port)
     (hostcall Unix.addr_inet addr port)))
 
+(define gethostbyname
+  (lambda (name)
+    (hostcall Unix.gethostbyname name)))
+
+(define inet_addr_of_host_entry
+  (lambda (hostentry)
+    (hostcall Misc.inet_addr_of_host_entry hostentry)))
+
 (define socket
   (lambda (domain type protocol)
     (hostcall Unix.socket domain type protocol)))

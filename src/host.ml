@@ -238,7 +238,12 @@ module LUnix = struct
     | VList(VInetAddr(addr)::VInt(port)::[]) ->
        VSockAddr(Unix.ADDR_INET(addr, port))
     | _ -> failwith "unix_addr_inet"
-		    
+	
+  let gethostbyname = function
+    | VList(VString(hostname)::[]) ->
+       VHostEntry(Unix.gethostbyname hostname)
+    | _ -> failwith "wrong arguments"
+	    
   let socket = function
     | VList(VString(domain)::VString(stype)::VInt(protocol)::[]) ->
        (VFile (Unix.socket (domain_of_string domain) (socket_type_of_string stype) protocol))
@@ -270,6 +275,30 @@ module LUnix = struct
        VUnit (Unix.shutdown fd (shutdown_command_of_string sc))
     | _ -> failwith "unix_shutdown"
 
+end
+
+module Bytes = struct
+
+  let bytes_of_string = function
+    |  VList(VString(s)::[]) ->
+	VBytes(Bytes.of_string s)
+    | _ -> failwith "wrong arguments"		    
+  
+  let bytes_create = function
+    |  VList(VInt(n)::[]) ->
+	VBytes(Bytes.create n)
+    | _ -> failwith "wrong arguments"		    
+  
+  let bytes_to_string = function
+    |  VList(VBytes(b)::[]) ->
+	VString(Bytes.to_string b)
+    | _ -> failwith "wrong arguments"		    
+  
+  let bytes_length = function
+    |  VList(VBytes(b)::[]) ->
+	VInt(Bytes.length b)
+    | _ -> failwith "wrong arguments"		    
+  
 end
 
 module String = struct
@@ -331,6 +360,61 @@ module Ssl = struct
        VSslCertificate(Ssl.get_certificate socket)
     | _ -> failwith "wrong arguments"
 
+  let get_cipher = function
+    | VList(VSslSocket(socket)::[]) ->
+       VSslCipher(Ssl.get_cipher socket)
+    | _ -> failwith "wrong arguments"
+
+  let get_issuer = function
+    | VList(VSslCertificate(cert)::[]) ->
+       VString(Ssl.get_issuer cert)
+    | _ -> failwith "wrong arguments"
+
+  let get_subject = function
+    | VList(VSslCertificate(cert)::[]) ->
+       VString(Ssl.get_subject cert)
+    | _ -> failwith "wrong arguments"
+
+  let get_cipher_name = function
+    | VList(VSslCipher(cipher)::[]) ->
+       VString(Ssl.get_cipher_name cipher)
+    | _ -> failwith "wrong arguments"
+
+  let get_cipher_version = function
+    | VList(VSslCipher(cipher)::[]) ->
+       VString(Ssl.get_cipher_version cipher)
+    | _ -> failwith "wrong arguments"
+
+  let get_cipher_description = function
+    | VList(VSslCipher(cipher)::[]) ->
+       VString(Ssl.get_cipher_description cipher)
+    | _ -> failwith "wrong arguments"
+
+  let write = function
+    | VList(VSslSocket(socket)::VBytes(bytes)::VInt(offset)::VInt(length)::[]) ->
+       VInt(Ssl.write socket bytes offset length)
+    | _ -> failwith "wrong arguments"
+
+  let read = function
+    | VList(VSslSocket(socket)::VBytes(bytes)::VInt(offset)::VInt(length)::[]) ->
+       let r = Ssl.read socket bytes offset length in
+       VInt(r)
+    | _ -> failwith "wrong arguments"
+
+  let shutdown = function
+    | VList(VSslSocket(socket)::[]) ->
+       VUnit(Ssl.shutdown socket)
+    | _ -> failwith "wrong arguments"
+
+end
+
+module Misc = struct
+
+  let inet_addr_of_host_entry = function
+    | VList(VHostEntry(hostentry)::[]) ->
+       VInetAddr(hostentry.h_addr_list.(0))
+    | _ -> failwith "wrong arguments"
+
 end
                 
 (* module Thread = struct
@@ -389,6 +473,7 @@ let functions =
     ("Unix.inet6_addr_loopback", LUnix.inet6_addr_loopback);
     ("Unix.addr_unix", LUnix.addr_unix);
     ("Unix.addr_inet", LUnix.addr_inet);
+    ("Unix.gethostbyname", LUnix.gethostbyname);
     ("Unix.socket", LUnix.socket);
     ("Unix.connect", LUnix.connect);
     ("Unix.bind", LUnix.bind);
@@ -396,11 +481,33 @@ let functions =
     ("Unix.listen", LUnix.listen);
     ("Unix.shutdown", LUnix.shutdown);
 
+    ("Bytes.of_string", Bytes.bytes_of_string);
+    ("Bytes.create", Bytes.bytes_create);
+    ("Bytes.to_string", Bytes.bytes_to_string);
+    ("Bytes.length", Bytes.bytes_length);
+
     ("String.make", String.make);
     ("String.length", String.length);
     ("String.get", String.get);
     ("String.sub", String.sub);
     ("String.concat", String.concat);
 
-    ("Char.char_to_string", Char.char_to_string)
+    ("Char.char_to_string", Char.char_to_string);
+
+    ("Ssl.init", Ssl.init);
+    ("Ssl.protocol_v23", Ssl.protocol_v23);
+    ("Ssl.open_connection", Ssl.open_connection);
+    ("Ssl.get_certificate", Ssl.get_certificate);
+    ("Ssl.get_cipher", Ssl.get_cipher);
+    ("Ssl.get_issuer", Ssl.get_issuer);
+    ("Ssl.get_subject", Ssl.get_subject);
+    ("Ssl.get_cipher_name", Ssl.get_cipher_name);
+    ("Ssl.get_cipher_version", Ssl.get_cipher_version);
+    ("Ssl.get_cipher_description", Ssl.get_cipher_description);
+    ("Ssl.write", Ssl.write);
+    ("Ssl.read", Ssl.read);
+    ("Ssl.shutdown", Ssl.shutdown);
+
+    ("Misc.inet_addr_of_host_entry", Misc.inet_addr_of_host_entry)
+
   ]
