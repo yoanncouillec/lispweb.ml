@@ -309,6 +309,30 @@ module Char = struct
     | _ -> failwith "char_to_string"
 end
                 
+module Ssl = struct
+  
+  let init = function
+    | VList([]) ->
+       VUnit(Ssl.init())
+    | _ -> failwith "Ssl.init"
+
+  let protocol_v23 = function
+    | VList([]) ->
+       VSslProtocol(Ssl.SSLv23)
+    | _ -> failwith "wrong arguments"
+
+  let open_connection = function
+    | VList(VSslProtocol(protocol)::VSockAddr(sockaddr)::[]) ->
+       VSslSocket(Ssl.open_connection protocol sockaddr)
+    | _ -> failwith "wrong arguments"
+
+  let get_certificate = function
+    | VList(VSslSocket(socket)::[]) ->
+       VSslCertificate(Ssl.get_certificate socket)
+    | _ -> failwith "wrong arguments"
+
+end
+                
 (* module Thread = struct
  *   
  *   let create = function

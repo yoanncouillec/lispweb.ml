@@ -17,6 +17,9 @@ type value =
   | VChannelIn of in_channel
   | VChannelOut of out_channel
   | VThread of Thread.t
+  | VSslProtocol of Ssl.protocol
+  | VSslSocket of Ssl.socket
+  | VSslCertificate of Ssl.certificate
 		
  and env = (string * value ref) list
 

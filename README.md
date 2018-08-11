@@ -2,13 +2,19 @@ LispWeb
 ============
 ![Current Version](https://img.shields.io/badge/version-1.0.0--alpha-green.svg)
 
-LispWeb is a functional web language with native support of data sources.
+LispWeb is a functional multi-tiers programming language.
 
-It is an *all-in-one* language (a.k.a. multi-tier). 
+It becomes very easy to write web application in LispWeb because there
+is no other language you need to use. You write the whole application
+in LispWeb (server, client and database access)
 
-It supports server code, client code and data sources code in only a single language.
+## A REST API in one line
 
-## Server
+```scheme
+(let (/math/inc (lambda (a) (+ a 1))) (listen 9091))
+```
+
+You can
 
 LispWeb can create servers with only two pieces.
 
