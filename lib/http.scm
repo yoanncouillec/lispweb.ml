@@ -4,8 +4,8 @@
 (load "lib/stdout.scm")
 
 (define http-parse-method
-  (lambda (l)
-    (let* ((fst-line (map list->string (split ' ' (string->list (input-line l)))))
+  (lambda (line)
+    (let* ((fst-line (map list->string (split ' ' (string->list line))))
 	   (method (car fst-line))
 	   (path (car (cdr fst-line)))
 	   (protocol (car (cdr (cdr fst-line)))))
@@ -13,17 +13,26 @@
 	  (list method path protocol)
 	  (throw error 'wrong-http-first-line)))))
 
-(define http-parse-header
-  (lambda (in)
-    (map list->string (split ':' (string->list (input-line in))))))
+(define http-parse-response-status
+  (lambda (line)
+    (let* ((fst-line (map list->string (split ' ' (string->list line))))
+	   (version (car fst-line))
+	   (code (car (cdr fst-line)))
+	   (message (concat " " (cdr fst-line))))
+      (list version code message))))
+
+(define http-parse-one-header
+  (lambda (header)
+    (map list->string (split ':' (string->list header)))))
 
 (define http-parse-headers
-  (lambda (in)
-    (let* ((l (input-line in)))
-      (print-line l)
-      (if (equal? "" l)
-	  l
-	  (cons (map list->string (split ':' (string->list l))) (http-parse-headers in))))))
+  (lambda (read fd)
+    (let* ((l (read-line read fd))
+	   (length (string-length l)))
+      (if (equal? length 0)
+	  (list)
+	  (cons (map list->string (split-into-2 ':' (string->list l))) 
+		(http-parse-headers read fd))))))
 
 (define http-parse-headers-light
   (lambda (in)

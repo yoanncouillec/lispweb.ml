@@ -72,3 +72,12 @@
 (define trim
   (lambda (e l)
     (trim-right e (trim-left e l))))
+
+(define assoc
+  (lambda (l k0)
+    (let* ((fst (car l))
+	   (k (car fst))
+	   (v (car (cdr fst))))
+      (if (equal? k k0)
+	  v
+	  (assoc (cdr l) k0)))))

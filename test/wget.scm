@@ -3,6 +3,17 @@
 (load "lib/string.scm")
 (load "lib/bytes.scm")
 (load "lib/stdout.scm")
+(load "lib/file.scm")
+(load "lib/http.scm")
+
+(define read-all
+  (lambda (ssl)
+    (let* ((bufsize 1024)
+	   (buff (bytes-create bufsize))
+	   (r (ssl-read ssl buff 0 bufsize))
+	   (s (bytes-to-string buff)))
+      (print-line s)
+      (read-all ssl))))
 
 (let* ((scheme "https")
        (host "raw.githubusercontent.com")
@@ -20,10 +31,17 @@
 	 (cipher_version (ssl-get-cipher-version cipher))
 	 (cipher_description (ssl-get-cipher-description cipher))
 	 (s (concat "" (list "GET " path " HTTP/1.1" (make-string 1 '\n') "Host: " host (make-string 1 '\n') (make-string 1 '\n'))))
-	 (b (bytes-of-string s))
-	 (bufsize 1024)
-	 (buff (bytes-create bufsize)))
+	 (b (bytes-of-string s)))
     (ssl-write ssl b 0 (bytes-length b))
-    (let* ((r (ssl-read ssl buff 0 bufsize))
-	   (s (bytes-to-string buff)))
-      (print-line s))))
+    (let* ((status (http-parse-response-status (read-line ssl-read ssl)))
+	   (headers (http-parse-headers ssl-read ssl))
+	   (l (string->int (list->string (trim-left ' ' (string->list (assoc headers "Content-Length")))))))
+      (print (car (cdr status)))
+      (let (content (bytes-create l))
+	(ssl-read ssl content 0 l)
+	(let (s (bytes-to-string content))
+	  s)))))
+
+
+
+

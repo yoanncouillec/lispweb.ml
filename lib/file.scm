@@ -1,3 +1,7 @@
+(load "lib/bytes.scm")
+(load "lib/stdout.scm")
+(load "lib/string.scm")
+
 (define stdin
   (lambda ()
     (hostcall Unix.stdin)))
@@ -21,6 +25,19 @@
 (define read
   (lambda (fd buff ofs len)
     (hostcall Unix.read fd buff ofs len)))
+
+(define read-line 
+  (lambda (read fd)
+    (let* ((b (bytes-create 1))
+	   (n (read fd b 0 1))
+	   (c (bytes-get b 0)))
+      (if (equal? '\r' c)
+	  (let* ((n2 (read fd b 0 1))
+		 (c2 (bytes-get b 0)))
+	    (if (equal? '\n' c2)
+		""
+		(concat "" (list (make-string 1 c) (read-line read fd)))))
+	  (concat "" (list (make-string 1 c) (read-line read fd)))))))
 
 (define write
   (lambda (fd buff ofs len)

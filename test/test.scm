@@ -1,2 +1,5 @@
+(load "lib/stdout.scm")
+
 (define foo
-  (lambda (x) x))
+  (lambda ()
+    (print "foo")))

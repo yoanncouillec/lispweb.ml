@@ -13,3 +13,7 @@
 (define bytes-length
   (lambda (b)
     (hostcall Bytes.length b)))
+
+(define bytes-get
+  (lambda (b n)
+    (hostcall Bytes.get b n)))

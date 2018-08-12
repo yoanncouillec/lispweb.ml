@@ -1,0 +1,54 @@
+### Starting build.
+# Target: src/lispwebeval.ml.depends, tags: { package(ssl), package(unix), extension:ml, file:src/lispwebeval.ml, ocaml, ocamldep, quiet, thread, traverse }
+ocamlfind ocamldep -package ssl -package unix -modules src/lispwebeval.ml > src/lispwebeval.ml.depends # cached
+# Target: src/eval.ml.depends, tags: { package(ssl), package(unix), extension:ml, file:src/eval.ml, ocaml, ocamldep, quiet, thread, traverse }
+ocamlfind ocamldep -package ssl -package unix -modules src/eval.ml > src/eval.ml.depends # cached
+# Target: src/env.ml.depends, tags: { package(ssl), package(unix), extension:ml, file:src/env.ml, ocaml, ocamldep, quiet, thread, traverse }
+ocamlfind ocamldep -package ssl -package unix -modules src/env.ml > src/env.ml.depends # cached
+# Target: src/value.ml.depends, tags: { package(ssl), package(unix), extension:ml, file:src/value.ml, ocaml, ocamldep, quiet, thread, traverse }
+ocamlfind ocamldep -package ssl -package unix -modules src/value.ml > src/value.ml.depends # cached
+# Target: src/expr.ml.depends, tags: { package(ssl), package(unix), extension:ml, file:src/expr.ml, ocaml, ocamldep, quiet, thread, traverse }
+ocamlfind ocamldep -package ssl -package unix -modules src/expr.ml > src/expr.ml.depends # cached
+# Target: src/expr.cmo, tags: { package(ssl), package(unix), byte, compile, extension:cmo, extension:ml, file:src/expr.cmo, file:src/expr.ml, implem, ocaml, quiet, thread, traverse }
+ocamlfind ocamlc -c -thread -package ssl -package unix -I src -I lib -o src/expr.cmo src/expr.ml # cached
+# Target: src/value.cmo, tags: { package(ssl), package(unix), byte, compile, extension:cmo, extension:ml, file:src/value.cmo, file:src/value.ml, implem, ocaml, quiet, thread, traverse }
+ocamlfind ocamlc -c -thread -package ssl -package unix -I src -I lib -o src/value.cmo src/value.ml # cached
+# Target: src/env.cmo, tags: { package(ssl), package(unix), byte, compile, extension:cmo, extension:ml, file:src/env.cmo, file:src/env.ml, implem, ocaml, quiet, thread, traverse }
+ocamlfind ocamlc -c -thread -package ssl -package unix -I src -I lib -o src/env.cmo src/env.ml # cached
+# Target: src/host.ml.depends, tags: { package(ssl), package(unix), extension:ml, file:src/host.ml, ocaml, ocamldep, quiet, thread, traverse }
+ocamlfind ocamldep -package ssl -package unix -modules src/host.ml > src/host.ml.depends # cached
+# Target: src/pretty.ml.depends, tags: { package(ssl), package(unix), extension:ml, file:src/pretty.ml, ocaml, ocamldep, quiet, thread, traverse }
+ocamlfind ocamldep -package ssl -package unix -modules src/pretty.ml > src/pretty.ml.depends # cached
+# Target: src/pretty.cmo, tags: { package(ssl), package(unix), byte, compile, extension:cmo, extension:ml, file:src/pretty.cmo, file:src/pretty.ml, implem, ocaml, quiet, thread, traverse }
+ocamlfind ocamlc -c -thread -package ssl -package unix -I src -I lib -o src/pretty.cmo src/pretty.ml # cached
+# Target: src/host.cmo, tags: { package(ssl), package(unix), byte, compile, extension:cmo, extension:ml, file:src/host.cmo, file:src/host.ml, implem, ocaml, quiet, thread, traverse }
+ocamlfind ocamlc -c -thread -package ssl -package unix -I src -I lib -o src/host.cmo src/host.ml # cached
+# Target: src/lexer.mll, tags: { package(ssl), package(unix), extension:mll, file:src/lexer.mll, lexer, ocaml, ocamllex, quiet, thread, traverse }
+/Users/couillec/.opam/4.06.1/bin/ocamllex.opt -q src/lexer.mll # cached
+# Target: src/lexer.ml.depends, tags: { package(ssl), package(unix), extension:ml, file:src/lexer.ml, ocaml, ocamldep, quiet, thread, traverse }
+ocamlfind ocamldep -package ssl -package unix -modules src/lexer.ml > src/lexer.ml.depends # cached
+# Target: src/parser.mly.depends, tags: { package(ssl), package(unix), extension:mly, file:src/parser.mly, infer, menhir_ocamldep, ocaml, ocamldep, quiet, thread, traverse }
+menhir --raw-depend --ocamldep 'ocamlfind ocamldep -modules' src/parser.mly > src/parser.mly.depends # cached
+# Target: src/parser.mly, tags: { package(ssl), package(unix), byte, compile, extension:ml, extension:mly, file:src/parser.ml, file:src/parser.mly, infer, menhir, ocaml, parser, quiet, thread, traverse }
+menhir --ocamlc 'ocamlfind ocamlc -thread -package ssl -package unix -I src -I lib' --infer src/parser.mly # cached
+# Target: src/parser.mli.depends, tags: { package(ssl), package(unix), extension:mli, file:src/parser.mli, ocaml, ocamldep, quiet, thread, traverse }
+ocamlfind ocamldep -package ssl -package unix -modules src/parser.mli > src/parser.mli.depends # cached
+# Target: src/parser.cmi, tags: { package(ssl), package(unix), byte, compile, extension:mli, file:src/parser.mli, interf, ocaml, quiet, thread, traverse }
+ocamlfind ocamlc -c -thread -package ssl -package unix -I src -I lib -o src/parser.cmi src/parser.mli # cached
+# Target: src/lexer.cmo, tags: { package(ssl), package(unix), byte, compile, extension:cmo, extension:ml, file:src/lexer.cmo, file:src/lexer.ml, implem, ocaml, quiet, thread, traverse }
+ocamlfind ocamlc -c -thread -package ssl -package unix -I src -I lib -o src/lexer.cmo src/lexer.ml # cached
+# Target: src/mem.ml.depends, tags: { package(ssl), package(unix), extension:ml, file:src/mem.ml, ocaml, ocamldep, quiet, thread, traverse }
+ocamlfind ocamldep -package ssl -package unix -modules src/mem.ml > src/mem.ml.depends # cached
+# Target: src/mem.cmo, tags: { package(ssl), package(unix), byte, compile, extension:cmo, extension:ml, file:src/mem.cmo, file:src/mem.ml, implem, ocaml, quiet, thread, traverse }
+ocamlfind ocamlc -c -thread -package ssl -package unix -I src -I lib -o src/mem.cmo src/mem.ml # cached
+# Target: src/eval.cmo, tags: { package(ssl), package(unix), byte, compile, extension:cmo, extension:ml, file:src/eval.cmo, file:src/eval.ml, implem, ocaml, quiet, thread, traverse }
+ocamlfind ocamlc -c -thread -package ssl -package unix -I src -I lib -o src/eval.cmo src/eval.ml # cached
+# Target: src/lispwebeval.cmo, tags: { package(ssl), package(unix), byte, compile, extension:cmo, extension:ml, file:src/lispwebeval.cmo, file:src/lispwebeval.ml, implem, ocaml, quiet, thread, traverse }
+ocamlfind ocamlc -c -thread -package ssl -package unix -I src -I lib -o src/lispwebeval.cmo src/lispwebeval.ml # cached
+# Target: src/parser.ml.depends, tags: { package(ssl), package(unix), extension:ml, file:src/parser.ml, ocaml, ocamldep, quiet, thread, traverse }
+ocamlfind ocamldep -package ssl -package unix -modules src/parser.ml > src/parser.ml.depends # cached
+# Target: src/parser.cmo, tags: { package(ssl), package(unix), byte, compile, extension:cmo, extension:ml, file:src/parser.cmo, file:src/parser.ml, implem, ocaml, quiet, thread, traverse }
+ocamlfind ocamlc -c -thread -package ssl -package unix -I src -I lib -o src/parser.cmo src/parser.ml # cached
+# Target: src/lispwebeval.byte, tags: { package(ssl), package(unix), byte, dont_link_with, extension:byte, file:src/lispwebeval.byte, link, ocaml, program, quiet, thread, traverse }
+ocamlfind ocamlc -linkpkg -thread -package ssl -package unix -I src src/expr.cmo src/value.cmo src/env.cmo src/pretty.cmo src/host.cmo src/parser.cmo src/lexer.cmo src/mem.cmo src/eval.cmo src/lispwebeval.cmo -o src/lispwebeval.byte # cached
+# Compilation successful.
