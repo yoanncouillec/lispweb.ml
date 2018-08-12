@@ -18,7 +18,7 @@
 (let* ((scheme "https")
        (host "raw.githubusercontent.com")
        (port 443)
-       (path "/yoanncouillec/lispweb.ml/master/lib/list.scm"))
+       (path "/yoanncouillec/lispweb.ml/master/test/test.scm"))
   (ssl-init)
   (let* ((he (gethostbyname host))
 	 (sockaddr (addr_inet (inet_addr_of_host_entry he) port))
@@ -40,7 +40,9 @@
       (let (content (bytes-create l))
 	(ssl-read ssl content 0 l)
 	(let (s (bytes-to-string content))
-	  s)))))
+	  (eval s)
+	  (foo)
+	  )))))
 
 
 

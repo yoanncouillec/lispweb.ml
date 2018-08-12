@@ -1,2 +1,0 @@
-src/parser.ml: Expr Lexing List String
-src/parser.mli: Expr Lexing
