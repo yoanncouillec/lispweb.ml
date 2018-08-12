@@ -239,11 +239,6 @@ module LUnix = struct
        VSockAddr(Unix.ADDR_INET(addr, port))
     | _ -> failwith "unix_addr_inet"
 	
-  let gethostbyname = function
-    | VList(VString(hostname)::[]) ->
-       VHostEntry(Unix.gethostbyname hostname)
-    | _ -> failwith "wrong arguments"
-	    
   let socket = function
     | VList(VString(domain)::VString(stype)::VInt(protocol)::[]) ->
        (VFile (Unix.socket (domain_of_string domain) (socket_type_of_string stype) protocol))
@@ -415,6 +410,11 @@ module Misc = struct
        VInetAddr(hostentry.h_addr_list.(0))
     | _ -> failwith "wrong arguments"
 
+  let gethostbyname = function
+    | VList(VString(hostname)::[]) ->
+       VHostEntry(Unix.gethostbyname hostname)
+    | _ -> failwith "wrong arguments"
+	    
 end
                 
 (* module Thread = struct
@@ -473,7 +473,6 @@ let functions =
     ("Unix.inet6_addr_loopback", LUnix.inet6_addr_loopback);
     ("Unix.addr_unix", LUnix.addr_unix);
     ("Unix.addr_inet", LUnix.addr_inet);
-    ("Unix.gethostbyname", LUnix.gethostbyname);
     ("Unix.socket", LUnix.socket);
     ("Unix.connect", LUnix.connect);
     ("Unix.bind", LUnix.bind);
@@ -508,6 +507,7 @@ let functions =
     ("Ssl.read", Ssl.read);
     ("Ssl.shutdown", Ssl.shutdown);
 
-    ("Misc.inet_addr_of_host_entry", Misc.inet_addr_of_host_entry)
+    ("Misc.inet_addr_of_host_entry", Misc.inet_addr_of_host_entry);
+    ("Misc.gethostbyname", Misc.gethostbyname)
 
   ]

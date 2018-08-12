@@ -29,6 +29,13 @@ let rec apply_bin_op op v1 v2 =
  *   match e with 
  *   | EInt n -> *)
 
+let rec get_function s fs = 
+  match fs with
+  | [] -> failwith ("Eval: EHostCall: function not found: "^s^" is not in ("
+                    ^ (List.fold_left (fun a -> function (b,_) -> a^" "^b) "" functions)^")")
+  | (s',f)::rest -> 
+     if s = s' then f else get_function s rest
+
 let rec eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
   (*(print_endline ("evaluate: "^(string_of_expr e)));*)
   match e with
@@ -201,8 +208,8 @@ let rec eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 		 | _ -> cont (VList (v1::[v2])) genv'' mem''))
   | EHostCall (s, e) ->
      eval e genv env denv mem
-	  (fun v genv' mem' ->
-	   cont ((List.assoc s functions) v) genv' mem')
+       (fun v genv' mem' ->
+	 cont ((get_function s functions) v) genv' mem')
   | ELoad e ->
     eval e genv env denv mem
     (fun v genv' mem' ->

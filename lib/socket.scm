@@ -24,7 +24,7 @@
 
 (define gethostbyname
   (lambda (name)
-    (hostcall Unix.gethostbyname name)))
+    (hostcall Misc.gethostbyname name)))
 
 (define inet_addr_of_host_entry
   (lambda (hostentry)
