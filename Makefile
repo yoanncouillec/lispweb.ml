@@ -13,6 +13,7 @@
 
 OCB_FLAGS   = -use-ocamlfind -use-menhir -I src -I lib -tag thread -r -package unix -package ssl# uses menhir
 OCB = ocamlbuild $(OCB_FLAGS)
+VERSION=1.0
 
 all: native byte # profile debug
 
@@ -38,6 +39,15 @@ debug: sanity
 sanity:
 	which menhir
 
+install:
+	cp lispwebeval.native /usr/local/bin/lispwebeval.$(VERSION).native
+	mkdir -p /usr/local/lib/lispweb
+	cp -R lib/* /usr/local/lib/lispweb
+	rm -f /usr/local/bin/lispwebeval.native
+	ln -s /usr/local/bin/lispwebeval.$(VERSION).native /usr/local/bin/lispwebeval.native
+	rm -f /usr/local/bin/lispwebeval
+	ln -s /usr/local/bin/lispwebeval.$(VERSION).native /usr/local/bin/lispwebeval
+
 test: native
 	./lispwebeval.native test/add.scm
 	./lispwebeval.native test/first.scm
@@ -61,3 +71,4 @@ test: native
 	./lispwebeval.native test/html.scm
 	./lispwebeval.native test/test.scm
 #	./lispwebeval.native test/http.scm
+	./lispwebeval.native test/load.scm
