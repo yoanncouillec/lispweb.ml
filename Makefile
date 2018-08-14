@@ -39,14 +39,28 @@ debug: sanity
 sanity:
 	which menhir
 
-install:
+install: install-bin install-lib
+
+install-bin:
 	cp lispwebeval.native /usr/local/bin/lispwebeval.$(VERSION).native
-	mkdir -p /usr/local/lib/lispweb
-	cp -R lib/* /usr/local/lib/lispweb
 	rm -f /usr/local/bin/lispwebeval.native
 	ln -s /usr/local/bin/lispwebeval.$(VERSION).native /usr/local/bin/lispwebeval.native
 	rm -f /usr/local/bin/lispwebeval
 	ln -s /usr/local/bin/lispwebeval.$(VERSION).native /usr/local/bin/lispwebeval
+
+uninstall-bin:
+	rm -f /usr/local/bin/lispwebeval
+	rm -f  /usr/local/bin/lispwebeval.native
+	rm -f /usr/local/bin/lispwebeval.$(VERSION).native
+
+install-lib:
+	mkdir -p /usr/local/lib/lispweb
+	cp -R lib/* /usr/local/lib/lispweb
+
+uninstall-lib:
+	rm -rf /usr/local/lib/lispweb
+
+uninstall: uninstall-bin uninstall-lib
 
 test: native
 	./lispwebeval.native test/add.scm
