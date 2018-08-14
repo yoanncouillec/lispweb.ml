@@ -50,7 +50,7 @@ expression:
 | LPAREN IF expression expression expression RPAREN { Expr.EIf ($3, $4, $5) }
 | LPAREN LAMBDA LPAREN RPAREN expressions RPAREN { Expr.EThunk (Expr.EBegin $5) }
 | LPAREN LAMBDA LPAREN idents RPAREN expressions RPAREN { List.fold_left (fun a b -> Expr.ELambda(b,a)) (Expr.ELambda (List.hd ((List.rev $4)), (Expr.EBegin $6))) (List.tl (List.rev $4)) }
-| LPAREN LET LPAREN ER_IDENT expression RPAREN expressions RPAREN { Expr.ELet ($4, $5, Expr.EList $7) }
+| LPAREN LET LPAREN ER_IDENT expression RPAREN expressions RPAREN { Expr.ELet ($4, $5, Expr.EBegin $7) }
 | LPAREN LETSTAR LPAREN bindings RPAREN expressions RPAREN { List.fold_left (fun a b -> Expr.ELet (fst b, snd b, a)) (Expr.ELet (fst (List.hd (List.rev $4)), snd (List.hd (List.rev $4)), Expr.EBegin $6)) (List.tl (List.rev $4)) }
 | LPAREN DEFINE ER_IDENT expression RPAREN { Expr.EDefine ($3, $4) }
 | LPAREN LETREC LPAREN ER_IDENT expression RPAREN expression RPAREN { Expr.ELet ($4, Expr.EInt 0, Expr.ELet ($4^"-rec-tmp", $5, Expr.EBegin([Expr.ESet($4,Expr.EVar ($4^"-rec-tmp"));$7]))) }
