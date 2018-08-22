@@ -40,7 +40,7 @@ let rec get_function s fs =
      if s = s' then f else get_function s rest
 
 let rec eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
-  (*(print_endline ("evaluate: "^(string_of_expr e)));*)
+  (print_endline ("evaluate: "^(string_of_expr e)));
   match e with
   | EInt n -> cont (VInt n) genv mem
   | EBinary (op, e1, e2) ->
@@ -230,7 +230,8 @@ let rec eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
      match v with
        | VString s ->
 	   eval (expr_of_string s) genv' env denv mem' cont
-       | _ -> failwith "eval ELoad: should be a string")
+       | _ -> failwith "eval EEval
+: should be a string")
   | ELoad e ->
     eval e genv env denv mem
     (fun v genv' mem' ->
