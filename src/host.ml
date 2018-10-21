@@ -118,7 +118,7 @@ module Pervasives = struct
   let input_line = function
     | VList(VChannelIn(ic)::[]) ->
        VString(Pervasives.input_line ic);
-    | _ -> failwith "input_line"
+    | _ as params -> failwith ("input_line expecting a VChannelIn. Got "^(string_of_value params))
 		    
   let close_in = function
     | VList(VChannelIn(c)::[]) ->

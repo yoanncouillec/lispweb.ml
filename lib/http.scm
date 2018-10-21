@@ -5,7 +5,7 @@
 
 (define http-parse-method
   (lambda (l)
-    (let* ((fst-line (map list->string (split ' ' (string->list (input-line l)))))
+    (let* ((fst-line (map list->string (split ' ' (string->list l))))
 	   (method (car fst-line))
 	   (path (car (cdr fst-line)))
 	   (pathqueryparams (split-into-2 '?' (string->list path)))
@@ -15,17 +15,29 @@
 	  (list method path protocol)
 	  (throw error 'wrong-http-first-line)))))
 
+(define http-parse-response-status
+  (lambda (l)
+    (let* ((fst-line (map list->string (split ' ' (string->list l))))
+	   (version (car fst-line))
+	   (code (car (cdr fst-line)))
+	   (phrase (car (cdr (cdr fst-line)))))
+      (list version code phrase))))
+
 (define http-parse-header
   (lambda (in)
     (map list->string (split ':' (string->list (input-line in))))))
 
 (define http-parse-headers
-  (lambda (in)
-    (let* ((l (input-line in)))
+  (lambda (read fd)
+    (let* ((l (read-line read fd)))
       (print-line l)
       (if (equal? "" l)
 	    l
-	      (cons (map list->string (split ':' (string->list l))) (http-parse-headers in))))))
+	    (let* ((header (split-into-2 ':' (string->list l)))
+		   (len (length header)))
+	      (cons (map list->string 
+			 header)
+		    (http-parse-headers read fd)))))))
 
 (define http-parse-headers-light
   (lambda (in)

@@ -33,9 +33,11 @@
       (ssl-write ssl b 0 (bytes-length b))
       (let* ((status (http-parse-response-status (read-line ssl-read ssl)))
 	     (headers (http-parse-headers ssl-read ssl))
-	     (l (string->int (list->string (trim-left ' ' (string->list (assoc headers "Content-Length")))))))
+	     (content-length-header (assoc headers "Content-Length"))
+	     (l (string->int (list->string (trim-left ' ' (string->list content-length-header))))))
 	(let (content (bytes-create l))
 	  (ssl-read ssl content 0 l)
 	  (let (s (bytes-to-string content))
+	    (print-line s)
 	    (eval s)))))))
   
