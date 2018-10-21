@@ -1,5 +1,5 @@
 (load "lib/stdout.scm")
 
 (define bar
-  (lambda ()
-    (print "bar")))
+  (lambda (x)
+    (print x)))

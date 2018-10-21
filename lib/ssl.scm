@@ -49,3 +49,19 @@
 (define ssl-shutdown
   (lambda (ssl)
     (hostcall Ssl.shutdown ssl)))
+
+(define ssl-make
+  (lambda (host port)
+    (ssl-init)
+    (let* ((he (gethostbyname host))
+	   (sockaddr (addr_inet (inet_addr_of_host_entry he) port))
+	   (ssl (ssl-open-connection (ssl-protocol-v23) sockaddr))
+	   (cert (ssl-get-certificate ssl))
+	   (cipher (ssl-get-cipher ssl))
+	   (issuer(ssl-get-issuer cert))
+	   (subject (ssl-get-subject cert))
+	   (cipher_name (ssl-get-cipher-name cipher))
+	   (cipher_version (ssl-get-cipher-version cipher))
+	   (cipher_description (ssl-get-cipher-description cipher)))
+      ssl)))
+

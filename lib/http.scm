@@ -30,7 +30,6 @@
 (define http-parse-headers
   (lambda (read fd)
     (let* ((l (read-line read fd)))
-      (print-line l)
       (if (equal? "" l)
 	    l
 	    (let* ((header (split-into-2 ':' (string->list l)))
@@ -42,7 +41,6 @@
 (define http-parse-headers-light
   (lambda (in)
     (let* ((l (input-line in)))
-      (print-line l)
       (if (equal? "" l)
 	    l
 	      (cons l (http-parse-headers-light in))))))

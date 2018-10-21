@@ -13,7 +13,7 @@ let rec string_of_channel channel accu =
   | End_of_file -> accu
 
 let expr_of_string s = 
-  print_endline ("expr_of_string "^s);
+  (*print_endline ("expr_of_string "^s);*)
   let lexbuf = Lexing.from_string s in
   Parser.start Lexer.token lexbuf
 
