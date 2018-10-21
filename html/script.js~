@@ -1,0 +1,2 @@
+var content = document.getElementById("content");
+var terminal = content.querySelector("code.terminal");
