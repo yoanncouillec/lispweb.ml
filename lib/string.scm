@@ -6,7 +6,7 @@
 
 (define make-empty-string
   (lambda (n)
-    (hostcall String.make n 'a')))
+    (hostcall String.make n 'x')))
 
 (define string->list
   (lambda (s)
@@ -43,3 +43,11 @@
 (define concat
   (lambda (sep l)
     (hostcall String.concat sep l)))
+
+(define string-concat 
+  (lambda (l)
+    (concat "" l)))
+
+(define string-concat-sep 
+  (lambda (sep l)
+    (concat sep l)))

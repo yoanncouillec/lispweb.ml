@@ -26,6 +26,17 @@
   (lambda (fd buff ofs len)
     (hostcall Unix.read fd buff ofs len)))
 
+(define read-file
+  (lambda (fd)
+    (let* ((b (bytes-create 1024))
+	   (n (read fd b 0 1024)))
+      (if (equal? 0 n)
+	  ""
+	  (string-concat 
+	   (list
+	    (bytes-to-string b)
+	    (read-file fd)))))))
+
 (define read-line 
   (lambda (read fd)
     (let* ((b (bytes-create 1))

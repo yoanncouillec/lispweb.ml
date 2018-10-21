@@ -18,6 +18,7 @@ let rec string_of_value = function
   | VShutdownCommand _ -> "#SHUTDOWNCOMMAND"
   | VChannelIn _ -> "#INCHANNEL"
   | VChannelOut _ -> "#OUTCHANNEL"
+  | VBytes _ -> "#BYTES"
 
 and string_of_expr = function
   | EInt n -> string_of_int n

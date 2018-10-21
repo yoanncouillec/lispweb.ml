@@ -6,7 +6,7 @@ module Pervasives = struct
   let string_of_int = function
     | VList(VInt(n)::[]) -> 
        VString(Pervasives.string_of_int n)
-    | _ -> failwith "error"
+    | _ -> failwith "string_of_int: error"
 
   let int_of_string = function
     | VList(VString(n)::[]) -> 
@@ -47,7 +47,7 @@ module Pervasives = struct
   let print_endline = function
     | VList(VString(s)::[]) ->
        VUnit (Pervasives.print_endline s)
-    | _ -> failwith "print_endline"
+    | _ as v -> failwith ("error print_endline: "^(string_of_value v))
 
   let print_newline = function
     | VList([]) ->
@@ -167,13 +167,13 @@ module LUnix = struct
   let read = function
     | VList(VFile(fd)::rest) ->
        (match rest with
-	| VString(buff)::rest ->
+	| VBytes(buff)::rest ->
 	   (match rest with
 	    | VInt(ofs)::rest->
 	       (match rest with 
 		| VInt(len)::rest -> 
 		   (match rest with 
-		    | [] -> VInt(Unix.read fd (Bytes.of_string buff) ofs len)
+		    | [] -> VInt(Unix.read fd buff ofs len)
 		    | _ -> failwith "unix_read: wrong number of arguments: 4 expected")
 		| _ -> failwith "unix_read: 4th argument must be an integer")
 	    | _ -> failwith ("unix_read: 3th argument must be an integer: "^(string_of_value (List.hd rest))))
@@ -282,6 +282,11 @@ module Bytes = struct
   let bytes_of_string = function
     |  VList(VString(s)::[]) ->
 	VBytes(Bytes.of_string s)
+    | _ -> failwith "wrong arguments"		    
+  
+  let bytes_to_string = function
+    |  VList(VBytes(b)::[]) ->
+	VString(Bytes.to_string b)
     | _ -> failwith "wrong arguments"		    
   
   let bytes_create = function
@@ -492,6 +497,7 @@ let functions =
     ("Unix.shutdown", LUnix.shutdown);
 
     ("Bytes.of_string", Bytes.bytes_of_string);
+    ("Bytes.to_string", Bytes.bytes_to_string);
     ("Bytes.create", Bytes.bytes_create);
     ("Bytes.to_string", Bytes.bytes_to_string);
     ("Bytes.length", Bytes.bytes_length);

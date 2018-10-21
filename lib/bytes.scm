@@ -2,6 +2,10 @@
   (lambda (s)
     (hostcall Bytes.of_string s)))
 
+(define bytes-to-string
+  (lambda (s)
+    (hostcall Bytes.to_string s)))
+
 (define bytes-create
   (lambda (n)
     (hostcall Bytes.create n)))
