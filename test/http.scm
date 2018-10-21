@@ -24,3 +24,14 @@
 
 (http-server 8081
  service)
+
+http://hostname:port/api/run?player=xxx&x=yyy...
+
+[Root("api")]
+public class{
+
+[HTTPGET("/run")
+public void Run(string player, int x, int y){
+
+}
+|

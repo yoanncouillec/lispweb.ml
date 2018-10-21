@@ -6,3 +6,7 @@
        (path "/yoanncouillec/lispweb.ml/master/test/test.scm"))
   (load-url scheme host port path)
   (foo))
+
+(load-url "https" "raw.githubusercontent.com" 443 "/yoanncouillec/lispweb.ml/master/test/test2.scm")
+
+(bar "yyy")
