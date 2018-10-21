@@ -151,7 +151,7 @@ let rec eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 	    (* 		      denv *)
 	    (* 		      (extend_mem addr v mem'') *)
 	    (* 		      cont))        *)
-	    | _ -> failwith "Not a closure"))
+	    | _ -> failwith ("Not a closure: "^(string_of_value v))))
   | EBegin [] -> cont (VUnit()) genv mem
   | EBegin (expression::[]) ->
      eval expression genv env denv mem cont

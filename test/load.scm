@@ -9,4 +9,4 @@
 
 (load-url
  "https" "raw.githubusercontent.com" 443 "/yoanncouillec/lispweb.ml/master/test/test2.scm")
-(bar "hello whole world")
+(remote-print "hello whole world")

@@ -1,5 +1,5 @@
 (load "lib/stdout.scm")
 
-(define bar
+(define remote-print
   (lambda (x)
     (print x)))
