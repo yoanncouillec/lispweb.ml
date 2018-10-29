@@ -45,8 +45,8 @@ module Pervasives = struct
     | _ -> failwith "print_string"
 
   let print_endline = function
-    | VList(VString(s)::[]) ->
-       VUnit (Pervasives.print_endline s)
+    | VList(v::[]) ->
+       VUnit (Pervasives.print_endline (string_of_value v))
     | _ as v -> failwith ("error print_endline: "^(string_of_value v))
 
   let print_newline = function
@@ -180,11 +180,16 @@ module LUnix = struct
 	| _ -> failwith "unix_read: 2nd argument must be a string")
     | _ -> failwith "unix_read: 1st argument must be a file descriptor"
 		    
-  let write = function
-    | VList(VFile(fd)::VString(buff)::VInt(ofs)::VInt(len)::[]) -> 
-       VInt(Unix.write fd (Bytes.of_string buff) ofs len)
-    | _ -> failwith "unix_write"
-		    
+  let write_bytes = function
+    | VList(VFile(fd)::VBytes(b)::VInt(ofs)::VInt(len)::[]) -> 
+       VInt(Unix.write fd b ofs len)
+    | _ -> failwith "unix_write_bytes"
+
+  let write_substring = function
+    | VList(VFile(fd)::VString(s)::VInt(ofs)::VInt(len)::[]) -> 
+       VInt(Unix.write_substring fd s ofs len)
+    | _ -> failwith "unix_write_substring"
+		    		    
   let in_channel_of_descr = function
     | VList(VFile(fd)::[]) ->
        VChannelIn(Unix.in_channel_of_descr fd);
@@ -294,6 +299,11 @@ module Bytes = struct
 	VBytes(Bytes.create n)
     | _ -> failwith "wrong arguments"		    
   
+  let bytes_make = function
+    |  VList(VInt(n)::VChar(c)::[]) ->
+	VBytes(Bytes.make n c)
+    | _ -> failwith "wrong arguments"		    
+  
   let bytes_to_string = function
     |  VList(VBytes(b)::[]) ->
 	VString(Bytes.to_string b)
@@ -321,7 +331,7 @@ module String = struct
   let length = function
     |  VList(VString(s)::[]) ->
 	VInt(String.length s)
-    | _ -> failwith "string_length: wrong arguments"
+    | _ as v -> failwith ("string_length: wrong arguments: "^(string_of_value v))
 		    
   let get = function
     |  VList(VString(s)::VInt(n)::[]) ->
@@ -477,7 +487,8 @@ let functions =
     ("Unix.openfile", LUnix.openfile);
     ("Unix.close", LUnix.close);
     ("Unix.read", LUnix.read);
-    ("Unix.write", LUnix.write);
+    ("Unix.write_bytes", LUnix.write_bytes);
+    ("Unix.write_substring", LUnix.write_substring);
     ("Unix.stdin", LUnix.stdin);
     ("Unix.stdout", LUnix.stdout);
     ("Unix.stderr", LUnix.stderr);
@@ -499,6 +510,7 @@ let functions =
     ("Bytes.of_string", Bytes.bytes_of_string);
     ("Bytes.to_string", Bytes.bytes_to_string);
     ("Bytes.create", Bytes.bytes_create);
+    ("Bytes.make", Bytes.bytes_make);
     ("Bytes.to_string", Bytes.bytes_to_string);
     ("Bytes.length", Bytes.bytes_length);
     ("Bytes.get", Bytes.bytes_get);

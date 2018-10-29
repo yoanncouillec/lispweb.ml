@@ -40,6 +40,10 @@
   (lambda (c)
     (hostcall Char.char_to_string c)))
 
+(define char->bytes
+  (lambda (c)
+    (bytes-make 1 c)))
+
 (define concat
   (lambda (sep l)
     (hostcall String.concat sep l)))
@@ -51,3 +55,4 @@
 (define string-concat-sep 
   (lambda (sep l)
     (concat sep l)))
+
