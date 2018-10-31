@@ -1,0 +1,17 @@
+- [] Json library
+- [] WebSocket Library
+- [] HTTPS library + Tests
+- [] WebSite library (based on JS generation)
+- [x] HTTP library
+- [] HTML library
+- [] Namespace
+  - versioning
+  - accept functions like object. Ex:
+    - string.length(...)
+    - http.serve(...)
+    - core.math.abs(...)
+- [] public/private functions
+- [] R7RS
+- [] compile to C
+- [] compile to bytecode
+- [] use quote/quasiquote/antiquote for multi-tiers
