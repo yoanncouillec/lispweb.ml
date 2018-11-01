@@ -1,6 +1,10 @@
 command_history = [""]
 history_position = 0
 
+function init3(){
+    
+}
+
 function Flex(){
 
     Node.prototype.add = Node.prototype.appendChild;

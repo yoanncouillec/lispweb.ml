@@ -13,6 +13,8 @@ type value =
   | VFile of Unix.file_descr
   | VInetAddr of Unix.inet_addr
   | VSockAddr of Unix.sockaddr
+  | VSockDomain of Unix.socket_domain
+  | VSockBoolOption of Unix.socket_bool_option
   | VShutdownCommand of Unix.shutdown_command
   | VChannelIn of in_channel
   | VChannelOut of out_channel
@@ -21,6 +23,8 @@ type value =
   | VSslSocket of Ssl.socket
   | VSslCertificate of Ssl.certificate
   | VSslCipher of Ssl.cipher
+  | VSslContextType of Ssl.context_type
+  | VSslContext of Ssl.context
   | VBytes of Bytes.t
   | VHostEntry of Unix.host_entry	
 	

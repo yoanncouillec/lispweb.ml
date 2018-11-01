@@ -6,6 +6,10 @@
   (lambda ()
     (hostcall Ssl.protocol_v23)))
 
+(define ssl-context-type-server
+  (lambda ()
+    (hostcall Ssl.context_type_server)))
+
 (define ssl-open-connection
   (lambda (v s)
     (hostcall Ssl.open_connection v s)))
@@ -50,7 +54,27 @@
   (lambda (ssl)
     (hostcall Ssl.shutdown ssl)))
 
-(define ssl-make
+(define ssl-create-context
+  (lambda (protocol context-type)
+    (hostcall Ssl.create_context protocol context-type)))
+
+(define ssl-use-certificate
+  (lambda (context cert privkey)
+    (hostcall Ssl.use_certificate context cert privkey)))
+
+(define ssl-set-password
+  (lambda (context pwd)
+    (hostcall Ssl.set_password context pwd)))
+
+(define ssl-embed-socket
+  (lambda (context s ctx)
+    (hostcall Ssl.embed_socket s ctx)))
+
+(define ssl-accept
+  (lambda (sock)
+    (hostcall Ssl.accept sock)))
+
+(define ssl-make-client
   (lambda (host port)
     (ssl-init)
     (let* ((he (gethostbyname host))
@@ -65,3 +89,28 @@
 	   (cipher_description (ssl-get-cipher-description cipher)))
       ssl)))
 
+(define ssl-make-server
+  (lambda (port password certfile privkeyfile nbconn)
+    (ssl-init)
+    (print "111")
+    (let* ((sockaddr (addr_inet (inet_addr_any) port))
+	   (domain (domain_of_sockaddr sockaddr))
+	   (sock (socket (string-of-domain domain) "SOCK_STREAM" 0))
+	   (ctx (ssl-create-context (ssl-protocol-v23) (ssl-context-type-server))))
+      (print "222")
+      (ssl-set-password ctx password)
+      (print "333")
+      (ssl-use-certificate ctx certfile privkeyfile)
+      (print "444")
+      (setsockopt sock "SO_REUSEADDR" #t)
+      (print "444")
+      (bind sock sockaddr)
+      (print "555")
+      (listen sock nbconn)
+      (print "666")
+      (let* ((p (accept sock))
+	     (s (car p))
+	     (caller (car (cdr p)))
+	     (sslss (ssl-embed-socket s ctx)))
+	(ssl-accept ssl-s)
+	ssl-s))))

@@ -28,7 +28,7 @@
 (define wget
   (lambda (scheme host port path)
     (if (equal? scheme "https")
-	(let* ((fd (ssl-make host port))
+	(let* ((fd (ssl-make-client host port))
 	       (read ssl-read)
 	       (write ssl-write))
 	  (url-get-content fd read write host path))
