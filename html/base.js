@@ -1,54 +1,6 @@
-function addLine(element, color, height = undefined){
-    var line = document.createElement("div");
-    line.style.display = "flex";
-    line.style.flexDirection = "row";
-    line.style.backgroundColor = color;
-    if (height == undefined){
-	line.style.flexGrow = 1
-    } else {
-	line.style.height = height
-    }
-    element.appendChild(line);
-    return line;
-}
-
-function addColumn(element, color, width = undefined){
-    var col = document.createElement("div");
-    col.style.backgroundColor = color;
-    col.style.display = "flex";
-    col.style.flexDirection = "column";
-    if (width == undefined){
-	col.style.flexGrow = 1
-    } else {
-	col.style.width = width;
-    }
-    element.appendChild(col);
-    return col;
-}
-
-function makeFlexContainer(element, orientation = "line", size = undefined){
-    element.style.border = "inherit";
-    element.style.display = "flex";
-    element.style.flexDirection = orientation;
-    if (orientation == "line"){
-	if (size == undefined){
-	    element.style.flexGrow = 1
-	} else {
-	    element.style.height = size;
-	}
-    } else if (orientation == "column"){
-	if (size == undefined){
-	    element.style.flexGrow = 1
-	} else {
-	    element.style.width = size;
-	}
-    } else {
-	throw "unknown orientation " + orientation;
-    }
-    return element;
-}
-
 function Flex(){
+
+    Node.prototype.add = Node.prototype.appendChild;
 
     h = document.querySelector("html");    
     h.style.display = "flex";
@@ -92,7 +44,7 @@ function Flex(){
 	return el;
     }
 
-    this.column = function(){
+    this.column = function(justify="center"){
 	el = document.createElement("div");
 	el.style.border = "inherit";
 	el.style.margin = "inherit";
@@ -101,12 +53,12 @@ function Flex(){
 	el.style.display = "flex";
 	el.style.flexDirection = "column";
 	//el.style.width = "100%";
-	el.style.justifyContent = "center";
+	el.style.justifyContent = justify;
 	//el.style.flexGrow = 1;
 	return el;
     }
 
-    this.line = function(){
+    this.line = function(justify="center"){
 	el = document.createElement("div");
 	el.style.border = "inherit";
 	el.style.margin = "inherit";
@@ -116,10 +68,42 @@ function Flex(){
 	el.style.flexDirection = "line";
 	//el.style.height = "100%";
 	//el.style.flexGrow = 1;
-	el.style.justifyContent = "center";
+	el.style.justifyContent = justify;
 	return el;
     }
 
+    this.input = function(){
+	el = document.createElement("input");
+	el.style.border = "inherit";
+	el.style.margin = "inherit";
+	el.style.padding = "inherit";
+	el.style.color = "inherit";
+	el.style.backgroundColor = "inherit";
+	el.style.fontFamily = "inherit";
+	el.style.fontSize = "inherit";
+	el.style.letterSpacing = "inherit";
+	return el;
+    }
+
+}
+
+function createCORSRequest(method, url) {
+    var xhr = new XMLHttpRequest();
+    if ("withCredentials" in xhr) {
+	// XHR for Chrome/Firefox/Opera/Safari.
+	xhr.open(method, url, true);
+    } else if (typeof XDomainRequest != "undefined") {
+	// XDomainRequest for IE.
+	xhr = new XDomainRequest();
+	xhr.open(method, url);
+    } else {
+	// CORS not supported.
+	xhr = null;
+    }
+    return xhr;
+}
+
+function makeCorsRequest(method, url) {
 }
 
 function init2(){
@@ -128,7 +112,7 @@ function init2(){
     body = flex.body();
 
     header = flex.line();
-    header.style.height = "50px";
+    //header.style.height = "50px";
     body.appendChild(header);
 
     title = flex.column();
@@ -147,11 +131,48 @@ function init2(){
 
     middle = flex.column();
     middle.style.width = "100%";
+    middle.style.backgroundColor = "black";
+    middle.style.color = "white";
+    middle.style.justifyContent = "left";
     content.appendChild(middle);
 
-    //par0 = flex.column();
-    //par0.appendChild(document.createTextNode("text text text text text text text"));
-    //middle.appendChild(par0);
+    prompt_entry = flex.column();
+    prompt_entry.style.fontFamily = "'Courier New', Courier, monospace";
+    prompt_entry.style.fontSize = "16px";
+    //prompt_entry.style.letterSpacing = "1px";
+    middle.appendChild(prompt_entry);
+    prompt_input = flex.line("left");    
+    prompt_entry.add(prompt_input);
+    prompt_welcome = flex.column();
+    prompt_welcome.add(document.createTextNode(">"));
+    prompt_input.add(prompt_welcome);
+    prompt_user_input = flex.input();
+    prompt_user_input.style.width = "100%";
+    prompt_user_input.addEventListener("keypress", function(event){
+	if (event.code == "Enter"){
+	    var url = 'http://localhost:8765';
+	    var method = "POST";
+	    var xhr = new XMLHttpRequest();
+	    xhr.open(method, url);
+	    xhr.onload = function() {
+		var text = xhr.responseText;
+		console.log(text);
+	    };
+	    
+	    xhr.onerror = function() {
+		alert('Woops, there was an error making the request.');
+	    };
+	    
+	    xhr.setRequestHeader("Content-Type", "application/json");
+	    //xhr.setRequestHeader("Origin", "http://localhost:8765");
+	    command = {"command":this.value}
+	    xhr.send(JSON.stringify(command));
+	}
+    });
+    prompt_input.add(prompt_user_input);
+    prompt_response = flex.line();
+    prompt_entry.add(prompt_response);
+
 
     right = flex.column();
     right.style.width = "20%";
@@ -160,198 +181,6 @@ function init2(){
     footer = flex.line();
     footer.style.height = "10px";
     body.appendChild(footer);
-}
-
-function init() {
-
-    // BODY
-    var body = document.querySelector("body");    
-    body.style.margin = "10px";
-    //body.style.margin = 0;
-    body.style.padding = "10px";
-    //body.style.padding = 0;
-    //body = makeFlexContainer(body, "column");
-    body.style.border = "inherit";
-    body.style.display = "flex";
-    body.style.flexDirection = "column";
-    body.style.backgroundColor = "white";
-    body.style.border = "dashed red 3px";
-    body.style.fontFamily = "'Lato', sans-serif";
-    body.style.fontSize = "16px";
-    body.style.fontWeight = "300";
-
-    // HEADER
-    header = document.createElement("div");
-    //header = makeFlexContainer(header, "line", "20%");
-    //header.style.minHeight = "60px";
-    //header.style.maxHeight = "100px";
-    header.style.fontSize = "54px";
-    //header.style.alignItems = "center";
-    header.style.justifyContent = "center";
-    header.style.border = "inherit";
-    header.style.margin = "inherit";
-    header.style.padding = "inherit";
-    header.style.display = "flex";
-    header.style.flexDirection = "line";
-    header.style.flexGrow = 1
-    header.style.lineHeight = "58px";
-    //header.style.height = "30px";
-    body.appendChild(header);
-
-    // TITLE
-    header_title = document.createElement("div");
-    header_title.style.border = "inherit";
-    header_title.style.margin = "inherit";
-    header_title.style.padding = "inherit";
-    header_title.appendChild(document.createTextNode("Title"));
-    header_title.style.fontSize = "54px";
-    header.appendChild(header_title);
-
-    // CONTENT
-    content = document.createElement("div");
-    //content = makeFlexContainer(content, "line", "20%");
-    //content.style.alignItems = "center";
-    content.style.justifyContent = "center";
-    content.style.border = "inherit";
-    content.style.margin = "inherit";
-    content.style.padding = "inherit";
-    content.style.display = "flex";
-    content.style.flexDirection = "line";
-    content.style.flexGrow = 1;
-    body.appendChild(content);
-
-    // MENU
-    x0_container = document.createElement("div");
-    x0_container.style.display = "flex";
-    x0_container.style.flexDirection = "column";
-    x0_container.style.justifyContent = "center";
-    x0_container.style.width = "50%";
-    x0_container.style.border = "inherit";
-    x0_container.style.margin = "inherit";
-    x0_container.style.padding = "inherit";
-
-    x0 = document.createElement("div");
-    //x0 = makeFlexContainer(x0, "line", "20%");
-    //x0.style.alignItems = "center";
-    //x0.style.justifyContent = "center";
-    x0.style.border = "inherit";
-    x0.style.margin = "inherit";
-    x0.style.padding = "inherit";
-    //x0.style.display = "inline-block";
-    //x0.style.flexDirection = "line";
-    //x0.style.flexGrow = 1;
-    //x0.style.flexShrink = 1;
-    x0.style.lineHeight = "20px";
-    x0.style.textAlign = "center";
-
-    x0_container.appendChild(x0);
-
-    content.appendChild(x0_container);
-
-    x0.appendChild(document.createTextNode("Tiled say decay spoil now walls meant house. My mr interest thoughts screened of outweigh removing. Evening society musical besides inhabit ye my. Lose hill well up will he over on. Increasing sufficient everything men him admiration unpleasing sex. Around really his use uneasy longer him man. His our pulled nature elinor talked now for excuse result. Admitted add peculiar get joy doubtful."));
-
-    // MIDDLE
-    x1 = document.createElement("div");
-    //x1 = makeFlexContainer(x1, "line", "21%");
-    x1.style.alignItems = "center";
-    x1.style.justifyContent = "center";
-    x1.style.border = "inherit";
-    x1.style.margin = "inherit";
-    x1.style.padding = "inherit";
-    //x1.style.display = "inline-block";
-    x1.style.flexDirection = "line";
-    //x1.style.flexGrow = 1;
-    //x1.style.flexShrink = 1;
-    x1.style.width = "100%";
-    content.appendChild(x1);
-
-    // RIGHT
-    x2 = document.createElement("div");
-    //x2 = makeFlexContainer(x2, "line", "21%");
-    x2.style.alignItems = "center";
-    x2.style.justifyContent = "center";
-    x2.style.border = "inherit";
-    x2.style.margin = "inherit";
-    x2.style.padding = "inherit";
-    //x2.style.display = "inline-block";
-    x2.style.flexDirection = "line";
-    //x2.style.flexGrow = 1;
-    //x2.style.flexShrink = 1;
-    x2.style.width = "20%";
-    content.appendChild(x2);
-
-    // FOOTER
-    footer = document.createElement("div");
-    //footer = makeFlexContainer(footer, "line", "10%");
-    //footer.style.minHeight = "30px";
-    //footer.style.maxHeight = "50px";
-    footer.style.fontSize = "24px";
-    footer.style.alignItems = "center";
-    footer.style.justifyContent = "center";
-    footer.style.border = "inherit";
-    footer.style.margin = "inherit";
-    footer.style.padding = "inherit";
-    footer.style.display = "flex";
-    footer.style.flexDirection = "line";
-    footer.style.flexGrow = 1
-    //footer.style.height = "30px";
-    body.appendChild(footer);
-
-    // // P0
-    // p0 = document.createElement("div");
-    // //p0.appendChild(document.createTextNode("text text texttext text text"));
-    // p0.style.border = "inherit";
-    // p0.style.margin = "inherit";
-    // p0.style.padding = "inherit";
-    // p0.style.flexGrow = 1
-    // //p0.style.display = "flex";
-    // content.appendChild(p0);
-
-    // // P1
-    // p1 = document.createElement("div");
-    // //p1.appendChild(document.createTextNode("text text text"));
-    // p1.style.border = "inherit";
-    // p1.style.margin = "inherit";
-    // p1.style.padding = "inherit";
-    // p1.style.flexGrow = 1
-    // //p1.style.display = "flex";
-    // content.appendChild(p1);
-
-
-    // title = document.createElement("div");
-    // title.appendChild(document.createTextNode("Header"));
-
-    // header.appendChild(title);
-    
-    // content = document.createElement("div");
-    // content.style.color = "white";
-    // content = makeFlexContainer(content, "line");
-    // content.style.flexDirection = "line";
-
-    // body.appendChild(content);
-
-    // footer = document.createElement("div");
-    // footer = makeFlexContainer(footer, "line", "10%");
-    // footer.style.minHeight = "30px";
-    // footer.style.maxHeight = "50px";
-    // footer.style.backgroundColor = "white";
-    // footer.style.alignItems = "center";
-    // footer.style.justifyContent = "center";
-
-    // body.appendChild(footer);
-
-    // footer_text = document.createElement("div");
-    // footer_text.appendChild(document.createTextNode("Footer"));
-    // footer_text.style.fontSize = "20px";
-
-    // footer.appendChild(footer_text);
-
-    // p2 = document.createElement("div");
-    // p2.appendChild(document.createTextNode("text text text"));
-    // p2.style.display = "flex";
-    // content.appendChild(p2);
-
-
 }
 
 window.onload = function () {
