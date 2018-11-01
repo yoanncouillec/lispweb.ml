@@ -1,3 +1,6 @@
+command_history = [""]
+history_position = 0
+
 function Flex(){
 
     Node.prototype.add = Node.prototype.appendChild;
@@ -61,8 +64,8 @@ function Flex(){
     this.line = function(justify="center"){
 	el = document.createElement("div");
 	el.style.border = "inherit";
-	el.style.margin = "inherit";
-	el.style.padding = "inherit";
+	//el.style.margin = "inherit";
+	//el.style.padding = "inherit";
 	//el.style.boxSizing = "inherit";
 	el.style.display = "flex";
 	el.style.flexDirection = "line";
@@ -75,8 +78,8 @@ function Flex(){
     this.input = function(){
 	el = document.createElement("input");
 	el.style.border = "inherit";
-	el.style.margin = "inherit";
-	el.style.padding = "inherit";
+	//el.style.margin = "inherit";
+	//el.style.padding = "inherit";
 	el.style.color = "inherit";
 	el.style.backgroundColor = "inherit";
 	el.style.fontFamily = "inherit";
@@ -106,9 +109,75 @@ function createCORSRequest(method, url) {
 function makeCorsRequest(method, url) {
 }
 
+function createPromptEntry(middle){
+    prompt_entry = flex.column();
+    prompt_entry.style.padding = "5px";
+    prompt_entry.style.fontFamily = "'Courier New', Courier, monospace";
+    prompt_entry.style.fontSize = "16px";
+    //prompt_entry.style.letterSpacing = "1px";
+    prompt_input = flex.line("left");
+    prompt_entry.add(prompt_input);
+    prompt_welcome = flex.column();
+    prompt_welcome.style.paddingRight = "5px";
+    prompt_welcome.add(document.createTextNode(">"));
+    prompt_input.add(prompt_welcome);
+    prompt_response = flex.line("left");
+    prompt_entry.add(prompt_response);
+    prompt_user_input = flex.input();
+    //prompt_user_input.setAttribute("tabindex","1");
+    //prompt_user_input.focus();
+    prompt_user_input.style.width = "100%";
+    prompt_user_input.addEventListener("keydown", function(event){
+	//if (event.defaultPrevented) {
+	//    return; // Ne devrait rien faire si l'événement de la touche était déjà consommé.
+	//}
+	console.log(event.key);
+	if (event.key == "Enter"){
+	    var url = 'http://localhost:8765';
+	    var method = "POST";
+	    var xhr = new XMLHttpRequest();
+	    xhr.open(method, url);
+	    xhr.onload = function() {
+		var text = xhr.responseText;
+		prompt_response.add(document.createTextNode(text));
+		prompt_user_input.readOnly = true;
+		//prompt_user_input.setAttribute("tabindex","-1");
+		prompt_entry = createPromptEntry(middle);
+		middle.appendChild(prompt_entry);
+		//prompt_user_input.blur();
+	    };
+	    
+	    xhr.onerror = function() {
+		alert('Woops, there was an error making the request.');
+	    };
+	    
+	    xhr.setRequestHeader("Content-Type", "application/json");
+	    command = {command:this.value}
+	    //command_history.push("");
+	    //history_position = command_history.length - 1;
+	    console.log(command);
+	    scommand = JSON.stringify(command);
+	    console.log(scommand);
+	    xhr.send(scommand);
+	} else if (event.key == "ArrowUp") {
+	    console.log("ArrowUp");
+	    if (history_position >= 0) {
+		old_command = command_history[history_position];
+		history_position = history_position - 1;
+		prompt_user_input.value = old_command;
+	    }
+	} else {
+	    
+	}
+	//event.preventDefault();
+    }, true);
+    prompt_input.add(prompt_user_input);
+    return prompt_entry;
+}
+
 function init2(){
     flex = new Flex();
-    flex.debug(true);
+    flex.debug(false);
     body = flex.body();
 
     header = flex.line();
@@ -117,7 +186,7 @@ function init2(){
 
     title = flex.column();
     title.style.fontSize = "54px";
-    title.appendChild(document.createTextNode("Title"));
+    title.appendChild(document.createTextNode("KV Console"));
     header.appendChild(title);
 
     content = flex.line();
@@ -134,45 +203,12 @@ function init2(){
     middle.style.backgroundColor = "black";
     middle.style.color = "white";
     middle.style.justifyContent = "left";
+    middle.style.overflowY = "scroll";
+    //middle.style.height = "100%";
     content.appendChild(middle);
 
-    prompt_entry = flex.column();
-    prompt_entry.style.fontFamily = "'Courier New', Courier, monospace";
-    prompt_entry.style.fontSize = "16px";
-    //prompt_entry.style.letterSpacing = "1px";
+    prompt_entry = createPromptEntry(middle);
     middle.appendChild(prompt_entry);
-    prompt_input = flex.line("left");    
-    prompt_entry.add(prompt_input);
-    prompt_welcome = flex.column();
-    prompt_welcome.add(document.createTextNode(">"));
-    prompt_input.add(prompt_welcome);
-    prompt_user_input = flex.input();
-    prompt_user_input.style.width = "100%";
-    prompt_user_input.addEventListener("keypress", function(event){
-	if (event.code == "Enter"){
-	    var url = 'http://localhost:8765';
-	    var method = "POST";
-	    var xhr = new XMLHttpRequest();
-	    xhr.open(method, url);
-	    xhr.onload = function() {
-		var text = xhr.responseText;
-		console.log(text);
-	    };
-	    
-	    xhr.onerror = function() {
-		alert('Woops, there was an error making the request.');
-	    };
-	    
-	    xhr.setRequestHeader("Content-Type", "application/json");
-	    //xhr.setRequestHeader("Origin", "http://localhost:8765");
-	    command = {"command":this.value}
-	    xhr.send(JSON.stringify(command));
-	}
-    });
-    prompt_input.add(prompt_user_input);
-    prompt_response = flex.line();
-    prompt_entry.add(prompt_response);
-
 
     right = flex.column();
     right.style.width = "20%";

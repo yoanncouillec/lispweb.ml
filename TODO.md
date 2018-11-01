@@ -16,3 +16,6 @@
 - [ ] compile to bytecode
 - [ ] use quote/quasiquote/antiquote for multi-tiers
 - [ ] write example of client that query kv.ml
+- [ ] HTML
+  - [ ] command history
+  - [ ] prompt scroll
