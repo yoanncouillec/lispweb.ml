@@ -1,18 +1,27 @@
 function load(){
-    TweenLite.set("#circle", {transformOrigin:"50% 50%"})
-    
     Draggable.create("#box", {
 	type:"x,y",
-	bounds:"#container",
+	bounds:"#svg",
 	overshootTolerance:0,
 	throwProps:true
     })
-    
-    Draggable.create("#circle", {
-	type:"rotation",
+
+    var svg = document.querySelector("svg")
+
+    var ns = 'http://www.w3.org/2000/svg'
+    var rect = document.createElementNS(ns, 'rect')
+    rect.setAttributeNS(null, 'width', 100)
+    rect.setAttributeNS(null, 'height', 100)
+    rect.setAttributeNS(null, 'fill', 'red')
+    rect.id = "rect"
+    svg.appendChild(rect)
+
+    Draggable.create("#rect", {
+	type:"x,y",
+	bounds:"#svg",
+	overshootTolerance:0,
 	throwProps:true
     })
-
 
     //body = document.querySelector("body");    
 
