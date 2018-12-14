@@ -1,0 +1,53 @@
+body {
+  background-color:black;
+  font-family: Signika Negative, Asap, sans-serif;
+}
+
+#container {
+  height:801px; 
+  overflow:visible; 
+  padding:0; 
+  position:relative;
+}
+
+.box {
+    background-color: #91e600;
+    text-align: center;
+    font-family: Asap, Avenir, Arial, sans-serif;
+    width: 196px;
+    height: 100px;
+    line-height: 100px;
+    color: black;
+    position: absolute;
+    top:0;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+}
+
+.controls {
+    background-color: #222;
+    border: 1px solid #555;
+    color: #bbb;
+    font-size: 18px;
+  margin: 20px 0;
+}
+.controls ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.controls li {
+    display: inline-block;
+    padding: 8px 0 8px 10px;
+    margin:0;
+}
+.controls input {
+  vertical-align:middle;
+  cursor: pointer;
+}
+.controls .controlsTitle {
+  border-right:1px solid #555; 
+  border-bottom:none; 
+  padding-right:10px;
+}
