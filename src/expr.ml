@@ -1,6 +1,7 @@
 type operator = OPlus | OMinus | OMult
 
 type expr =
+  | EVersion
   | EInt of int
   | EBinary of operator * expr * expr
   | EBool of bool
