@@ -38,7 +38,8 @@ let rec string_of_value = function
   | VUnit _ -> "()"
   | VInt n -> string_of_int n
   | VBool b -> string_of_bool b
-  | VString s -> "\"" ^ s ^ "\""
+  (*| VString s -> "\"" ^ s ^ "\""*)
+  | VString s -> s
   | VChar c -> "'" ^ (String.make 1 c) ^ "'"
   | VClosure (_, e)-> "#CLOSURE"^(string_of_expr e)^")"
   | VCont _ -> "#CONT"
