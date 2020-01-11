@@ -3,7 +3,6 @@ open Value
 open Mem
 open Env
 open Host
-open Pretty
 
 let rec string_of_channel channel accu = 
   try
@@ -26,7 +25,8 @@ let rec apply_bin_op op v1 v2 =
      (match op with
       | OPlus -> VInt (n1 + n2)
       | OMinus -> VInt (n1 - n2)
-      | OMult -> VInt (n1 * n2))
+      | OMult -> VInt (n1 * n2)
+      | ODiv -> VInt (n1 / n2))
   | _ -> failwith "Should be integers"
 
 (* let rec eval_quasi_quote e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =

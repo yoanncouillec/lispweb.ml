@@ -1,5 +1,4 @@
 open Value
-open Pretty
 
 module Pervasives = struct
 

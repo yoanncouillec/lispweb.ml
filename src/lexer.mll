@@ -37,6 +37,7 @@ rule token = parse
   | "+" { PLUS }
   | "-" { MINUS }
   | "*" { MULT }
+  | "/" { DIV }	
   | ''' ['A'-'Z''a'-'z''0'-'9'' '':''?'] ''' { ER_CHAR (Lexing.lexeme lexbuf) }
   | ''' '\\'['A'-'Z''a'-'z''0'-'9'' '] ''' { ER_CHAR_ESC (Lexing.lexeme lexbuf) }
   | '\"' (('\\' _) | [^'\"'])* '\"' { ER_STRING (Lexing.lexeme lexbuf) }

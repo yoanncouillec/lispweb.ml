@@ -5,7 +5,7 @@
 %token TRUE FALSE IF EOF BEGIN EQUAL SET NOT AND
 %token CAR CDR CONS LIST
 %token CATCH THROW CALLCC BLOCK RETURNFROM HOSTCALL
-%token PLUS MINUS MULT
+%token PLUS MINUS MULT DIV
 %token CQUOTE CQUASIQUOTE CUNQUOTE
 %start start
 %type <Expr.expr> start
@@ -37,6 +37,7 @@ expression:
 | LPAREN PLUS expression expression RPAREN { Expr.EBinary(Expr.OPlus,$3,$4) }
 | LPAREN MINUS expression expression RPAREN { Expr.EBinary(Expr.OMinus,$3,$4) }
 | LPAREN MULT expression expression RPAREN { Expr.EBinary(Expr.OMult,$3,$4) }
+| LPAREN DIV expression expression RPAREN { Expr.EBinary(Expr.ODiv,$3,$4) }
 | LPAREN CATCH ER_IDENT expression RPAREN { Expr.ECatch($3,$4) }
 | LPAREN THROW ER_IDENT expression RPAREN { Expr.EThrow($3,$4) }
 | LPAREN BLOCK ER_IDENT expression RPAREN { Expr.EBlock($3,$4) }
