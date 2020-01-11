@@ -2,6 +2,6 @@
 
 (define foo
   (lambda (x)
-    (print "Hey ")
-    (print x)
-    (print "! I am a code downloaded on github :-)")))
+    (print-string "Hey ")
+    (print-string x)
+    (print-endline "! I am a code downloaded on github :-)")))
