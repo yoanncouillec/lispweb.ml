@@ -1,7 +1,7 @@
 (load "lib/stdout.scm")
 
-(define foo
+(define say-hey
   (lambda (x)
     (print-string "Hey ")
     (print-string x)
-    (print "! I am a code downloaded on github :-)")))
+    (print-line "! I am a code downloaded on github :-)")))
