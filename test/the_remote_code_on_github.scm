@@ -4,4 +4,4 @@
   (lambda (x)
     (print-string "Hey ")
     (print-string x)
-    (print-endline "! I am a code downloaded on github :-)")))
+    (print "! I am a code downloaded on github :-)")))

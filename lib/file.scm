@@ -42,7 +42,6 @@
     (let* ((b (bytes-create 1))
 	   (n (read fd b 0 1))
 	   (c (bytes-get b 0)))
-      (print c)
       (if (equal? '\r' c)
 	  (let* ((n2 (read fd b 0 1))
 		 (c2 (bytes-get b 0)))
