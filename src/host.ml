@@ -7,6 +7,11 @@ module Pervasives = struct
        VString(Pervasives.string_of_int n)
     | _ -> failwith "string_of_int: error"
 
+  let string_of_val = function
+    | VList(v::[]) -> 
+       VString(Value.string_of_value v)
+    | _ -> failwith "string_of_val: error"
+
   let int_of_string = function
     | VList(VString(n)::[]) -> 
        VInt(Pervasives.int_of_string n)
@@ -516,6 +521,7 @@ end
 let functions = 
   [
     ("Pervasives.string_of_int", Pervasives.string_of_int);
+    ("Pervasives.string_of_val", Pervasives.string_of_val);
     ("Pervasives.int_of_string", Pervasives.int_of_string);
 
     ("Pervasives.stdin", Pervasives.stdin);

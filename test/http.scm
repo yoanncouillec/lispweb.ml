@@ -19,9 +19,9 @@
 		   (list
 		    (<input> (list (list "type" "text") (list "name" "expr")) (list))))))))
 	(if (equal? path "/eval")
-	    (let* ((expr "\"hello\"")
-		   (xxx (eval expr)))
-	      (http-send-response fd "200" "text/html" (html->string (<h1> (list) (list (list "string" expr))))))
+	    (let* ((expr "(+1 2)")
+		   (v (eval expr)))
+	      (http-send-response fd "200" "text/html" (html->string (<h1> (list) (list (list "string" (val->string v)))))))
 	    (http-send-response fd "404" "text/html" (html->string (<h1> (list) (list (list "string" path)))))))))
 
 

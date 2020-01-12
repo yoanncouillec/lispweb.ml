@@ -24,6 +24,11 @@
   (lambda (n)
     (hostcall Pervasives.string_of_int n)))
 
+(define val->string
+  (lambda (v)
+    (hostcall Pervasives.string_of_val v)))
+
 (define string->int
   (lambda (s)
     (hostcall Pervasives.int_of_string s)))
+
