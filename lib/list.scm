@@ -26,12 +26,26 @@
   (lambda (c l)
     (if (pair? l)
 	(if (equal? c (car l))
-	    (list (list) (cdr l))
+	    (begin
+	      (list (list) (cdr l))
+	      )
 	    (let* ((res (split-into-2 c (cdr l)))
 		   (fst (car res))
 		   (snd (car (cdr res))))
 	      (list (cons (car l) fst) snd)))
 	(list (list) (list)))))
+
+(define is-begin-of
+  (lambda (l0 l)
+    (if (pair? l)
+	(if (pair? l0)
+	    (if (equal? (car l) (car l0))
+		(is-begin-of (cdr l0) (cdr l))
+		#f)
+	    #t)
+	(if (pair? l0)
+	    #f
+	    #t))))
 
 (define split
   (lambda (c l)
@@ -75,7 +89,12 @@
 
 (define assoc
   (lambda (l k0)
+    (print "ASSOC")
+    (print (val->string l))
+    (print (val->string k0))
     (let* ((fst (car l)))
+      (print "FST")
+      (print (val->string fst))
       (let* ((k (car fst))
 	     (v (car (cdr fst))))
 	(if (equal? k k0)

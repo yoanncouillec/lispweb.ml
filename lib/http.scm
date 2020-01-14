@@ -3,6 +3,20 @@
 (load "lib/channel.scm")
 (load "lib/stdout.scm")
 
+(define http-parse-queryparams
+  (lambda (queryparams)
+    (let (xxx (split '&' queryparams))
+      (let (yyy (map (lambda (p)
+		       (let (res (split '=' p))
+			 (list
+			  (list->string (car res))
+			  (list->string (car (cdr res)))))
+		       )
+		     xxx))
+	(print "yyy")
+	yyy))))
+    
+
 (define http-parse-method
   (lambda (read fd)
     (let* ((fst-line (map list->string (split ' ' (string->list (read-line read fd)))))
@@ -10,9 +24,14 @@
 	   (path (car (cdr fst-line)))
 	   (pathqueryparams (split-into-2 '?' (string->list path)))
 	   (path (list->string (car pathqueryparams)))
+	   (queryparams (http-parse-queryparams (car (cdr pathqueryparams))))
 	   (protocol (car (cdr (cdr fst-line)))))
+      (print "PATH")
+      (print path)
+      (print "QUERYPARAMS")
+      (print queryparams)
       (if (equal? "GET" method)
-	  (list method path protocol)
+	  (list method path queryparams protocol)
 	  (throw error 'wrong-http-first-line)))))
 
 (define http-parse-response-status
@@ -69,9 +88,10 @@
     (let* ((first-line (http-parse-method read client))
 	   (method (car first-line))
 	   (path (car (cdr first-line)))
-	   (protocol (car (cdr (cdr first-line))))
+	   (queryparams (car (cdr (cdr first-line))))
+	   (protocol (car (cdr (cdr (cdr first-line)))))
 	   (headers (http-parse-headers-light read client)))
-      (service client method path protocol headers))))
+      (service client method path queryparams protocol headers))))
     
 (define accept-client
   (lambda (server service)

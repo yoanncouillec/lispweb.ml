@@ -27,7 +27,7 @@
 (define get-char
   (lambda (s n)
     (hostcall String.get s n)))
-    
+
 (define sub-string
   (lambda (s ofs len)
     (hostcall String.sub s ofs len)))
