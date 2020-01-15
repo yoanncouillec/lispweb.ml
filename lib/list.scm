@@ -35,17 +35,33 @@
 	      (list (cons (car l) fst) snd)))
 	(list (list) (list)))))
 
-(define is-begin-of
+(define is-begin-of?
   (lambda (l0 l)
     (if (pair? l)
 	(if (pair? l0)
 	    (if (equal? (car l) (car l0))
-		(is-begin-of (cdr l0) (cdr l))
+		(is-begin-of? (cdr l0) (cdr l))
 		#f)
 	    #t)
 	(if (pair? l0)
 	    #f
 	    #t))))
+
+(define drop
+  (lambda (l n)
+    (if (equal? n 0)
+	l
+	(drop (cdr l) (- n 1)))))
+
+(define split-into-two
+  (lambda (l0 l)
+    (print l)
+    (if (pair? l)
+	(if (is-begin-of? l0 l)
+	    (list (list) (drop l (length l0)))
+	    (let (sub (split-into-two l0 (cdr l)))
+	      (list (cons (car l) (car sub)) (car (cdr sub)))))
+	(list (list) (list)))))
 
 (define split
   (lambda (c l)
@@ -89,12 +105,7 @@
 
 (define assoc
   (lambda (l k0)
-    (print "ASSOC")
-    (print (val->string l))
-    (print (val->string k0))
     (let* ((fst (car l)))
-      (print "FST")
-      (print (val->string fst))
       (let* ((k (car fst))
 	     (v (car (cdr fst))))
 	(if (equal? k k0)
@@ -102,3 +113,8 @@
 	      v)
 	    (begin
 	      (assoc (cdr l) k0)))))))
+
+(define replace
+  (lambda (l l0 l1)
+    (let (res (split-into-two l0 l))
+      (append (car res) (append l1 (car (cdr res)))))))
