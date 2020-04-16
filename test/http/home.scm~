@@ -9,5 +9,6 @@
      (list) 
      (list
       (load "test/header.scm")
+      (load "test/menu.scm")
       (load "test/form.scm")))
     (load "test/footer.scm")))))
