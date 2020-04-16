@@ -35,6 +35,6 @@
  (equal?
   (split-into-two (list 9 9 9) (list 1 2 3 4 5))
   (list (list 1 2 3 4 5) (list)))
- (replace (list 1 2 3 4 5) (list 2 3) (list 9 9 9 9 9))
-  (replace (list 1 2 3 4 5) (list 2 3) (list))
+ (replace-first (list 1 2 3 4 5) (list 2 3) (list 9 9 9 9 9))
+ (replace-first (list 1 2 3 4 5) (list 2 3) (list))
  )

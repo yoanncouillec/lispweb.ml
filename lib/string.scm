@@ -8,6 +8,23 @@
   (lambda (n)
     (hostcall String.make n 'x')))
 
+(define make-regexp
+  (lambda (s)
+    (hostcall Str.regexp s)))
+
+(define global-replace
+  (lambda (old niou s)
+    (hostcall Str.global_replace old niou s)))
+
+(define global-replace-list
+  (lambda (l s)
+    (if (pair? l)
+	(let (fst (car l))
+	  (let (old (car fst))
+	    (let (niou (car (cdr fst)))
+	      (global-replace-list (cdr l) (global-replace old niou s)))))
+	s)))
+
 (define string->list
   (lambda (s)
     (if (equal? 1 (string-length s))

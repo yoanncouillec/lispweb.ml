@@ -384,6 +384,20 @@ module String = struct
 		    		    
 end
 
+module Str = struct
+
+  let regexp = function
+    | VList(VString(s)::[]) ->
+       VRegexp(Str.regexp(s))
+    | _ -> failwith "regexp"
+
+  let global_replace = function
+    | VList(VRegexp(old)::VString(niou)::VString(s)::[]) ->
+       VString(Str.global_replace old niou s)
+    | _ -> failwith "global_replace"
+  
+end
+
 module Char = struct
   
   let char_to_string = function
@@ -589,6 +603,9 @@ let functions =
     ("String.get", String.get);
     ("String.sub", String.sub);
     ("String.concat", String.concat);
+
+    ("Str.regexp", Str.regexp);
+    ("Str.global_replace", Str.global_replace);
 
     ("Char.char_to_string", Char.char_to_string);
 

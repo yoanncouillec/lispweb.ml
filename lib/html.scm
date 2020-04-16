@@ -50,6 +50,18 @@
   (lambda (attributes children)
     (list "tag" "p" attributes children)))
 
+(define <a>
+  (lambda (attributes children)
+    (list "tag" "a" attributes children)))
+
+(define <ul>
+  (lambda (attributes children)
+    (list "tag" "ul" attributes children)))
+
+(define <li>
+  (lambda (attributes children)
+    (list "tag" "li" attributes children)))
+
 (define <label>
   (lambda (attributes children)
     (list "tag" "label" attributes children)))

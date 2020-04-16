@@ -26,6 +26,7 @@ type value =
   | VSslContextType of Ssl.context_type
   | VSslContext of Ssl.context
   | VBytes of Bytes.t
+  | VRegexp of Str.regexp
   | VHostEntry of Unix.host_entry	
 	
  and env = (string * value ref) list
@@ -62,4 +63,5 @@ let rec string_of_value = function
   | VSslContextType _ -> "Ssl.context_type"
   | VSslContext _ -> "Ssl.context"
   | VBytes _ -> "#BYTES"
+  | VRegexp _ -> "#REGEXP"
   | VHostEntry _ -> "Unix.host_entry"

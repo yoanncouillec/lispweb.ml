@@ -114,7 +114,7 @@
 	    (begin
 	      (assoc (cdr l) k0)))))))
 
-(define replace
+(define replace-first
   (lambda (l l0 l1)
     (let (res (split-into-two l0 l))
       (append (car res) (append l1 (car (cdr res)))))))
