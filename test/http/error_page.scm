@@ -9,6 +9,5 @@
      (list) 
      (list
       (load "test/http/header.scm")
-      (<h1> (list) (list (list "string" "404")))
-      (load "test/http/form.scm")))
+      (<h1> (list) (list (list "string" "404")))))
     (load "test/http/footer.scm")))))

@@ -1,5 +1,5 @@
 {
-  open Parser
+  open ParserOpt
 }
 rule token = parse
   | eof { EOF }

@@ -6,7 +6,7 @@
 
 (define http-parse-queryparams
   (lambda (queryparams)
-    (print "http-parse-queryparams")
+    ;; (print "http-parse-queryparams") ;;
     (let (xxx (split '&' queryparams))
       (let (yyy (map (lambda (p)
 		       (let (res (split '=' p))
@@ -20,7 +20,7 @@
 
 (define http-parse-method
   (lambda (read fd)
-    (print "http-parse-method")
+    ;; (print "http-parse-method") ;;
     (let* ((fst-line (map list->string (split ' ' (string->list (read-line read fd)))))
 	   (method (car fst-line))
 	   (path (car (cdr fst-line)))
@@ -28,10 +28,10 @@
 	   (path (list->string (car pathqueryparams)))
 	   (queryparams (http-parse-queryparams (car (cdr pathqueryparams))))
 	   (protocol (car (cdr (cdr fst-line)))))
-      (print (concat "=" (list "  method" method)))
-      (print (concat "=" (list "  path" path)))
-      (print (concat "=" (list "  queryparams" (val->string queryparams))))
-      (print (concat "=" (list "  protocol" (val->string protocol))))
+      ;; (print (concat "=" (list "  method" method))) ;;
+      ;; (print (concat "=" (list "  path" path))) ;;
+      ;; (print (concat "=" (list "  queryparams" (val->string queryparams)))) ;;
+      ;; (print (concat "=" (list "  protocol" (val->string protocol)))) ;;
       (if (equal? "GET" method)
 	  (list method path queryparams protocol)
 	  (throw error 'wrong-http-first-line)))))
@@ -61,7 +61,7 @@
 
 (define http-parse-headers-light
   (lambda (read fd)
-    (print "http-parse-headers-light")
+    ;; (print "http-parse-headers-light") ;;
     (let* ((l (read-line read fd)))
       (if (equal? "" l)
 	    l
@@ -88,7 +88,7 @@
 
 (define serve
   (lambda (client service)
-    (print "serve")
+    ;; (print "serve") ;;
     (let* ((first-line (http-parse-method read client))
 	   (method (car first-line))
 	   (path (car (cdr first-line)))
@@ -99,14 +99,14 @@
     
 (define accept-client
   (lambda (server service)
-    (print "accept-client")
+    ;; (print "accept-client") ;;
     (let* ((client (car (accept server))))
       (serve client service)
       (accept-client server service))))
 
 (define http-server
   (lambda (port service)
-    (print "http-server")
+    ;; (print "http-server") ;;
     (let* ((server (socket "PF_INET" "SOCK_STREAM" 0))
 	   (sockaddr (addr_inet (inet_addr_loopback) port)))
       (bind server sockaddr)
@@ -115,7 +115,7 @@
 
 (define https-server
   (lambda (port password certfile privkeyfile nbconn service)
-    (print "https-server")
+    ;; (print "https-server") ;;
     (let* ((server (ssl-make-server port password certfile privkeyfile nbconn))
 	   (sockaddr (addr_inet (inet_addr_loopback) port)))
       (bind server sockaddr)
