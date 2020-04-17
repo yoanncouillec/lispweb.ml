@@ -13,6 +13,8 @@ rule token = parse
   | "#t" { TRUE }
   | "#f" { FALSE }
   | "if" { IF }
+  | "cond" { COND }
+  | "else" { ELSE }
   | "lambda" { LAMBDA }
   | "let" { LET }
   | "let*" { LETSTAR }

@@ -1,6 +1,10 @@
 type operator = OPlus | OMinus | OMult | ODiv
 
-type expr =
+type clause =
+  | EClause of expr * expr
+  | EElseClause of expr
+
+and expr =
   | EInt of int
   | EBinary of operator * expr * expr
   | EBool of bool
@@ -14,6 +18,7 @@ type expr =
   | EVar of string
   | ESet of string * expr
   | EIf of expr * expr * expr
+  | ECond of clause list
   | ELet of string * expr * expr
   | EDefine of string * expr
   | EThunk of expr

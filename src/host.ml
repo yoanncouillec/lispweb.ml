@@ -489,10 +489,10 @@ module Ssl = struct
        VSslSocket(Ssl.embed_socket fd ctx)
     | _ -> failwith "wrong arguments"
 
-  let accept = function
+  let accept v = match v with
     | VList(VSslSocket(sock)::[]) ->
        VUnit(Ssl.accept sock)
-    | _ -> failwith "wrong arguments"
+    | _ -> failwith ("Ssl.accept: wrong arguments: "^(string_of_value v))
 
   let use_certificate = function
     | VList(VSslContext(context)::VString(cert)::VString(privkey)::[]) ->

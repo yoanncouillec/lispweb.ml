@@ -2,7 +2,7 @@
 %token<string> ER_CHAR_ESC
 %token<string> ER_IDENT ER_STRING ER_CHAR
 %token LPAREN RPAREN LAMBDA LET LETREC DEFINE LETSTAR LOAD EVAL
-%token TRUE FALSE IF EOF BEGIN EQUAL SET NOT AND
+%token TRUE FALSE IF COND ELSE EOF BEGIN EQUAL SET NOT AND
 %token CAR CDR CONS LIST
 %token CATCH THROW CALLCC BLOCK RETURNFROM HOSTCALL
 %token PLUS MINUS MULT DIV
@@ -49,6 +49,7 @@ expression:
 | LPAREN LIST RPAREN { Expr.EList([]) }
 | LPAREN LIST expressions RPAREN { Expr.EList($3) }
 | LPAREN IF expression expression expression RPAREN { Expr.EIf ($3, $4, $5) }
+| LPAREN COND clauses RPAREN { Expr.ECond ($3) }
 | LPAREN LAMBDA LPAREN RPAREN expressions RPAREN { Expr.EThunk (Expr.EBegin $5) }
 | LPAREN LAMBDA LPAREN idents RPAREN expressions RPAREN { List.fold_left (fun a b -> Expr.ELambda(b,a)) (Expr.ELambda (List.hd ((List.rev $4)), (Expr.EBegin $6))) (List.tl (List.rev $4)) }
 | LPAREN LET LPAREN ER_IDENT expression RPAREN expressions RPAREN { Expr.ELet ($4, $5, Expr.EBegin $7) }
@@ -70,3 +71,11 @@ idents:
 bindings:
 | LPAREN ER_IDENT expression RPAREN { [($2, $3)] }
 | LPAREN ER_IDENT expression RPAREN bindings { ($2, $3)::$5 }
+
+clauses:
+| clause { [$1] }
+| clause clauses { $1::$2 }
+
+clause:
+| LPAREN expression expression RPAREN { Expr.EClause($2, $3) }
+| LPAREN ELSE expression RPAREN { Expr.EElseClause($3) }

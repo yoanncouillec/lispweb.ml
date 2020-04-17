@@ -2,6 +2,7 @@
 (load "lib/socket.scm")
 (load "lib/channel.scm")
 (load "lib/stdout.scm")
+(load "lib/ssl.scm")
 
 (define http-parse-queryparams
   (lambda (queryparams)
@@ -107,6 +108,15 @@
   (lambda (port service)
     (print "http-server")
     (let* ((server (socket "PF_INET" "SOCK_STREAM" 0))
+	   (sockaddr (addr_inet (inet_addr_loopback) port)))
+      (bind server sockaddr)
+      (listen server 10)
+      (accept-client server service))))
+
+(define https-server
+  (lambda (port password certfile privkeyfile nbconn service)
+    (print "https-server")
+    (let* ((server (ssl-make-server port password certfile privkeyfile nbconn))
 	   (sockaddr (addr_inet (inet_addr_loopback) port)))
       (bind server sockaddr)
       (listen server 10)

@@ -96,6 +96,22 @@ let rec eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 	    | VBool x -> if x then eval b genv' env denv mem' cont 
 			 else eval c genv' env denv mem' cont
 	    | _ -> failwith "eval EIf: expecting a boolean"))
+  | ECond (EElseClause(e1)::rest) -> 
+     eval e1 genv env denv mem cont
+  | ECond (EClause(e1,e2)::[]) -> 
+     eval e1 genv env denv mem
+	  (fun v genv' mem' -> 
+	   (match v with 
+	    | VBool x -> if x then eval e2 genv' env denv mem' cont 
+			 else cont (VUnit()) genv' mem'
+	    | _ -> failwith "eval ECond: expecting a boolean"))
+  | ECond (EClause(e1,e2)::rest) -> 
+     eval e1 genv env denv mem
+	  (fun v genv' mem' -> 
+	   (match v with 
+	    | VBool x -> if x then eval e2 genv' env denv mem' cont 
+			 else eval (ECond(rest)) genv' env denv mem' cont
+	    | _ -> failwith "eval ECond: expecting a boolean"))
   | ELet (s, expr, body) ->
      eval expr genv env denv mem
 	  (fun v genv' mem' ->

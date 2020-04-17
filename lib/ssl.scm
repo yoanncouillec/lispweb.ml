@@ -67,7 +67,7 @@
     (hostcall Ssl.set_password context pwd)))
 
 (define ssl-embed-socket
-  (lambda (context s ctx)
+  (lambda (s ctx)
     (hostcall Ssl.embed_socket s ctx)))
 
 (define ssl-accept
@@ -111,6 +111,8 @@
       (let* ((p (accept sock))
 	     (s (car p))
 	     (caller (car (cdr p)))
-	     (sslss (ssl-embed-socket s ctx)))
+	     (ssl-s (ssl-embed-socket s ctx)))
+	(print "777")
 	(ssl-accept ssl-s)
+	(print "888")
 	ssl-s))))
