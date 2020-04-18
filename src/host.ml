@@ -1,5 +1,6 @@
 open Value
-
+open Expr
+   
 module Pervasives = struct
 
   let string_of_int = function
@@ -529,8 +530,16 @@ end
  *            (match List.nth args 0 with
  *             | VClosure(env,expr) ->
  *                let arg = List.nth args 1 in
- *                VThread(Thread.create)))
+ *                VThread(Thread.create
  * end *)
+
+module HThread = struct
+
+  let join = function
+    | VList(VThread(t)::[]) ->
+       VUnit(Thread.join(t))
+    | _ -> failwith "Thread.join: wrong arguments"
+end
 
 let functions = 
   [
@@ -628,6 +637,8 @@ let functions =
     ("Ssl.set_password", Ssl.set_password);
     ("Ssl.embed_socket", Ssl.embed_socket);
     ("Ssl.accept", Ssl.accept);
+
+    ("Thread.join", HThread.join);
 
     ("Misc.inet_addr_of_host_entry", Misc.inet_addr_of_host_entry);
     ("Misc.gethostbyname", Misc.gethostbyname)

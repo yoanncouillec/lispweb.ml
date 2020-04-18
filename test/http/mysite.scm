@@ -5,7 +5,7 @@
 (load "lib/html.scm")
 (load "lib/url.scm")
 
-(define port 8080)
+(define port 8081)
 
 (define service
   (lambda (fd method path queryparams protocol headers)
@@ -47,9 +47,9 @@
 (print "φ Serving app MySite")
 (print (concat "" (list "φ Running on http://127.0.0.1:" (int->string port))))
 
-(https-run-server port
-		  ""
-		  "/etc/letsencrypt/live/galaad.servebeer.com/cert.pem"
-		  "/etc/letsencrypt/live/galaad.servebeer.com/privkey.pem"
-		  100
-		  service)
+(https-threaded-run-server port
+			   ""
+			   "/etc/letsencrypt/live/galaad.servebeer.com/cert.pem"
+			   "/etc/letsencrypt/live/galaad.servebeer.com/privkey.pem"
+			   100
+			   service)

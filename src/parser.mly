@@ -1,10 +1,10 @@
 %token<int> ER_INT
 %token<string> ER_CHAR_ESC
-%token<string> ER_IDENT ER_STRING ER_CHAR ER_LINE_COMMENT
+%token<string> ER_IDENT ER_STRING ER_CHAR
 %token LPAREN RPAREN LAMBDA LET LETREC DEFINE LETSTAR LOAD EVAL
 %token TRUE FALSE IF COND ELSE EOF BEGIN EQUAL SET NOT AND
 %token CAR CDR CONS LIST
-%token CATCH THROW CALLCC BLOCK RETURNFROM HOSTCALL
+%token CATCH THROW CALLCC BLOCK RETURNFROM HOSTCALL CALLWITHNEWTHREAD
 %token PLUS MINUS MULT DIV
 %token CQUOTE CQUASIQUOTE CUNQUOTE
 %start start
@@ -52,15 +52,17 @@ expression:
 | LPAREN COND clauses RPAREN { Expr.ECond ($3) }
 | LPAREN LAMBDA LPAREN RPAREN expressions RPAREN { Expr.EThunk (Expr.EBegin $5) }
 | LPAREN LAMBDA LPAREN idents RPAREN expressions RPAREN { List.fold_left (fun a b -> Expr.ELambda(b,a)) (Expr.ELambda (List.hd ((List.rev $4)), (Expr.EBegin $6))) (List.tl (List.rev $4)) }
-| LPAREN LET LPAREN ER_IDENT expression RPAREN expressions RPAREN { Expr.ELet ($4, $5, Expr.EBegin $7) }
-| LPAREN LETSTAR LPAREN bindings RPAREN expressions RPAREN { List.fold_left (fun a b -> Expr.ELet (fst b, snd b, a)) (Expr.ELet (fst (List.hd (List.rev $4)), snd (List.hd (List.rev $4)), Expr.EBegin $6)) (List.tl (List.rev $4)) }
+| LPAREN LET LPAREN ER_IDENT expression RPAREN expressions RPAREN { Expr.ELet ([($4, $5)], Expr.EBegin $7, []) }
+| LPAREN LET LPAREN bindings RPAREN expressions RPAREN { Expr.ELet ($4, Expr.EBegin $6, []) }
+| LPAREN LETSTAR LPAREN bindings RPAREN expressions RPAREN { List.fold_left (fun a b -> Expr.ELet ([fst b, snd b], a, [])) (Expr.ELet ([fst (List.hd (List.rev $4)), snd (List.hd (List.rev $4))], Expr.EBegin $6, [])) (List.tl (List.rev $4)) }
 | LPAREN DEFINE ER_IDENT expression RPAREN { Expr.EDefine ($3, $4) }
-| LPAREN LETREC LPAREN ER_IDENT expression RPAREN expression RPAREN { Expr.ELet ($4, Expr.EInt 0, Expr.ELet ($4^"-rec-tmp", $5, Expr.EBegin([Expr.ESet($4,Expr.EVar ($4^"-rec-tmp"));$7]))) }
+| LPAREN LETREC LPAREN ER_IDENT expression RPAREN expression RPAREN { Expr.ELet ([$4, Expr.EInt 0], Expr.ELet ([$4^"-rec-tmp", $5], Expr.EBegin([Expr.ESet($4,Expr.EVar ($4^"-rec-tmp"));$7]),[]),[]) }
 | LPAREN SET ER_IDENT expression RPAREN { Expr.ESet($3, $4) }
 | LPAREN EQUAL expression expression RPAREN { Expr.EEqual ($3,$4) }
 | LPAREN BEGIN expressions RPAREN { Expr.EBegin ($3) }
 | LPAREN HOSTCALL ER_IDENT RPAREN { Expr.EHostCall ($3,Expr.EList []) }
 | LPAREN HOSTCALL ER_IDENT expressions RPAREN { Expr.EHostCall ($3,Expr.EList $4) }
+| LPAREN CALLWITHNEWTHREAD expression RPAREN { Expr.ECallWithNewThread $3 }
 | LPAREN expression RPAREN { Expr.EThunkApp $2 }
 | LPAREN expression expressions RPAREN { List.fold_left (fun a b -> Expr.EApp(a,b)) (Expr.EApp ($2, List.hd $3)) (List.tl $3)}
 

@@ -65,13 +65,13 @@ let rec eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
                eval e2 genv' env denv mem'
 	         (fun v2 genv'' mem'' ->
 	           (match v2 with
-	            | VBool b2 -> cont (VBool (b1 & b2)) genv'' mem''
+	            | VBool b2 -> cont (VBool (b1 && b2)) genv'' mem''
 	            | _ -> failwith ("eval ENot: boolean expected: "^(string_of_value v2))))
 	    | _ -> failwith ("eval ENot: boolean expected: "^(string_of_value v1))))
   | EString s -> cont (VString s) genv mem
   | EChar c -> cont (VChar c) genv mem
   | EQuote e -> cont (VExpr e) genv mem
-(*  | EQuasiQuote e -> eval_quasi_quote e genv env denv mem cont *)
+  | EQuasiQuote e -> failwith "eval EQuasiQuote: not implemented"
   | EUnQuote e -> failwith "eval EUnQuote: must be inside a quasiquote"
   | EVar s -> 
      (match get_env s env with
@@ -96,6 +96,8 @@ let rec eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 	    | VBool x -> if x then eval b genv' env denv mem' cont 
 			 else eval c genv' env denv mem' cont
 	    | _ -> failwith "eval EIf: expecting a boolean"))
+  | ECond ([]) -> 
+     cont (VUnit()) genv mem
   | ECond (EElseClause(e1)::rest) -> 
      eval e1 genv env denv mem cont
   | ECond (EClause(e1,e2)::[]) -> 
@@ -112,11 +114,13 @@ let rec eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 	    | VBool x -> if x then eval e2 genv' env denv mem' cont 
 			 else eval (ECond(rest)) genv' env denv mem' cont
 	    | _ -> failwith "eval ECond: expecting a boolean"))
-  | ELet (s, expr, body) ->
+  | ELet ([], body, tenv) ->
+	   eval body genv (List.append tenv env) denv mem cont
+  | ELet ((s, expr)::rest, body, tenv) ->
      eval expr genv env denv mem
 	  (fun v genv' mem' ->
 	   let addr = ref v in
-	   eval body genv' (extend_env s addr env) denv (extend_mem addr v mem') cont)
+	   eval (ELet(rest,body,(extend_env s addr tenv))) genv' env denv (extend_mem addr v mem') cont)
   | EDefine (s, expr) ->
      eval expr genv env denv mem
 	  (fun v genv' mem' -> 
@@ -256,3 +260,11 @@ let rec eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
        | VString s ->
 	   eval (expr_of_filename (s)) genv' env denv mem' cont
        | _ -> failwith "eval ELoad: should be a string")
+  | ECallWithNewThread e1 ->
+     eval e1 genv env denv mem
+       (fun v1 genv' mem' ->
+         match v1 with
+         | VClosure(env', EThunk e2) ->
+            let t = Thread.create (fun _ -> eval e2 genv' env' denv mem' (fun v _ _ -> v)) () in
+            cont (VThread t) genv' mem'
+         | _  -> failwith "eval ECallWithNewThread")

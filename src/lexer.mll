@@ -37,6 +37,7 @@ rule token = parse
   | "hostcall" { HOSTCALL }
   | "eval" { EVAL }
   | "load" { LOAD }
+  | "call-with-new-thread" { CALLWITHNEWTHREAD }
   | "+" { PLUS }
   | "-" { MINUS }
   | "*" { MULT }

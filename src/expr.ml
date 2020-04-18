@@ -19,7 +19,7 @@ and expr =
   | ESet of string * expr
   | EIf of expr * expr * expr
   | ECond of clause list
-  | ELet of string * expr * expr
+  | ELet of ((string * expr) list) * expr * env
   | EDefine of string * expr
   | EThunk of expr
   | EThunkApp of expr
@@ -40,7 +40,43 @@ and expr =
   | EHostCall of string * expr
   | ELoad of expr
   | EEval of expr
+  | ECallWithNewThread of expr
 
+and value = 
+  | VUnit of unit
+  | VInt of int
+  | VBool of bool
+  | VString of string
+  | VChar of char
+  | VClosure of env * expr
+  | VCont of cont
+  | VList of value list
+  | VExpr of expr
+  | VFile of Unix.file_descr
+  | VInetAddr of Unix.inet_addr
+  | VSockAddr of Unix.sockaddr
+  | VSockDomain of Unix.socket_domain
+  | VSockBoolOption of Unix.socket_bool_option
+  | VShutdownCommand of Unix.shutdown_command
+  | VChannelIn of in_channel
+  | VChannelOut of out_channel
+  | VThread of Thread.t
+  | VSslProtocol of Ssl.protocol
+  | VSslSocket of Ssl.socket
+  | VSslCertificate of Ssl.certificate
+  | VSslCipher of Ssl.cipher
+  | VSslContextType of Ssl.context_type
+  | VSslContext of Ssl.context
+  | VBytes of Bytes.t
+  | VRegexp of Str.regexp
+  | VHostEntry of Unix.host_entry	
+	
+ and env = (string * value ref) list
+
+ and mem = (value ref * value) list
+			       
+ and cont = value  -> env -> mem -> value
+          
 let rec string_of_expr = function
   | EInt n -> string_of_int n
   | EBinary (op, e1, e2) ->
@@ -51,6 +87,20 @@ let rec string_of_expr = function
 	  | OMinus -> "-")^" "^(string_of_expr e1)^" "^(string_of_expr e2)^")"
   | EBool b -> string_of_bool b
   | ENot e -> "(not "^(string_of_expr e)^")"
+  | EAnd (e1,e2) -> "(and "^(string_of_expr e1)^" "^(string_of_expr e2)^")"
+  | ECond clauses ->
+     "(cond "^
+       (List.fold_left
+          (fun a clause ->
+            a^
+              (match clause with
+               | EClause (e1,e2) -> "("^(string_of_expr e1)^" "^(string_of_expr e2)^")"
+               | EElseClause e -> "(else "^(string_of_expr e)^")"))
+          ""
+          clauses)
+       ^")"
+  | ECallWithNewThread e ->
+     "(call-with-new-thread "^(string_of_expr e)^")"
   | EString s -> "\"" ^ s ^ "\""
   | EChar c -> "'" ^ (String.make 1 c) ^ "'"
   | EQuote e -> "(quote" ^ (string_of_expr e) ^")"
@@ -62,8 +112,12 @@ let rec string_of_expr = function
   | ELoad e -> "(load "^(string_of_expr e)^")"
   | EIf (e1, e2, e3) -> 
      "(if "^(string_of_expr e1)^" "^(string_of_expr e2)^" "^(string_of_expr e3)^")"
-  | ELet (s, e, body) ->
-    "(let ("^s^" "^(string_of_expr e)^") "^(string_of_expr body)^")"
+  | ELet (bindings, body,_) ->
+     "(let ("^
+       (List.fold_left
+          (fun a -> function (s,e) -> a ^ "("^s^" "^(string_of_expr e)^")")
+          ""
+          bindings)^") "^(string_of_expr body)^")"
   | EDefine (s, e) ->
     "(define "^s^" "^(string_of_expr e)^")"
   | ELambda (s, body) ->

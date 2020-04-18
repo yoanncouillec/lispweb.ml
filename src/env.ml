@@ -1,4 +1,5 @@
 open Value
+open Expr
 
 type env_addr = 
   | EnvAddr of value ref
