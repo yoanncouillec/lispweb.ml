@@ -184,15 +184,15 @@ module LUnix = struct
 	| _ -> failwith "unix_read: 2nd argument must be a string")
     | _ -> failwith "unix_read: 1st argument must be a file descriptor"
 		    
-  let write_bytes = function
+  let write = function
     | VList(VFile(fd)::VBytes(b)::VInt(ofs)::VInt(len)::[]) -> 
        VInt(Unix.write fd b ofs len)
-    | _ -> failwith "unix_write_bytes"
+    | _ -> failwith "unix_write"
 
-  let write_substring = function
+  let write_substring v = match v with
     | VList(VFile(fd)::VString(s)::VInt(ofs)::VInt(len)::[]) -> 
        VInt(Unix.write_substring fd s ofs len)
-    | _ -> failwith "unix_write_substring"
+    | _ -> failwith ("unix_write_substring"^(string_of_value v))
 		    		    
   let in_channel_of_descr = function
     | VList(VFile(fd)::[]) ->
@@ -288,10 +288,10 @@ module LUnix = struct
        VUnit (Unix.connect fd saddr)
     | _ -> failwith "unix_connect"
 		    
-  let bind = function
+  let bind v = match v with
     | VList(VFile(fd)::VSockAddr(saddr)::[]) ->
        VUnit (Unix.bind fd saddr)
-    | _ -> failwith "unix_bind"
+    | _ -> failwith ("unix_bind:"^(string_of_value v))
 		    
   let accept = function
     | VList(VFile(fd)::[]) ->
@@ -566,7 +566,7 @@ let functions =
     ("Unix.openfile", LUnix.openfile);
     ("Unix.close", LUnix.close);
     ("Unix.read", LUnix.read);
-    ("Unix.write_bytes", LUnix.write_bytes);
+    ("Unix.write", LUnix.write);
     ("Unix.write_substring", LUnix.write_substring);
     ("Unix.stdin", LUnix.stdin);
     ("Unix.stdout", LUnix.stdout);

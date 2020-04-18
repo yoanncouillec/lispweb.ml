@@ -52,9 +52,9 @@
 	      ""
 	      (concat "" (list (make-string 1 c) (read-line read fd))))))))
 
-(define write-bytes
+(define write
   (lambda (fd b ofs len)
-    (hostcall Unix.write_bytes fd b ofs len)))
+    (hostcall Unix.write fd b ofs len)))
 
 (define write-substring
   (lambda (fd s ofs len)
@@ -66,7 +66,7 @@
 
 (define write-char
   (lambda (fd c)
-    (write-bytes fd (char->bytes c) 0 1)))
+    (write fd (char->bytes c) 0 1)))
 
 (define write-line
   (lambda (fd l)

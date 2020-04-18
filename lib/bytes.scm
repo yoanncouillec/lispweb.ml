@@ -1,8 +1,8 @@
-(define bytes-of-string
+(define string->bytes
   (lambda (s)
     (hostcall Bytes.of_string s)))
 
-(define bytes-to-string
+(define bytes->string
   (lambda (s)
     (hostcall Bytes.to_string s)))
 
@@ -13,10 +13,6 @@
 (define bytes-make
   (lambda (n c)
     (hostcall Bytes.make n c)))
-
-(define bytes-to-string
-  (lambda (b)
-    (hostcall Bytes.to_string b)))
 
 (define bytes-length
   (lambda (b)

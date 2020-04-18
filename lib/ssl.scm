@@ -46,6 +46,31 @@
   (lambda (ssl buff offset length)
     (hostcall Ssl.write ssl buff offset length)))
 
+(define ssl-write-char
+  (lambda (fd c)
+    (ssl-write fd (char->bytes c) 0 1)))
+
+(define ssl-write-string
+  (lambda (fd s)
+    (let (b (string->bytes s))
+      (let (l (bytes-length b))
+	(ssl-write fd b 0 l)))))
+
+(define ssl-write-line
+  (lambda (fd l)
+    (ssl-write-string fd l)
+    (ssl-write-char fd '\r')
+    (ssl-write-char fd '\n')))
+
+(define ssl-write-lines
+  (lambda (fd lines)
+    (if (pair? lines)
+	(let* ((line (car lines))
+	       (rest (cdr lines)))
+	  (ssl-write-line fd line)
+	  (ssl-write-lines fd rest))
+	(list))))
+	
 (define ssl-read
   (lambda (ssl buff offset length)
     (hostcall Ssl.read ssl buff offset length)))
