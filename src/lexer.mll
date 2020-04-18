@@ -1,10 +1,19 @@
 {
   open Parser
+
+  exception SyntaxError of string
+
+  let next_line (lexbuf:Lexing.lexbuf) =
+    let pos = lexbuf.lex_curr_p in
+    lexbuf.lex_curr_p <-
+      { pos with pos_bol = lexbuf.lex_curr_pos;
+                 pos_lnum = pos.pos_lnum + 1
+      }
 }
 rule token = parse
-  | eof { EOF }
   | ';' ';' [^';']* ';' ';' { token lexbuf }
-  | [' ' '\t' '\n'] { token lexbuf }
+  | [' ' '\t'] { token lexbuf }
+  | ['\n'] { next_line lexbuf; token lexbuf }
   | '(' { LPAREN }
   | ')' { RPAREN }
   | '\'' { CQUOTE }
@@ -47,3 +56,5 @@ rule token = parse
   | '\"' (('\\' _) | [^'\"'])* '\"' { ER_STRING (Lexing.lexeme lexbuf) }
   | ['0'-'9']+ { ER_INT (int_of_string (Lexing.lexeme lexbuf)) }
   | ['A'-'Z''a'-'z''<''/']['A'-'Z''a'-'z''+''-''*''/''#''-''@''{'']''*''&''%''$''!''?''_''0'-'9''>''.']* { ER_IDENT (Lexing.lexeme lexbuf) }
+  | _ { raise (SyntaxError ("Unexpected char: " ^ Lexing.lexeme lexbuf)) }
+  | eof { EOF }

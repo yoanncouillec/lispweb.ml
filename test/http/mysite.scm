@@ -4,6 +4,7 @@
 (load "lib/string.scm")
 (load "lib/html.scm")
 (load "lib/url.scm")
+(load "lib/bootstrap.scm")
 
 (define port 8081)
 

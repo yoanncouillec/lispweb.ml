@@ -8,12 +8,12 @@
 %token PLUS MINUS MULT DIV
 %token CQUOTE CQUASIQUOTE CUNQUOTE
 %start start
-%type <Expr.expr> start
+%type <Expr.expr option> start
 
 %%
 
 start: 
-| e = expressions EOF { Expr.EBegin e }
+| e = expressions EOF { Some(Expr.EBegin e) }
 
 expressions:
 | expression { [$1] }

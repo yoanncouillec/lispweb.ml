@@ -46,6 +46,14 @@
   (lambda (attributes children)
     (list "tag" "h1" attributes children)))
 
+(define <span>
+  (lambda (attributes children)
+    (list "tag" "span" attributes children)))
+
+(define <button> (lambda (attributes children) (list "tag" "button" attributes children)))
+(define <img> (lambda (attributes children) (list "tag" "img" attributes children)))
+(define <h5> (lambda (attributes children) (list "tag" "h5" attributes children)))
+
 (define <p>
   (lambda (attributes children)
     (list "tag" "p" attributes children)))

@@ -12,12 +12,31 @@ let rec string_of_channel channel accu =
   | End_of_file -> accu
 
 let expr_of_string s = 
-  (*print_endline ("expr_of_string "^s);*)
   let lexbuf = Lexing.from_string s in
   Parser.start Lexer.token lexbuf
+  
+let print_position out_channel (lexbuf:Lexing.lexbuf) =
+  let pos = lexbuf.lex_curr_p in
+  Printf.fprintf out_channel "%s:%d:%d" 
+    pos.pos_fname pos.pos_lnum (pos.pos_cnum - pos.pos_bol + 1)
+  
+let parse_with_error lexbuf =
+  try Parser.start Lexer.token lexbuf with
+    Lexer.SyntaxError msg ->
+     Printf.fprintf stderr "%a: %s\n" print_position lexbuf msg; None
+  | Parser.Error -> 
+     Printf.fprintf stderr "%a: syntax error\n" print_position lexbuf; None
 
-let expr_of_filename filename = 
-  expr_of_string (string_of_channel (open_in filename) "")
+     
+let rec parse_and_print lexbuf =
+  match parse_with_error lexbuf with
+  | Some value -> parse_and_print lexbuf
+  | None -> ()
+  
+let expr_of_filename filename : expr option = 
+  let lexbuf = Lexing.from_string (string_of_channel (open_in filename) "") in
+  lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
+  parse_with_error lexbuf
 
 let rec apply_bin_op op v1 v2 = 
   match (v1, v2) with
@@ -249,16 +268,19 @@ let rec eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
     eval e genv env denv mem
     (fun v genv' mem' ->
      match v with
-       | VString s ->
-	   eval (expr_of_string s) genv' env denv mem' cont
-       | _ -> failwith "eval EEval
-: should be a string")
+     | VString s ->
+        (match expr_of_string s with
+         | Some e -> eval e genv' env denv mem' cont
+         | None -> failwith "EEval: cannot parse")
+     | _ -> failwith "eval EEval: should be a string")
   | ELoad e ->
     eval e genv env denv mem
     (fun v genv' mem' ->
      match v with
        | VString s ->
-	   eval (expr_of_filename (s)) genv' env denv mem' cont
+          (match expr_of_filename s with
+           | Some e -> eval e genv' env denv mem' cont
+           | None -> failwith "ELoad: cannot parse")
        | _ -> failwith "eval ELoad: should be a string")
   | ECallWithNewThread e1 ->
      eval e1 genv env denv mem
