@@ -4,6 +4,14 @@ type clause =
   | EClause of expr * expr
   | EElseClause of expr
 
+and param =
+  | Param of string
+  | ParamOpt of string * expr
+                 
+and arg =
+  | Arg of expr
+  | ArgOpt of string * expr
+            
 and expr =
   | EInt of int
   | EBinary of operator * expr * expr
@@ -23,9 +31,9 @@ and expr =
   | EDefine of string * expr
   | EThunk of expr
   | EThunkApp of expr
-  | ELambda of string * expr
+  | ELambda of param * expr
   | ELambdaDot of string * expr
-  | EApp of expr * expr
+  | EApp of expr * arg
   | EBegin of expr list
   | ECatch of string * expr
   | EThrow of string * expr
@@ -76,8 +84,16 @@ and value =
  and mem = (value ref * value) list
 			       
  and cont = value  -> env -> mem -> value
+
+let rec string_of_param = function
+  | Param s -> s
+  | ParamOpt(s, e) -> s ^ " " ^ (string_of_expr e)
           
-let rec string_of_expr = function
+and string_of_arg = function
+  | Arg e -> string_of_expr e
+  | ArgOpt(s, e) -> s ^ " " ^ (string_of_expr e)
+          
+and string_of_expr = function
   | EInt n -> string_of_int n
   | EBinary (op, e1, e2) ->
      "("^(match op with
@@ -120,16 +136,16 @@ let rec string_of_expr = function
           bindings)^") "^(string_of_expr body)^")"
   | EDefine (s, e) ->
     "(define "^s^" "^(string_of_expr e)^")"
-  | ELambda (s, body) ->
-     "(lambda ("^s^") "^(string_of_expr body)^")"
+  | ELambda (p, body) ->
+     "(lambda ("^(string_of_param p)^") "^(string_of_expr body)^")"
   | ELambdaDot (s, body) ->
      "(lambda (. "^s^") "^(string_of_expr body)^")"
   | EThunk (body) ->
      "(lambda () "^(string_of_expr body)^")"
   | EThunkApp e ->
      "("^(string_of_expr e)^")"
-  | EApp (e1, e2) ->
-     "("^(string_of_expr e1)^" "^(string_of_expr e2)^")"
+  | EApp (e1, a) ->
+     "("^(string_of_expr e1)^" "^(string_of_arg a)^")"
   | EBegin es -> 
      "(begin"^(List.fold_left (fun acc x -> acc^" "^(string_of_expr x)) "" es)^")"
   | ECatch (s, e) ->

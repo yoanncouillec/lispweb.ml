@@ -148,49 +148,77 @@ let rec eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
   | ELambda (_, _) as e -> cont (VClosure (env, e)) genv mem
   | ELambdaDot (_, _) as e -> cont (VClosure (env, e)) genv mem
   | EThunk _ as e -> cont (VClosure (env, e)) genv mem
-  | EThunkApp e ->
-     eval e genv env denv mem
-	  (fun v genv' mem' -> 
-	   (match v with
-	    | (VClosure (env', EThunk (body))) ->
-	       eval body genv' env denv mem' cont
-	    | _ -> failwith "eval EThunkApp: should be a thunk"))
-  | EApp (e1, e2) ->
+  | EThunkApp e1 ->
+     eval e1 genv env denv mem
+       (fun v genv' mem' -> 
+	 (match v with
+	  | (VClosure (env', EThunk (body))) ->
+	     eval body genv' env denv mem' cont
+	  | (VClosure (env', ELambda (ParamOpt (s, e2), body))) ->
+	     eval e2 genv' env denv mem'
+	       (fun v genv'' mem'' ->
+		 let addr = ref v in
+		 eval body 
+		   genv''
+		   (extend_env (String.sub s 1 ((String.length s) - 1)) addr env')
+		   denv
+		   (extend_mem addr v mem'')
+		   cont)
+	  | _ -> failwith "eval EThunkApp: should be a thunk"))
+  | EApp (e1, Arg e2) ->
+     eval e1 genv env denv mem
+       (fun v genv' mem' -> 
+	 (match v with
+	  | (VClosure (env', ELambda (Param s, body))) ->
+	     eval e2 genv' env denv mem'
+	       (fun v genv'' mem'' ->
+		 let addr = ref v in
+		 eval body 
+		   genv''
+		   (extend_env s addr env')
+		   denv
+		   (extend_mem addr v mem'')
+		   cont)
+	  | (VClosure (env', ELambda (ParamOpt (s, e3), body))) ->
+	     eval e3 genv' env denv mem'
+	       (fun v genv'' mem'' ->
+		 let addr = ref v in
+		 eval (EApp (body, Arg e2))
+		   genv''
+                   (extend_env (String.sub s 1 ((String.length s) - 1)) addr env')
+		   denv
+		   (extend_mem addr v mem'')
+		   cont)
+	  | VCont k ->
+	     eval e2 genv' env denv mem' k
+	  | _ -> failwith ("Not a closure: "^(string_of_value v))))
+  | EApp (e1, ArgOpt(s, e2)) ->
      eval e1 genv env denv mem
 	  (fun v genv' mem' -> 
 	   (match v with
-	    | (VClosure (env', ELambda (s, body))) ->
+	    | (VClosure (env', ELambda (Param s, body))) ->
 	       eval e2 genv' env denv mem'
 		    (fun v genv'' mem'' ->
 		     let addr = ref v in
-		     eval body 
+		     eval body
 			  genv''
 			  (extend_env s addr env')
 			  denv
 			  (extend_mem addr v mem'')
 			  cont)
+	    | (VClosure (env', ELambda (ParamOpt (s, _), body))) ->
+	       eval e2 genv' env denv mem'
+		    (fun v genv'' mem'' ->
+		     let addr = ref v in
+		     eval body
+			  genv''
+		          (extend_env (String.sub s 1 ((String.length s) - 1)) addr env')
+			  denv
+			  (extend_mem addr v mem'')
+			  cont)
 	    | VCont k ->
 	       eval e2 genv' env denv mem' k
-	    (* | VClosure (env', ELambdaDot (s, body)) as ldot -> *)
-	    (*    eval e2 genv' env denv mem' *)
-	    (* 	    (fun v genv'' mem'' -> *)
-	    (* 	     (match get_env s env with *)
-	    (* 	      | EnvAddr addr ->  *)
-	    (* 		 (match (get_mem addr mem'') with *)
-	    (* 		  | VList vs -> *)
-	    (* 		     addr := VList (vs @ [v]) ; *)
-	    (* 		     cont ldot genv'' mem'' *)
-	    (* 		  | _ -> failwith "eval EApp-ELambdaDot: VList expected") *)
-	    (* 	      | EnvNotFound _ -> *)
-	    (* 		 let addr = ref (VList ([v])) in *)
-	    (* 		 cont *)
-	    (* 		 eval body  *)
-	    (* 		      genv'' *)
-	    (* 		      (extend_env s addr env') *)
-	    (* 		      denv *)
-	    (* 		      (extend_mem addr v mem'') *)
-	    (* 		      cont))        *)
-	    | _ -> failwith ("Not a closure: "^(string_of_value v))))
+	    | _ -> failwith ("222Not a closure: "^(string_of_value v))))
   | EBegin [] -> cont (VUnit()) genv mem
   | EBegin (expression::[]) ->
      eval expression genv env denv mem cont
@@ -290,3 +318,25 @@ let rec eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
             let t = Thread.create (fun _ -> eval e2 genv' env' denv mem' (fun v _ _ -> v)) () in
             cont (VThread t) genv' mem'
          | _  -> failwith "eval ECallWithNewThread")
+
+
+
+       	    (* | VClosure (env', ELambdaDot (s, body)) as ldot -> *)
+	    (*    eval e2 genv' env denv mem' *)
+	    (* 	    (fun v genv'' mem'' -> *)
+	    (* 	     (match get_env s env with *)
+	    (* 	      | EnvAddr addr ->  *)
+	    (* 		 (match (get_mem addr mem'') with *)
+	    (* 		  | VList vs -> *)
+	    (* 		     addr := VList (vs @ [v]) ; *)
+	    (* 		     cont ldot genv'' mem'' *)
+	    (* 		  | _ -> failwith "eval EApp-ELambdaDot: VList expected") *)
+	    (* 	      | EnvNotFound _ -> *)
+	    (* 		 let addr = ref (VList ([v])) in *)
+	    (* 		 cont *)
+	    (* 		 eval body  *)
+	    (* 		      genv'' *)
+	    (* 		      (extend_env s addr env') *)
+	    (* 		      denv *)
+	    (* 		      (extend_mem addr v mem'') *)
+	    (* 		      cont))        *)

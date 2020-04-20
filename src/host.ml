@@ -356,7 +356,7 @@ module Bytes = struct
   
 end
 
-module String = struct
+module HString = struct
   
   let make = function
     |  VList(VInt(n)::VChar(c)::[]) ->
@@ -607,11 +607,11 @@ let functions =
     ("Bytes.length", Bytes.bytes_length);
     ("Bytes.get", Bytes.bytes_get);
 
-    ("String.make", String.make);
-    ("String.length", String.length);
-    ("String.get", String.get);
-    ("String.sub", String.sub);
-    ("String.concat", String.concat);
+    ("String.make", HString.make);
+    ("String.length", HString.length);
+    ("String.get", HString.get);
+    ("String.sub", HString.sub);
+    ("String.concat", HString.concat);
 
     ("Str.regexp", Str.regexp);
     ("Str.global_replace", Str.global_replace);

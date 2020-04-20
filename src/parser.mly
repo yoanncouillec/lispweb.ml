@@ -1,6 +1,6 @@
 %token<int> ER_INT
 %token<string> ER_CHAR_ESC
-%token<string> ER_IDENT ER_STRING ER_CHAR
+%token<string> ER_IDENT ER_STRING ER_CHAR ER_IDENT_OPT
 %token LPAREN RPAREN LAMBDA LET LETREC DEFINE LETSTAR LOAD EVAL
 %token TRUE FALSE IF COND ELSE EOF BEGIN EQUAL SET NOT AND
 %token CAR CDR CONS LIST
@@ -51,7 +51,7 @@ expression:
 | LPAREN IF expression expression expression RPAREN { Expr.EIf ($3, $4, $5) }
 | LPAREN COND clauses RPAREN { Expr.ECond ($3) }
 | LPAREN LAMBDA LPAREN RPAREN expressions RPAREN { Expr.EThunk (Expr.EBegin $5) }
-| LPAREN LAMBDA LPAREN idents RPAREN expressions RPAREN { List.fold_left (fun a b -> Expr.ELambda(b,a)) (Expr.ELambda (List.hd ((List.rev $4)), (Expr.EBegin $6))) (List.tl (List.rev $4)) }
+| LPAREN LAMBDA LPAREN parameters RPAREN expressions RPAREN { List.fold_left (fun a b -> Expr.ELambda(b,a)) (Expr.ELambda (List.hd ((List.rev $4)), (Expr.EBegin $6))) (List.tl (List.rev $4)) }
 | LPAREN LET LPAREN ER_IDENT expression RPAREN expressions RPAREN { Expr.ELet ([($4, $5)], Expr.EBegin $7, []) }
 | LPAREN LET LPAREN bindings RPAREN expressions RPAREN { Expr.ELet ($4, Expr.EBegin $6, []) }
 | LPAREN LETSTAR LPAREN bindings RPAREN expressions RPAREN { List.fold_left (fun a b -> Expr.ELet ([fst b, snd b], a, [])) (Expr.ELet ([fst (List.hd (List.rev $4)), snd (List.hd (List.rev $4))], Expr.EBegin $6, [])) (List.tl (List.rev $4)) }
@@ -64,11 +64,23 @@ expression:
 | LPAREN HOSTCALL ER_IDENT expressions RPAREN { Expr.EHostCall ($3,Expr.EList $4) }
 | LPAREN CALLWITHNEWTHREAD expression RPAREN { Expr.ECallWithNewThread $3 }
 | LPAREN expression RPAREN { Expr.EThunkApp $2 }
-| LPAREN expression expressions RPAREN { List.fold_left (fun a b -> Expr.EApp(a,b)) (Expr.EApp ($2, List.hd $3)) (List.tl $3)}
+| LPAREN expression arguments RPAREN { List.fold_left (fun a b -> Expr.EApp(a,b)) (Expr.EApp ($2, List.hd $3)) (List.tl $3)}
 
-idents:
-| ER_IDENT { [$1] }
-| ER_IDENT idents { $1::$2 }
+parameters:
+| parameter { [$1] }
+| parameter parameters { $1::$2 } 
+
+parameter:
+| ER_IDENT { Expr.Param($1) }
+| ER_IDENT_OPT expression { Expr.ParamOpt($1, $2) }
+
+arguments:
+| argument { [$1] }
+| argument arguments { $1::$2 }
+
+argument:
+| expression { Expr.Arg($1) }
+| ER_IDENT_OPT expression { Expr.ArgOpt($1, $2) }
 
 bindings:
 | LPAREN ER_IDENT expression RPAREN { [($2, $3)] }
