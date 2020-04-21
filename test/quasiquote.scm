@@ -1,1 +1,1 @@
-(eval (eval (quote (list 2 3))))
+(eval (eval ''(list (+ 1 2) 3)))

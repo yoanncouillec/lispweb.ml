@@ -1,21 +1,20 @@
-open Value
 open Expr
    
 module Pervasives = struct
 
   let string_of_int = function
-    | VList(VInt(n)::[]) -> 
-       VString(Pervasives.string_of_int n)
+    | EList(EInt(n)::[]) -> 
+       EString(Pervasives.string_of_int n)
     | _ -> failwith "string_of_int: error"
 
   let string_of_val = function
-    | VList(v::[]) -> 
-       VString(Value.string_of_value v)
+    | EList(e::[]) -> 
+       EString(Expr.string_of_expr e)
     | _ -> failwith "string_of_val: error"
 
   let int_of_string = function
-    | VList(VString(n)::[]) -> 
-       VInt(Pervasives.int_of_string n)
+    | EList(EString(n)::[]) -> 
+       EInt(Pervasives.int_of_string n)
     | _ -> failwith "error"
 
   (******)
@@ -23,111 +22,111 @@ module Pervasives = struct
   (******)
 
   let stdin = function
-    | VList([]) -> 
-       VChannelIn(Pervasives.stdin)
+    | EList([]) -> 
+       EChannelIn(Pervasives.stdin)
     | _ -> failwith "error"
 
   let stdout = function
-    | VList([]) -> 
-       VChannelOut(Pervasives.stdout)
+    | EList([]) -> 
+       EChannelOut(Pervasives.stdout)
     | _ -> failwith "error"
 
   let stderr = function
-    | VList([]) -> 
-       VChannelOut(Pervasives.stderr)
+    | EList([]) -> 
+       EChannelOut(Pervasives.stderr)
     | _ -> failwith "error"
 
   (* Output functions on standard output *)
 		    
   let print_char = function
-    | VList(VChar(c)::[]) ->
-       VUnit (Pervasives.print_char c)
+    | EList(EChar(c)::[]) ->
+       EUnit (Pervasives.print_char c)
     | _ -> failwith "print_char"
 
   let print_string = function
-    | VList(VString(s)::[]) ->
-       VUnit (Pervasives.print_string s)
+    | EList(EString(s)::[]) ->
+       EUnit (Pervasives.print_string s)
     | _ -> failwith "print_string"
 
   let print_endline = function
-    | VList(v::[]) ->
-       VUnit (Pervasives.print_endline (string_of_value v))
-    | _ as v -> failwith ("error print_endline: "^(string_of_value v))
+    | EList(e::[]) ->
+       EUnit (Pervasives.print_endline (string_of_expr e))
+    | _ as e -> failwith ("error print_endline: "^(string_of_expr e))
 
   let print_newline = function
-    | VList([]) ->
-       VUnit (Pervasives.print_newline())
+    | EList([]) ->
+       EUnit (Pervasives.print_newline())
     | _ -> failwith "print_newline"
 
   (* Input functions on standard input *)
 
   let read_line = function
-    | VList([]) ->
-       VString (Pervasives.read_line())
+    | EList([]) ->
+       EString (Pervasives.read_line())
     | _ -> failwith "read_line"
 
   let read_int = function
-    | VList([]) ->
-       VInt (Pervasives.read_int())
+    | EList([]) ->
+       EInt (Pervasives.read_int())
     | _ -> failwith "read_int"
 
   (* General output functions *)
 
   let open_out = function
-    | VList(VString(s)::[]) ->
-       VChannelOut (Pervasives.open_out s)
+    | EList(EString(s)::[]) ->
+       EChannelOut (Pervasives.open_out s)
     | _ -> failwith "open_out"
 		    
   let open_out_bin = function
-    | VList(VString(s)::[]) ->
-       VChannelOut (Pervasives.open_out_bin s)
+    | EList(EString(s)::[]) ->
+       EChannelOut (Pervasives.open_out_bin s)
     | _ -> failwith "open_out_bin"
 
   let flush = function
-    | VList(VChannelOut(oc)::[]) ->
-       VUnit (Pervasives.flush oc)
+    | EList(EChannelOut(oc)::[]) ->
+       EUnit (Pervasives.flush oc)
     | _ -> failwith "flush"
 
   let output_char = function
-    | VList(VChannelOut(oc)::VChar(c)::[]) ->
-       VUnit (Pervasives.output_char oc c)
+    | EList(EChannelOut(oc)::EChar(c)::[]) ->
+       EUnit (Pervasives.output_char oc c)
     | _ -> failwith "output_char"
 
   let output_string = function
-    | VList(VChannelOut(oc)::VString(s)::[]) ->
-       VUnit (Pervasives.output_string oc s)
+    | EList(EChannelOut(oc)::EString(s)::[]) ->
+       EUnit (Pervasives.output_string oc s)
     | _ -> failwith "output_string"
 
   let close_out = function
-    | VList(VChannelOut(oc)::[]) ->
-       VUnit (Pervasives.close_out oc)
+    | EList(EChannelOut(oc)::[]) ->
+       EUnit (Pervasives.close_out oc)
     | _ -> failwith "close_out"
 		    
   (* General input functions *)		    
 
   let open_in = function
-    | VList(VString(s)::[]) ->
-       VChannelIn (Pervasives.open_in s)
+    | EList(EString(s)::[]) ->
+       EChannelIn (Pervasives.open_in s)
     | _ -> failwith "open_in"
 
   let open_in_bin = function
-    | VList(VString(s)::[]) ->
-       VChannelIn (Pervasives.open_in_bin s)
+    | EList(EString(s)::[]) ->
+       EChannelIn (Pervasives.open_in_bin s)
     | _ -> failwith "open_in_bin"
 
   let input_char = function
-    | VList(VChannelIn(ic)::[]) ->
-       VChar(Pervasives.input_char ic);
+    | EList(EChannelIn(ic)::[]) ->
+       EChar(Pervasives.input_char ic);
     | _ -> failwith "input_char"
 		    
   let input_line = function
-    | VList(VChannelIn(ic)::[]) ->
-       VString(Pervasives.input_line ic);
-    | _ as params -> failwith ("input_line expecting a VChannelIn. Got "^(string_of_value params))
+    | EList(EChannelIn(ic)::[]) ->
+       EString(Pervasives.input_line ic);
+    | _ as params -> failwith ("input_line expecting a EChannelIn. Got "^(string_of_expr params))
 		    
   let close_in = function
-    | VList(VChannelIn(c)::[]) ->
-       VUnit (Pervasives.close_in c)
+    | EList(EChannelIn(c)::[]) ->
+       EUnit (Pervasives.close_in c)
     | _ -> failwith "close_in"
 
 end
@@ -135,79 +134,79 @@ end
 module LUnix = struct
   
   let stdin = function
-    | VList([]) -> 
-       VFile(Unix.stdin)
+    | EList([]) -> 
+       EFile(Unix.stdin)
     | _ -> failwith "unix_stdin"
 		    
   let stdout = function
-    | VList([]) -> 
-       VFile(Unix.stdout)
+    | EList([]) -> 
+       EFile(Unix.stdout)
     | _ -> failwith "unix_stdout"
 		    
   let stderr = function
-    | VList([]) -> 
-       VFile(Unix.stderr)
+    | EList([]) -> 
+       EFile(Unix.stderr)
     | _ -> failwith "unix_stderr"
 
   let flag_of_string_value = function
-    | VString "O_RDONLY" -> Unix.O_RDONLY
-    | VString "O_WRONLY" -> Unix.O_WRONLY
-    | VString "O_CREAT" -> Unix.O_CREAT
-    | VString "O_RDWR" -> Unix.O_RDWR
+    | EString "O_RDONLY" -> Unix.O_RDONLY
+    | EString "O_WRONLY" -> Unix.O_WRONLY
+    | EString "O_CREAT" -> Unix.O_CREAT
+    | EString "O_RDWR" -> Unix.O_RDWR
     | _ -> failwith "flag_of_string_value: not managed"
 		    
   let openfile = function
-    | VList(VString(name)::VList(flags)::VString(perm)::[]) -> 
-       (VFile (Unix.openfile
+    | EList(EString(name)::EList(flags)::EString(perm)::[]) -> 
+       (EFile (Unix.openfile
 		 name 
 		 (List.map flag_of_string_value flags)
 		 (int_of_string perm)))
     | _ -> failwith "unix_openfile"
 		    
   let close = function
-    | VList(VFile(fd)::[]) -> 
-       VUnit (Unix.close fd)
+    | EList(EFile(fd)::[]) -> 
+       EUnit (Unix.close fd)
     | _ -> failwith "unix_close"
 		    
   let read = function
-    | VList(VFile(fd)::rest) ->
+    | EList(EFile(fd)::rest) ->
        (match rest with
-	| VBytes(buff)::rest ->
+	| EBytes(buff)::rest ->
 	   (match rest with
-	    | VInt(ofs)::rest->
+	    | EInt(ofs)::rest->
 	       (match rest with 
-		| VInt(len)::rest -> 
+		| EInt(len)::rest -> 
 		   (match rest with 
-		    | [] -> VInt(Unix.read fd buff ofs len)
+		    | [] -> EInt(Unix.read fd buff ofs len)
 		    | _ -> failwith "unix_read: wrong number of arguments: 4 expected")
 		| _ -> failwith "unix_read: 4th argument must be an integer")
-	    | _ -> failwith ("unix_read: 3th argument must be an integer: "^(string_of_value (List.hd rest))))
+	    | _ -> failwith ("unix_read: 3th argument must be an integer: "^(string_of_expr (List.hd rest))))
 	| _ -> failwith "unix_read: 2nd argument must be a string")
     | _ -> failwith "unix_read: 1st argument must be a file descriptor"
 		    
   let write = function
-    | VList(VFile(fd)::VBytes(b)::VInt(ofs)::VInt(len)::[]) -> 
-       VInt(Unix.write fd b ofs len)
+    | EList(EFile(fd)::EBytes(b)::EInt(ofs)::EInt(len)::[]) -> 
+       EInt(Unix.write fd b ofs len)
     | _ -> failwith "unix_write"
 
-  let write_substring v = match v with
-    | VList(VFile(fd)::VString(s)::VInt(ofs)::VInt(len)::[]) -> 
-       VInt(Unix.write_substring fd s ofs len)
-    | _ -> failwith ("unix_write_substring"^(string_of_value v))
+  let write_substring e = match e with
+    | EList(EFile(fd)::EString(s)::EInt(ofs)::EInt(len)::[]) -> 
+       EInt(Unix.write_substring fd s ofs len)
+    | _ -> failwith ("unix_write_substring"^(string_of_expr e))
 		    		    
   let in_channel_of_descr = function
-    | VList(VFile(fd)::[]) ->
-       VChannelIn(Unix.in_channel_of_descr fd);
+    | EList(EFile(fd)::[]) ->
+       EChannelIn(Unix.in_channel_of_descr fd);
     | _ -> failwith "in_channel_of_descr"
 		    
   let out_channel_of_descr = function
-    | VList(VFile(fd)::[]) ->
-       VChannelOut(Unix.out_channel_of_descr fd);
+    | EList(EFile(fd)::[]) ->
+       EChannelOut(Unix.out_channel_of_descr fd);
     | _ -> failwith "out_channel_of_descr"
 
   let domain_of_sockaddr = function
-    | VList (VSockAddr(sockaddr)::[]) ->
-       VSockDomain(Unix.domain_of_sockaddr sockaddr)
+    | EList (ESockAddr(sockaddr)::[]) ->
+       ESockDomain(Unix.domain_of_sockaddr sockaddr)
     | _ -> failwith "domain of sockaddr: wrong arguments"
 		    
   let domain_of_string = function
@@ -217,8 +216,8 @@ module LUnix = struct
     | _ -> failwith "domain_of_string"
 		    
   let string_of_domain = function
-    | VList(VSockDomain(domain)::[]) ->
-       VString 
+    | EList(ESockDomain(domain)::[]) ->
+       EString 
          (match domain with
           | Unix.PF_UNIX -> "PF_UNIX"
           | Unix.PF_INET -> "PF_INET"
@@ -243,76 +242,76 @@ module LUnix = struct
     | _ -> failwith "to be implemented"
 		    
   let inet_addr_of_sockaddr = function
-      VList(VSockAddr(sockaddr)::[]) ->
+      EList(ESockAddr(sockaddr)::[]) ->
        (match sockaddr with
-        | Unix.ADDR_INET (n, _) -> VInetAddr(n)
-        | Unix.ADDR_UNIX _ -> VInetAddr(Unix.inet_addr_any))
+        | Unix.ADDR_INET (n, _) -> EInetAddr(n)
+        | Unix.ADDR_UNIX _ -> EInetAddr(Unix.inet_addr_any))
     | _ -> failwith "wrong arguments"
 
   let inet_addr_any = function
-    | VList([]) ->
-       VInetAddr(Unix.inet_addr_any)
+    | EList([]) ->
+       EInetAddr(Unix.inet_addr_any)
     | _ -> failwith "unix_inet_addr_any"
 		    
   let inet_addr_loopback = function
-    | VList([]) ->
-       VInetAddr(Unix.inet_addr_loopback)
+    | EList([]) ->
+       EInetAddr(Unix.inet_addr_loopback)
     | _ -> failwith "unix_inet_addr_loopback"
 		    
   let inet6_addr_any = function
-    | VList([]) ->
-       VInetAddr(Unix.inet6_addr_any)
+    | EList([]) ->
+       EInetAddr(Unix.inet6_addr_any)
     | _ -> failwith "unix_inet6_addr_any"
 		    
   let inet6_addr_loopback = function
-    | VList([]) ->
-       VInetAddr(Unix.inet6_addr_loopback)
+    | EList([]) ->
+       EInetAddr(Unix.inet6_addr_loopback)
     | _ -> failwith "unix_inet6_addr_loopback"
 		    
   let addr_unix = function
-    | VList(VString(name)::[]) ->
-       VSockAddr(Unix.ADDR_UNIX name)
+    | EList(EString(name)::[]) ->
+       ESockAddr(Unix.ADDR_UNIX name)
     | _ -> failwith "unix_addr_unix"
 		    
   let addr_inet = function
-    | VList(VInetAddr(addr)::VInt(port)::[]) ->
-       VSockAddr(Unix.ADDR_INET(addr, port))
+    | EList(EInetAddr(addr)::EInt(port)::[]) ->
+       ESockAddr(Unix.ADDR_INET(addr, port))
     | _ -> failwith "unix_addr_inet"
 	
   let socket = function
-    | VList(VString(domain)::VString(stype)::VInt(protocol)::[]) ->
-       (VFile (Unix.socket (domain_of_string domain) (socket_type_of_string stype) protocol))
-    | _ as v -> failwith ("unix_socket: arguments are wrong: "^(string_of_value v))
+    | EList(EString(domain)::EString(stype)::EInt(protocol)::[]) ->
+       (EFile (Unix.socket (domain_of_string domain) (socket_type_of_string stype) protocol))
+    | _ as e -> failwith ("unix_socket: arguments are wrong: "^(string_of_expr e))
 		    
   let connect = function
-    | VList(VFile(fd)::VSockAddr(saddr)::[]) ->
-       VUnit (Unix.connect fd saddr)
+    | EList(EFile(fd)::ESockAddr(saddr)::[]) ->
+       EUnit (Unix.connect fd saddr)
     | _ -> failwith "unix_connect"
 		    
-  let bind v = match v with
-    | VList(VFile(fd)::VSockAddr(saddr)::[]) ->
-       VUnit (Unix.bind fd saddr)
-    | _ -> failwith ("unix_bind:"^(string_of_value v))
+  let bind e = match e with
+    | EList(EFile(fd)::ESockAddr(saddr)::[]) ->
+       EUnit (Unix.bind fd saddr)
+    | _ -> failwith ("unix_bind:"^(string_of_expr e))
 		    
   let accept = function
-    | VList(VFile(fd)::[]) ->
+    | EList(EFile(fd)::[]) ->
        let (fd,saddr) = Unix.accept fd in
-       VList(VFile(fd)::VSockAddr(saddr)::[])
+       EList(EFile(fd)::ESockAddr(saddr)::[])
     | _ -> failwith "unix_accept"
 		    
   let listen = function
-    | VList(VFile(fd)::VInt(n)::[]) ->
-       VUnit (Unix.listen fd n)
+    | EList(EFile(fd)::EInt(n)::[]) ->
+       EUnit (Unix.listen fd n)
     | _ -> failwith "unix_listen"
 		    
   let shutdown = function
-    | VList(VFile(fd)::VString(sc)::[]) ->
-       VUnit (Unix.shutdown fd (shutdown_command_of_string sc))
+    | EList(EFile(fd)::EString(sc)::[]) ->
+       EUnit (Unix.shutdown fd (shutdown_command_of_string sc))
     | _ -> failwith "unix_shutdown"
 
   let setsockopt = function
-    | VList(VFile(fd)::VString(sbo)::VBool(b)::[]) ->
-       VUnit (Unix.setsockopt fd (socket_bool_option_of_string sbo) b)
+    | EList(EFile(fd)::EString(sbo)::EBool(b)::[]) ->
+       EUnit (Unix.setsockopt fd (socket_bool_option_of_string sbo) b)
     | _ -> failwith "unix_shutdown"
 
 end
@@ -320,38 +319,38 @@ end
 module Bytes = struct
 
   let bytes_of_string = function
-    |  VList(VString(s)::[]) ->
-	VBytes(Bytes.of_string s)
+    |  EList(EString(s)::[]) ->
+	EBytes(Bytes.of_string s)
     | _ -> failwith "wrong arguments"		    
   
   let bytes_to_string = function
-    |  VList(VBytes(b)::[]) ->
-	VString(Bytes.to_string b)
+    |  EList(EBytes(b)::[]) ->
+	EString(Bytes.to_string b)
     | _ -> failwith "wrong arguments"		    
   
   let bytes_create = function
-    |  VList(VInt(n)::[]) ->
-	VBytes(Bytes.create n)
+    |  EList(EInt(n)::[]) ->
+	EBytes(Bytes.create n)
     | _ -> failwith "wrong arguments"		    
   
   let bytes_make = function
-    |  VList(VInt(n)::VChar(c)::[]) ->
-	VBytes(Bytes.make n c)
+    |  EList(EInt(n)::EChar(c)::[]) ->
+	EBytes(Bytes.make n c)
     | _ -> failwith "wrong arguments"		    
   
   let bytes_to_string = function
-    |  VList(VBytes(b)::[]) ->
-	VString(Bytes.to_string b)
+    |  EList(EBytes(b)::[]) ->
+	EString(Bytes.to_string b)
     | _ -> failwith "wrong arguments"		    
   
   let bytes_length = function
-    |  VList(VBytes(b)::[]) ->
-	VInt(Bytes.length b)
+    |  EList(EBytes(b)::[]) ->
+	EInt(Bytes.length b)
     | _ -> failwith "wrong arguments"		    
   
   let bytes_get = function
-    |  VList(VBytes(b)::VInt(n)::[]) ->
-	VChar(Bytes.get b n)
+    |  EList(EBytes(b)::EInt(n)::[]) ->
+	EChar(Bytes.get b n)
     | _ -> failwith "wrong arguments"		    
   
 end
@@ -359,28 +358,28 @@ end
 module HString = struct
   
   let make = function
-    |  VList(VInt(n)::VChar(c)::[]) ->
-	VString(String.make n c)
+    |  EList(EInt(n)::EChar(c)::[]) ->
+	EString(String.make n c)
     | _ -> failwith "string_make"		    
 		    
   let length = function
-    |  VList(VString(s)::[]) ->
-	VInt(String.length s)
-    | _ as v -> failwith ("string_length: wrong arguments: "^(string_of_value v))
+    |  EList(EString(s)::[]) ->
+	EInt(String.length s)
+    | _ as e -> failwith ("string_length: wrong arguments: "^(string_of_expr e))
 		    
   let get = function
-    |  VList(VString(s)::VInt(n)::[]) ->
-	VChar(String.get s n)
+    |  EList(EString(s)::EInt(n)::[]) ->
+	EChar(String.get s n)
     | _ -> failwith "string_get"
 		    		    
   let sub = function
-    |  VList(VString(s)::VInt(ofs)::VInt(len)::[]) ->
-	VString(String.sub s ofs len)
+    |  EList(EString(s)::EInt(ofs)::EInt(len)::[]) ->
+	EString(String.sub s ofs len)
     | _ -> failwith "string_sub"
 		    		    
   let concat = function
-    |  VList(VString(s)::VList(l)::[]) ->
-	VString(String.concat s (List.map (function VString s' -> s'|_ -> failwith "Should be a string") l))
+    |  EList(EString(s)::EList(l)::[]) ->
+	EString(String.concat s (List.map (function EString s' -> s'|_ -> failwith "Should be a string") l))
     | _ -> failwith "string_concat"
 		    		    
 end
@@ -388,13 +387,13 @@ end
 module Str = struct
 
   let regexp = function
-    | VList(VString(s)::[]) ->
-       VRegexp(Str.regexp(s))
+    | EList(EString(s)::[]) ->
+       ERegexp(Str.regexp(s))
     | _ -> failwith "regexp"
 
   let global_replace = function
-    | VList(VRegexp(old)::VString(niou)::VString(s)::[]) ->
-       VString(Str.global_replace old niou s)
+    | EList(ERegexp(old)::EString(niou)::EString(s)::[]) ->
+       EString(Str.global_replace old niou s)
     | _ -> failwith "global_replace"
   
 end
@@ -402,107 +401,107 @@ end
 module Char = struct
   
   let char_to_string = function
-    | VList(VChar(c)::[]) ->
-       VString(Char.escaped c)
+    | EList(EChar(c)::[]) ->
+       EString(Char.escaped c)
     | _ -> failwith "char_to_string"
 end
                 
 module Ssl = struct
   
   let init = function
-    | VList([]) ->
-       VUnit(Ssl_threads.init();Ssl.init())
+    | EList([]) ->
+       EUnit(Ssl_threads.init();Ssl.init())
     | _ -> failwith "Ssl.init"
 
   let protocol_v23 = function
-    | VList([]) ->
-       VSslProtocol(Ssl.SSLv23)
+    | EList([]) ->
+       ESslProtocol(Ssl.SSLv23)
     | _ -> failwith "wrong arguments"
 
   let context_type_server = function
-    | VList([]) ->
-       VSslContextType(Ssl.Server_context)
+    | EList([]) ->
+       ESslContextType(Ssl.Server_context)
     | _ -> failwith "wrong arguments"
 
   let open_connection = function
-    | VList(VSslProtocol(protocol)::VSockAddr(sockaddr)::[]) ->
-       VSslSocket(Ssl.open_connection protocol sockaddr)
+    | EList(ESslProtocol(protocol)::ESockAddr(sockaddr)::[]) ->
+       ESslSocket(Ssl.open_connection protocol sockaddr)
     | _ -> failwith "wrong arguments"
 
   let get_certificate = function
-    | VList(VSslSocket(socket)::[]) ->
-       VSslCertificate(Ssl.get_certificate socket)
+    | EList(ESslSocket(socket)::[]) ->
+       ESslCertificate(Ssl.get_certificate socket)
     | _ -> failwith "wrong arguments"
 
   let get_cipher = function
-    | VList(VSslSocket(socket)::[]) ->
-       VSslCipher(Ssl.get_cipher socket)
+    | EList(ESslSocket(socket)::[]) ->
+       ESslCipher(Ssl.get_cipher socket)
     | _ -> failwith "wrong arguments"
 
   let get_issuer = function
-    | VList(VSslCertificate(cert)::[]) ->
-       VString(Ssl.get_issuer cert)
+    | EList(ESslCertificate(cert)::[]) ->
+       EString(Ssl.get_issuer cert)
     | _ -> failwith "wrong arguments"
 
   let get_subject = function
-    | VList(VSslCertificate(cert)::[]) ->
-       VString(Ssl.get_subject cert)
+    | EList(ESslCertificate(cert)::[]) ->
+       EString(Ssl.get_subject cert)
     | _ -> failwith "wrong arguments"
 
   let get_cipher_name = function
-    | VList(VSslCipher(cipher)::[]) ->
-       VString(Ssl.get_cipher_name cipher)
+    | EList(ESslCipher(cipher)::[]) ->
+       EString(Ssl.get_cipher_name cipher)
     | _ -> failwith "wrong arguments"
 
   let get_cipher_version = function
-    | VList(VSslCipher(cipher)::[]) ->
-       VString(Ssl.get_cipher_version cipher)
+    | EList(ESslCipher(cipher)::[]) ->
+       EString(Ssl.get_cipher_version cipher)
     | _ -> failwith "wrong arguments"
 
   let get_cipher_description = function
-    | VList(VSslCipher(cipher)::[]) ->
-       VString(Ssl.get_cipher_description cipher)
+    | EList(ESslCipher(cipher)::[]) ->
+       EString(Ssl.get_cipher_description cipher)
     | _ -> failwith "wrong arguments"
 
   let write = function
-    | VList(VSslSocket(socket)::VBytes(bytes)::VInt(offset)::VInt(length)::[]) ->
-       VInt(Ssl.write socket bytes offset length)
+    | EList(ESslSocket(socket)::EBytes(bytes)::EInt(offset)::EInt(length)::[]) ->
+       EInt(Ssl.write socket bytes offset length)
     | _ -> failwith "wrong arguments"
 
   let read = function
-    | VList(VSslSocket(socket)::VBytes(bytes)::VInt(offset)::VInt(length)::[]) ->
+    | EList(ESslSocket(socket)::EBytes(bytes)::EInt(offset)::EInt(length)::[]) ->
        let r = Ssl.read socket bytes offset length in
-       VInt(r)
+       EInt(r)
     | _ -> failwith "wrong arguments"
 
   let shutdown = function
-    | VList(VSslSocket(socket)::[]) ->
-       VUnit(Ssl.shutdown socket)
+    | EList(ESslSocket(socket)::[]) ->
+       EUnit(Ssl.shutdown socket)
     | _ -> failwith "wrong arguments"
 
   let create_context = function
-    | VList(VSslProtocol(protocol)::VSslContextType(contextType)::[]) ->
-       VSslContext(Ssl.create_context protocol contextType)
+    | EList(ESslProtocol(protocol)::ESslContextType(contextType)::[]) ->
+       ESslContext(Ssl.create_context protocol contextType)
     | _ -> failwith "wrong arguments"
 
   let embed_socket = function
-    | VList(VFile(fd)::VSslContext(ctx)::[]) ->
-       VSslSocket(Ssl.embed_socket fd ctx)
+    | EList(EFile(fd)::ESslContext(ctx)::[]) ->
+       ESslSocket(Ssl.embed_socket fd ctx)
     | _ -> failwith "wrong arguments"
 
-  let accept v = match v with
-    | VList(VSslSocket(sock)::[]) ->
-       VUnit(Ssl.accept sock)
-    | _ -> failwith ("Ssl.accept: wrong arguments: "^(string_of_value v))
+  let accept e = match e with
+    | EList(ESslSocket(sock)::[]) ->
+       EUnit(Ssl.accept sock)
+    | _ -> failwith ("Ssl.accept: wrong arguments: "^(string_of_expr e))
 
   let use_certificate = function
-    | VList(VSslContext(context)::VString(cert)::VString(privkey)::[]) ->
-       VUnit(Ssl.use_certificate context cert privkey)
+    | EList(ESslContext(context)::EString(cert)::EString(privkey)::[]) ->
+       EUnit(Ssl.use_certificate context cert privkey)
     | _ -> failwith "wrong arguments"
 
   let set_password = function
-    | VList(VSslContext(ctx)::VString(pwd)::[]) ->
-       VUnit(Ssl.set_password_callback ctx (fun _ -> print_endline pwd ; pwd))
+    | EList(ESslContext(ctx)::EString(pwd)::[]) ->
+       EUnit(Ssl.set_password_callback ctx (fun _ -> print_endline pwd ; pwd))
     | _ -> failwith "wrong arguments"
 
 end
@@ -510,13 +509,13 @@ end
 module Misc = struct
 
   let inet_addr_of_host_entry = function
-    | VList(VHostEntry(hostentry)::[]) ->
-       VInetAddr(hostentry.h_addr_list.(0))
+    | EList(EHostEntry(hostentry)::[]) ->
+       EInetAddr(hostentry.h_addr_list.(0))
     | _ -> failwith "wrong arguments"
 
   let gethostbyname = function
-    | VList(VString(hostname)::[]) ->
-       VHostEntry(Unix.gethostbyname hostname)
+    | EList(EString(hostname)::[]) ->
+       EHostEntry(Unix.gethostbyname hostname)
     | _ -> failwith "wrong arguments"
 	    
 end
@@ -536,8 +535,8 @@ end
 module HThread = struct
 
   let join = function
-    | VList(VThread(t)::[]) ->
-       VUnit(Thread.join(t))
+    | EList(EThread(t)::[]) ->
+       EUnit(Thread.join(t))
     | _ -> failwith "Thread.join: wrong arguments"
 end
 

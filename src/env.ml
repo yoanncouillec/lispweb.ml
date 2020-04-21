@@ -1,8 +1,7 @@
-open Value
 open Expr
 
 type env_addr = 
-  | EnvAddr of value ref
+  | EnvAddr of expr ref
   | EnvNotFound of string
 
 let extend_env id r env = (id, r)::env

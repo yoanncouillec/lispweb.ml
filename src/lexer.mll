@@ -48,6 +48,7 @@ rule token = parse
   | "call/cc" { CALLCC }
   | "hostcall" { HOSTCALL }
   | "eval" { EVAL }
+  | "load-string" { LOAD_STRING }
   | "load" { LOAD }
   | "call-with-new-thread" { CALLWITHNEWTHREAD }
   | "+" { PLUS }

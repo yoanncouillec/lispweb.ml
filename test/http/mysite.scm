@@ -29,7 +29,7 @@
 (define /response
   (lambda (client queryparams)
     (let* ((expr (assoc queryparams "expr")))
-      (let* ((v (eval (url-decode-light expr))))
+      (let* ((v (load-string (url-decode-light expr))))
 	(https-send-response
 	 client
 	 "200"

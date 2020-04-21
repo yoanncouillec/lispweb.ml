@@ -1,6 +1,5 @@
 open Eval
 open Expr
-open Value
    
 let _ =
   let execname = List.hd (Array.to_list Sys.argv) in
@@ -16,4 +15,4 @@ let _ =
        expression_of_args ((ELoad (EString(file)))::accu) rest
     | [] -> Expr.EBegin (List.rev accu)
   in
-  eval (expression_of_args [] sargs) [] [] [] [] (fun v _ _ -> print_endline (string_of_value v) ; v)
+  eval (expression_of_args [] sargs) [] [] [] [] (fun v _ _ -> print_endline (string_of_expr v) ; v)

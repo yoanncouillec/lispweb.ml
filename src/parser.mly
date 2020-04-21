@@ -1,7 +1,7 @@
 %token<int> ER_INT
 %token<string> ER_CHAR_ESC
 %token<string> ER_IDENT ER_STRING ER_CHAR ER_IDENT_OPT
-%token LPAREN RPAREN LAMBDA LET LETREC DEFINE LETSTAR LOAD EVAL
+%token LPAREN RPAREN LAMBDA LET LETREC DEFINE LETSTAR LOAD_STRING LOAD EVAL
 %token TRUE FALSE IF COND ELSE EOF BEGIN EQUAL SET NOT AND
 %token CAR CDR CONS LIST
 %token CATCH THROW CALLCC BLOCK RETURNFROM HOSTCALL CALLWITHNEWTHREAD
@@ -31,6 +31,7 @@ expression:
 | TRUE { Expr.EBool (true) }
 | FALSE { Expr.EBool (false) }
 | LPAREN EVAL expression RPAREN { Expr.EEval $3 }
+| LPAREN LOAD_STRING expression RPAREN { Expr.ELoadString $3 }
 | LPAREN LOAD expression RPAREN { Expr.ELoad $3 }
 | LPAREN NOT expression RPAREN { Expr.ENot ($3) }
 | LPAREN AND expression expression RPAREN { Expr.EAnd ($3, $4) }
