@@ -155,8 +155,9 @@ module LUnix = struct
     | EString "O_RDWR" -> Unix.O_RDWR
     | _ -> failwith "flag_of_string_value: not managed"
 		    
-  let openfile = function
-    | EList(EString(name)::EList(flags)::EString(perm)::[]) -> 
+  let openfile f =
+    match f with
+    | EList(EString(name)::EList(flags)::EString(perm)::[]) ->
        (EFile (Unix.openfile
 		 name 
 		 (List.map flag_of_string_value flags)

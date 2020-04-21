@@ -1,7 +1,0 @@
-(define blabla
-  (lambda (a b :c 12 d :e (+ a c))
-    (+ a b c d e)))
-
-(blabla 1 2 3)
-(blabla 1 2 3 :c 5)
-(blabla 1 2 3 :c 5 :e 10)

@@ -6,7 +6,7 @@
 (load "lib/url.scm")
 (load "lib/bootstrap/bootstrap_badge.scm")
 
-(define port 8080)
+(define port 8081)
 
 (define /home
   (lambda (client)

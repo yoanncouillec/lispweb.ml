@@ -1,3 +1,12 @@
+%{
+    let remove_enclosing_quotes s = 
+      String.sub (s) 1 ((String.length s) - 2)
+
+    let replace_escape s =
+      let r = Str.regexp "\\\\\"" in
+      Str.global_replace r s "\""
+%}
+
 %token<int> ER_INT
 %token<string> ER_CHAR_ESC
 %token<string> ER_IDENT ER_STRING ER_CHAR ER_IDENT_OPT
@@ -9,7 +18,7 @@
 %token CQUOTE CQUASIQUOTE CUNQUOTE
 %start start
 %type <Expr.expr option> start
-
+    
 %%
 
 start: 
@@ -21,7 +30,7 @@ expressions:
 
 expression:
 | n = ER_INT { Expr.EInt (n) }
-| ER_STRING { Expr.EString (String.sub ($1) 1 ((String.length $1) - 2)) }
+| ER_STRING { Expr.EString (remove_enclosing_quotes $1) }
 | ER_CHAR { Expr.EChar (String.get $1 1) }
 | ER_CHAR_ESC { Expr.EChar (match $1 with "'\\n'" -> '\n' | "'\\r'" -> '\r' | _ -> failwith "ER_CHAR_ESC") }
 | ER_IDENT { Expr.EVar ($1) }
