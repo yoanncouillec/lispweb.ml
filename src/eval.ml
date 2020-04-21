@@ -48,24 +48,20 @@ let rec apply_bin_op op v1 v2 =
       | ODiv -> VInt (n1 / n2))
   | _ -> failwith "Should be integers"
 
-(* let rec eval_quasi_quote e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
- *   match e with 
- *   | EInt n -> *)
-
 let rec get_function s fs = 
   match fs with
   | [] -> failwith ("Eval: EHostCall: function not found: "^s^" is not in ("
                     ^ (List.fold_left (fun a -> function (b,_) -> a^" "^b) "" functions)^")")
   | (s',f)::rest -> 
      if s = s' then f else get_function s rest
-
+    
 let rec eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
   (*(print_endline ("evaluate: "^(string_of_expr e)));*)
   match e with
   | EInt n -> cont (VInt n) genv mem
   | EBinary (op, e1, e2) ->
      eval e1 genv env denv mem
-	  (fun v1 genv' mem' ->
+       (fun v1 genv' mem' ->
 	   eval e2 genv' env denv mem'
 		(fun v2 genv'' mem'' ->
 		 cont (apply_bin_op op v1 v2) genv'' mem''))
@@ -292,17 +288,19 @@ let rec eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
      eval e genv env denv mem
        (fun v genv' mem' ->
 	 cont ((get_function s functions) v) genv' mem')
-  | EEval e ->
-    eval e genv env denv mem
-    (fun v genv' mem' ->
-     match v with
-     | VString s ->
-        (match expr_of_string s with
-         | Some e -> eval e genv' env denv mem' cont
-         | None -> failwith "EEval: cannot parse")
-     | _ -> failwith "eval EEval: should be a string")
+  | EEval e1 ->
+     eval e1 genv env denv mem
+       (fun v genv' mem' ->
+         match v with
+         | VString s ->
+            (match expr_of_string s with
+             | Some e2 -> eval e2 genv' env denv mem' cont
+             | None -> failwith "EEval: cannot parse")
+         | VExpr e3 ->
+            eval e3 genv' env denv mem' cont
+         | _ -> failwith ("eval EEval: should be a string or an expression: "^(string_of_value v)))
   | ELoad e ->
-    eval e genv env denv mem
+     eval e genv env denv mem
     (fun v genv' mem' ->
      match v with
        | VString s ->

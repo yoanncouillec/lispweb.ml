@@ -9,9 +9,10 @@ let rec string_of_value = function
   | VChar c -> "'" ^ (String.make 1 c) ^ "'"
   | VClosure (_, e)-> "#CLOSURE"^(string_of_expr e)^")"
   | VCont _ -> "#CONT"
+  | VExpr e -> string_of_expr e
   | VList vs ->
      "(list"^(List.fold_left (fun acc e -> acc^" "^(string_of_value e)) "" vs)^")"
-  | VExpr e -> "'" ^ (string_of_expr e)
+  | VQuote e -> "(quote " ^ (string_of_expr e) ^")"
   | VFile _ -> "#FILE"
   | VInetAddr _ -> "#INETADDR"
   | VSockAddr _ -> "#SOCKADDR"

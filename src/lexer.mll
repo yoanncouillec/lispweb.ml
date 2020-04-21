@@ -19,6 +19,9 @@ rule token = parse
   | '\'' { CQUOTE }
   | "`" { CQUASIQUOTE }
   | "," { CUNQUOTE }
+  (* | "quote" { CQUOTE }
+   * | "quasiquote" { CQUASIQUOTE }
+   * | "unquote" { CUNQUOTE } *)
   | "equal?" { EQUAL }
   | "#t" { TRUE }
   | "#f" { FALSE }

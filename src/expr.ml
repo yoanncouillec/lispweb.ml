@@ -60,6 +60,7 @@ and value =
   | VCont of cont
   | VList of value list
   | VExpr of expr
+  | VQuote of expr
   | VFile of Unix.file_descr
   | VInetAddr of Unix.inet_addr
   | VSockAddr of Unix.sockaddr
@@ -119,9 +120,9 @@ and string_of_expr = function
      "(call-with-new-thread "^(string_of_expr e)^")"
   | EString s -> "\"" ^ s ^ "\""
   | EChar c -> "'" ^ (String.make 1 c) ^ "'"
-  | EQuote e -> "(quote" ^ (string_of_expr e) ^")"
-  | EQuasiQuote e -> "(quasiquote" ^ (string_of_expr e) ^")"
-  | EUnQuote e -> "(unquote" ^ (string_of_expr e) ^")"
+  | EQuote e -> "(quote " ^ (string_of_expr e) ^")"
+  | EQuasiQuote e -> "(quasiquote " ^ (string_of_expr e) ^")"
+  | EUnQuote e -> "(unquote " ^ (string_of_expr e) ^")"
   | EVar s -> s
   | ESet (s, e) -> "(set! "^s^(string_of_expr e)^")"
   | EEval e -> "(eval "^(string_of_expr e)^")"
