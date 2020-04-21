@@ -52,8 +52,20 @@ let rec get_function s fs =
                     ^ (List.fold_left (fun a -> function (b,_) -> a^" "^b) "" functions)^")")
   | (s',f)::rest -> 
      if s = s' then f else get_function s rest
+
+let rec eval_quasi_quote e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
+  match e with
+  | EBinary (op, e1, e2) ->
+     eval_quasi_quote e1 genv env denv mem
+       (fun v1 genv' mem' ->
+	 eval_quasi_quote e2 genv' env denv mem'
+	   (fun v2 genv'' mem'' ->
+	     cont (EBinary (op, v1, v2)) genv'' mem''))
+  | EUnQuote e ->
+     eval e genv env denv mem cont
+  | _ -> cont e genv mem    
     
-let rec eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
+and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
   (*(print_endline ("evaluate: "^(string_of_expr e)));*)
   match e with
   | EInt n -> cont (EInt n) genv mem
@@ -284,7 +296,7 @@ let rec eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
        (fun v genv' mem' ->
 	 cont ((get_function s functions) v) genv' mem')
   | EQuote e -> cont e genv mem
-  | EQuasiQuote e -> failwith "eval EQuasiQuote: not implemented"
+  | EQuasiQuote e -> eval_quasi_quote e genv env denv mem cont
   | EUnQuote e -> failwith "eval EUnQuote: must be inside a quasiquote"
   | EEval e1 ->
      eval e1 genv env denv mem
