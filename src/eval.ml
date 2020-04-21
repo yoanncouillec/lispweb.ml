@@ -61,6 +61,205 @@ let rec eval_quasi_quote e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont)
 	 eval_quasi_quote e2 genv' env denv mem'
 	   (fun v2 genv'' mem'' ->
 	     cont (EBinary (op, v1, v2)) genv'' mem''))
+  | ENot e ->
+     eval_quasi_quote e genv env denv mem
+	  (fun v genv' mem' ->
+	   cont v genv' mem')
+  | EAnd (e1,e2) ->
+     eval_quasi_quote e1 genv env denv mem
+       (fun v1 genv' mem' ->
+         eval_quasi_quote e2 genv' env denv mem'
+	   (fun v2 genv'' mem'' ->
+	     cont (EAnd(v1, v2)) genv'' mem''))
+  | ESet (s, e) -> 
+     eval_quasi_quote e genv env denv mem
+       (fun v genv' mem' -> 
+         cont v genv' mem')
+  | EIf (e1, e2, e3) -> 
+     eval_quasi_quote e1 genv env denv mem
+       (fun v1 genv1 mem1 -> 
+         eval_quasi_quote e2 genv1 env denv mem1
+           (fun v2 genv2 mem2 -> 
+             eval_quasi_quote e3 genv2 env denv mem2
+               (fun v3 genv3 mem3 -> 
+	         eval_quasi_quote (EIf(v1, v2, v3)) genv3 env denv mem3 cont)))
+
+  | ECond (EElseClause(e1)::rest) -> 
+     eval_quasi_quote e1 genv env denv mem
+       (fun v1 genv1 mem1 ->
+         eval_quasi_quote (ECond(rest)) genv1 env denv mem1
+           (fun v2 genv2 mem2 ->
+             match v2 with
+             | ECond(v3) ->
+                cont (ECond((EElseClause v1)::v3)) genv2 mem2
+             | _ -> failwith "Don't confond bananas & apples"))
+    
+  | ECond (EClause(e1,e2)::rest) -> 
+     eval_quasi_quote e1 genv env denv mem
+       (fun v1 genv1 mem1 -> 
+         eval_quasi_quote e2 genv1 env denv mem1
+	   (fun v2 genv2 mem2 -> 
+             eval_quasi_quote (ECond(rest)) genv2 env denv mem2
+               (fun v3 genv3 mem3 ->
+                 match v3 with
+                 | ECond(v4) ->
+                    cont (ECond((EClause(v1, v2))::v4)) genv3 mem3
+                 | _ -> failwith "Don't confond cabbage & tomato")))
+  | ELet ([], body, tenv) ->
+     eval_quasi_quote body genv env denv mem
+       (fun v genv1 mem1 ->
+         cont (ELet ([], v, tenv)) genv1 mem1)
+    
+  | ELet ((s, e1)::rest, body, tenv) ->
+     eval_quasi_quote e1 genv env denv mem
+       (fun v1 genv1 mem1 ->
+         eval_quasi_quote (ELet(rest, body, tenv)) genv1 env denv mem1
+           (fun v2 genv2 mem2 ->
+             match v2 with
+             |  (ELet(rest, body, tenv)) ->
+                 cont (ELet((s, v1)::rest, body, tenv)) genv2 mem2
+             | _ -> failwith "Bad Bad!"))
+
+  | EDefine (s, e1) ->
+     eval_quasi_quote e1 genv env denv mem
+       (fun v1 genv1 mem1 -> 
+	 cont (EDefine (s, v1)) genv1 mem1)
+
+  | ELambda (Param(s), e1) ->
+     eval_quasi_quote e1 genv env denv mem
+       (fun v1 genv1 mem1 ->
+         cont (ELambda (Param(s), v1)) genv1 mem1)
+
+  | ELambda (ParamOpt(s, e1), e2) ->
+     eval_quasi_quote e1 genv env denv mem
+       (fun v1 genv1 mem1 ->
+         eval_quasi_quote e1 genv1 env denv mem1
+           (fun v2 genv2 mem2 ->
+             cont (ELambda (ParamOpt(s, v1), v2)) genv2 mem2))
+
+  | ELambdaDot (s, e1) ->
+     eval_quasi_quote e1 genv env denv mem
+       (fun v1 genv1 mem1 ->
+         cont (ELambdaDot (s, v1)) genv1 mem1)
+
+  | EThunk (e1) ->
+     eval_quasi_quote e1 genv env denv mem
+       (fun v1 genv1 mem1 ->
+         cont (EThunk(v1)) genv1 mem1)
+    
+  | EThunkApp (e1) ->
+     eval_quasi_quote e1 genv env denv mem
+       (fun v1 genv1 mem1 ->
+         cont (EThunk(v1)) genv1 mem1)
+
+  | EApp (e1, Arg e2) ->
+     eval_quasi_quote e1 genv env denv mem
+       (fun v1 genv1 mem1 ->
+         eval_quasi_quote e1 genv1 env denv mem1
+           (fun v2 genv2 mem2 ->
+             cont (EApp(v1, Arg v2)) genv2 mem2))
+
+  | EApp (e1, ArgOpt(s, e2)) ->
+     eval_quasi_quote e1 genv env denv mem
+       (fun v1 genv1 mem1 ->
+         eval_quasi_quote e1 genv1 env denv mem1
+           (fun v2 genv2 mem2 ->
+             cont (EApp(v1, ArgOpt(s, v2))) genv2 mem2))
+
+  | EBegin (e1::rest) ->
+     eval_quasi_quote e1 genv env denv mem
+       (fun v1 genv1 mem1 ->
+         eval_quasi_quote (EBegin rest) genv1 env denv mem1
+           (fun v2 genv2 mem2 ->
+             match v2 with
+             | EBegin v2 ->
+                cont (EBegin(v1::v2)) genv2 mem2
+             | _ -> failwith "blah blah"))
+
+  | ECatch (s, e1) ->
+     eval_quasi_quote e1 genv env denv mem
+       (fun v1 genv1 mem1 ->
+         cont (ECatch(s, v1)) genv1 mem1)
+
+  | EThrow (s, e1) ->
+     eval_quasi_quote e1 genv env denv mem
+       (fun v1 genv1 mem1 ->
+         cont (EThrow (s, v1)) genv1 mem1)
+
+  | EBlock (s, e1) ->
+     eval_quasi_quote e1 genv env denv mem
+       (fun v1 genv1 mem1 ->
+         cont (EBlock (s, v1)) genv1 mem1)
+
+  | EReturnFrom (s, e1) ->
+     eval_quasi_quote e1 genv env denv mem
+       (fun v1 genv1 mem1 ->
+         cont (EReturnFrom (s, v1)) genv1 mem1)
+
+  | ECallcc (s, e1) ->
+     eval_quasi_quote e1 genv env denv mem
+       (fun v1 genv1 mem1 ->
+         cont (ECallcc (s, v1)) genv1 mem1)
+
+  | EEqual (e1, e2) ->
+     eval_quasi_quote e1 genv env denv mem
+       (fun v1 genv1 mem1 ->
+         eval_quasi_quote e2 genv1 env denv mem1
+           (fun v2 genv2 mem2 ->
+             cont (EEqual (v1, v2)) genv2 mem2))
+
+  | EList (e1::rest) ->
+     eval_quasi_quote e1 genv env denv mem
+       (fun v1 genv1 mem1 ->
+         eval_quasi_quote (EList rest) genv1 env denv mem1
+           (fun v2 genv2 mem2 ->
+             match v2 with
+             | EList(v2) ->
+                cont (EList (v1::v2)) genv2 mem2
+             | _ -> failwith "hard stuff here"))
+
+  | ECar e1 ->
+     eval_quasi_quote e1 genv env denv mem
+       (fun v1 genv1 mem1 ->
+         cont (ECar v1) genv1 mem1)
+         
+  | ECdr e1 ->
+     eval_quasi_quote e1 genv env denv mem
+       (fun v1 genv1 mem1 ->
+         cont (ECdr v1) genv1 mem1)
+         
+  | ECons (e1, e2) ->
+     eval_quasi_quote e1 genv env denv mem
+       (fun v1 genv1 mem1 ->
+         eval_quasi_quote e2 genv1 env denv mem1
+           (fun v2 genv2 mem2 ->
+             cont (ECons (v1, v2)) genv2 mem2))
+
+  | EHostCall (s, e1) ->
+     eval_quasi_quote e1 genv env denv mem
+       (fun v1 genv1 mem1 ->
+         cont (EHostCall(s,v1)) genv1 mem1)
+
+  | EEval e1 ->
+     eval_quasi_quote e1 genv env denv mem
+       (fun v1 genv1 mem1 ->
+         cont (EEval e1) genv1 mem1)
+
+  | ELoad e1 ->
+     eval_quasi_quote e1 genv env denv mem
+       (fun v1 genv1 mem1 ->
+         cont (ELoad e1) genv1 mem1)
+
+  | ELoadString e1 ->
+     eval_quasi_quote e1 genv env denv mem
+       (fun v1 genv1 mem1 ->
+         cont (ELoadString e1) genv1 mem1)
+
+  | ECallWithNewThread e1 ->
+     eval_quasi_quote e1 genv env denv mem
+       (fun v1 genv1 mem1 ->
+         cont (ECallWithNewThread e1) genv1 mem1)
+
   | EUnQuote e ->
      eval e genv env denv mem cont
   | _ -> cont e genv mem    
@@ -328,25 +527,24 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
             let t = Thread.create (fun _ -> eval e2 genv' env' denv mem' (fun v _ _ -> v)) () in
             cont (EThread t) genv' mem'
          | _  -> failwith "eval ECallWithNewThread")
-
-
-
-       	    (* | VClosure (env', ELambdaDot (s, body)) as ldot -> *)
-	    (*    eval e2 genv' env denv mem' *)
-	    (* 	    (fun v genv'' mem'' -> *)
-	    (* 	     (match get_env s env with *)
-	    (* 	      | EnvAddr addr ->  *)
-	    (* 		 (match (get_mem addr mem'') with *)
-	    (* 		  | VList vs -> *)
-	    (* 		     addr := VList (vs @ [v]) ; *)
-	    (* 		     cont ldot genv'' mem'' *)
-	    (* 		  | _ -> failwith "eval EApp-ELambdaDot: VList expected") *)
-	    (* 	      | EnvNotFound _ -> *)
-	    (* 		 let addr = ref (VList ([v])) in *)
-	    (* 		 cont *)
-	    (* 		 eval body  *)
-	    (* 		      genv'' *)
-	    (* 		      (extend_env s addr env') *)
-	    (* 		      denv *)
-	    (* 		      (extend_mem addr v mem'') *)
-	    (* 		      cont))        *)
+  | EBytes b ->  cont (EBytes b) genv mem
+  | EChannelIn c ->  cont (EChannelIn c) genv mem
+  | EChannelOut c ->  cont (EChannelOut c) genv mem
+  | EClosure (a, b) ->  cont (EClosure(a,b)) genv mem
+  | ECont a ->  cont (ECont a) genv mem
+  | EFile f ->  cont (EFile f) genv mem
+  | EHostEntry h ->  cont (EHostEntry h) genv mem
+  | EInetAddr i ->  cont (EInetAddr i) genv mem
+  | ERegexp r ->  cont (ERegexp r) genv mem
+  | EShutdownCommand s ->  cont (EShutdownCommand s) genv mem
+  | ESockAddr s ->  cont (ESockAddr s) genv mem
+  | ESockBoolOption s ->  cont (ESockBoolOption s) genv mem
+  | ESockDomain a ->  cont (ESockDomain a) genv mem
+  | ESslCertificate a ->  cont (ESslCertificate a) genv mem
+  | ESslCipher a ->  cont (ESslCipher a) genv mem
+  | ESslContext a ->  cont (ESslContext a) genv mem
+  | ESslContextType a ->  cont (ESslContextType a) genv mem
+  | ESslProtocol a ->  cont (ESslProtocol a) genv mem
+  | ESslSocket a ->  cont (ESslSocket a) genv mem
+  | EThread a ->  cont (EThread a) genv mem
+  | EUnit a ->  cont (EUnit a) genv mem
