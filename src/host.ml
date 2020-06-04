@@ -4,7 +4,7 @@ module Pervasives = struct
 
   let string_of_int = function
     | EList(EInt(n)::[]) -> 
-       EString(Pervasives.string_of_int n)
+       EString(Stdlib.string_of_int n)
     | _ -> failwith "string_of_int: error"
 
   let string_of_val = function
@@ -14,7 +14,7 @@ module Pervasives = struct
 
   let int_of_string = function
     | EList(EString(n)::[]) -> 
-       EInt(Pervasives.int_of_string n)
+       EInt(Stdlib.int_of_string n)
     | _ -> failwith "error"
 
   (******)
@@ -23,110 +23,110 @@ module Pervasives = struct
 
   let stdin = function
     | EList([]) -> 
-       EChannelIn(Pervasives.stdin)
+       EChannelIn(Stdlib.stdin)
     | _ -> failwith "error"
 
   let stdout = function
     | EList([]) -> 
-       EChannelOut(Pervasives.stdout)
+       EChannelOut(Stdlib.stdout)
     | _ -> failwith "error"
 
   let stderr = function
     | EList([]) -> 
-       EChannelOut(Pervasives.stderr)
+       EChannelOut(Stdlib.stderr)
     | _ -> failwith "error"
 
   (* Output functions on standard output *)
 		    
   let print_char = function
     | EList(EChar(c)::[]) ->
-       EUnit (Pervasives.print_char c)
+       EUnit (Stdlib.print_char c)
     | _ -> failwith "print_char"
 
   let print_string = function
     | EList(EString(s)::[]) ->
-       EUnit (Pervasives.print_string s)
+       EUnit (Stdlib.print_string s)
     | _ -> failwith "print_string"
 
   let print_endline = function
     | EList(e::[]) ->
-       EUnit (Pervasives.print_endline (string_of_expr e))
+       EUnit (Stdlib.print_endline (string_of_expr e))
     | _ as e -> failwith ("error print_endline: "^(string_of_expr e))
 
   let print_newline = function
     | EList([]) ->
-       EUnit (Pervasives.print_newline())
+       EUnit (Stdlib.print_newline())
     | _ -> failwith "print_newline"
 
   (* Input functions on standard input *)
 
   let read_line = function
     | EList([]) ->
-       EString (Pervasives.read_line())
+       EString (Stdlib.read_line())
     | _ -> failwith "read_line"
 
   let read_int = function
     | EList([]) ->
-       EInt (Pervasives.read_int())
+       EInt (Stdlib.read_int())
     | _ -> failwith "read_int"
 
   (* General output functions *)
 
   let open_out = function
     | EList(EString(s)::[]) ->
-       EChannelOut (Pervasives.open_out s)
+       EChannelOut (Stdlib.open_out s)
     | _ -> failwith "open_out"
 		    
   let open_out_bin = function
     | EList(EString(s)::[]) ->
-       EChannelOut (Pervasives.open_out_bin s)
+       EChannelOut (Stdlib.open_out_bin s)
     | _ -> failwith "open_out_bin"
 
   let flush = function
     | EList(EChannelOut(oc)::[]) ->
-       EUnit (Pervasives.flush oc)
+       EUnit (Stdlib.flush oc)
     | _ -> failwith "flush"
 
   let output_char = function
     | EList(EChannelOut(oc)::EChar(c)::[]) ->
-       EUnit (Pervasives.output_char oc c)
+       EUnit (Stdlib.output_char oc c)
     | _ -> failwith "output_char"
 
   let output_string = function
     | EList(EChannelOut(oc)::EString(s)::[]) ->
-       EUnit (Pervasives.output_string oc s)
+       EUnit (Stdlib.output_string oc s)
     | _ -> failwith "output_string"
 
   let close_out = function
     | EList(EChannelOut(oc)::[]) ->
-       EUnit (Pervasives.close_out oc)
+       EUnit (Stdlib.close_out oc)
     | _ -> failwith "close_out"
 		    
   (* General input functions *)		    
 
   let open_in = function
     | EList(EString(s)::[]) ->
-       EChannelIn (Pervasives.open_in s)
+       EChannelIn (Stdlib.open_in s)
     | _ -> failwith "open_in"
 
   let open_in_bin = function
     | EList(EString(s)::[]) ->
-       EChannelIn (Pervasives.open_in_bin s)
+       EChannelIn (Stdlib.open_in_bin s)
     | _ -> failwith "open_in_bin"
 
   let input_char = function
     | EList(EChannelIn(ic)::[]) ->
-       EChar(Pervasives.input_char ic);
+       EChar(Stdlib.input_char ic);
     | _ -> failwith "input_char"
 		    
   let input_line = function
     | EList(EChannelIn(ic)::[]) ->
-       EString(Pervasives.input_line ic);
+       EString(Stdlib.input_line ic);
     | _ as params -> failwith ("input_line expecting a EChannelIn. Got "^(string_of_expr params))
 		    
   let close_in = function
     | EList(EChannelIn(c)::[]) ->
-       EUnit (Pervasives.close_in c)
+       EUnit (Stdlib.close_in c)
     | _ -> failwith "close_in"
 
 end
