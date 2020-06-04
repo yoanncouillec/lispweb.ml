@@ -1,1 +1,1 @@
-(eval (eval (quote (list 2 3))))
+(let ((x 1)) `(+ ,(+ 1 2) '(+ 3 4)))

@@ -1,7 +1,16 @@
+%{
+    let remove_enclosing_quotes s = 
+      String.sub (s) 1 ((String.length s) - 2)
+
+    let replace_escape s =
+      let r = Str.regexp "\\\\\"" in
+      Str.global_replace r s "\""
+%}
+
 %token<int> ER_INT
 %token<string> ER_CHAR_ESC
 %token<string> ER_IDENT ER_STRING ER_CHAR ER_IDENT_OPT
-%token LPAREN RPAREN LAMBDA LET LETREC DEFINE LETSTAR LOAD EVAL
+%token LPAREN RPAREN LAMBDA LET LETREC DEFINE LETSTAR LOAD_STRING LOAD EVAL
 %token TRUE FALSE IF COND ELSE EOF BEGIN EQUAL SET NOT AND
 %token CAR CDR CONS LIST
 %token CATCH THROW CALLCC BLOCK RETURNFROM HOSTCALL CALLWITHNEWTHREAD
@@ -9,7 +18,7 @@
 %token CQUOTE CQUASIQUOTE CUNQUOTE
 %start start
 %type <Expr.expr option> start
-
+    
 %%
 
 start: 
@@ -21,7 +30,7 @@ expressions:
 
 expression:
 | n = ER_INT { Expr.EInt (n) }
-| ER_STRING { Expr.EString (String.sub ($1) 1 ((String.length $1) - 2)) }
+| ER_STRING { Expr.EString (remove_enclosing_quotes $1) }
 | ER_CHAR { Expr.EChar (String.get $1 1) }
 | ER_CHAR_ESC { Expr.EChar (match $1 with "'\\n'" -> '\n' | "'\\r'" -> '\r' | _ -> failwith "ER_CHAR_ESC") }
 | ER_IDENT { Expr.EVar ($1) }
@@ -31,6 +40,7 @@ expression:
 | TRUE { Expr.EBool (true) }
 | FALSE { Expr.EBool (false) }
 | LPAREN EVAL expression RPAREN { Expr.EEval $3 }
+| LPAREN LOAD_STRING expression RPAREN { Expr.ELoadString $3 }
 | LPAREN LOAD expression RPAREN { Expr.ELoad $3 }
 | LPAREN NOT expression RPAREN { Expr.ENot ($3) }
 | LPAREN AND expression expression RPAREN { Expr.EAnd ($3, $4) }

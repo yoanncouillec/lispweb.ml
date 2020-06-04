@@ -13,78 +13,70 @@ and arg =
   | ArgOpt of string * expr
             
 and expr =
-  | EInt of int
-  | EBinary of operator * expr * expr
-  | EBool of bool
-  | ENot of expr
   | EAnd of expr * expr
-  | EChar of char
-  | EString of string
-  | EQuote of expr
-  | EQuasiQuote of expr
-  | EUnQuote of expr
-  | EVar of string
-  | ESet of string * expr
-  | EIf of expr * expr * expr
-  | ECond of clause list
-  | ELet of ((string * expr) list) * expr * env
-  | EDefine of string * expr
-  | EThunk of expr
-  | EThunkApp of expr
-  | ELambda of param * expr
-  | ELambdaDot of string * expr
   | EApp of expr * arg
   | EBegin of expr list
-  | ECatch of string * expr
-  | EThrow of string * expr
+  | EBinary of operator * expr * expr
   | EBlock of string * expr
-  | EReturnFrom of string * expr
-  | ECallcc of string * expr
-  | EEqual of expr * expr
-  | ECar of expr
-  | ECdr of expr
-  | ECons of expr * expr
-  | EList of expr list
-  | EHostCall of string * expr
-  | ELoad of expr
-  | EEval of expr
+  | EBool of bool
+  | EBytes of Bytes.t
   | ECallWithNewThread of expr
-
-and value = 
-  | VUnit of unit
-  | VInt of int
-  | VBool of bool
-  | VString of string
-  | VChar of char
-  | VClosure of env * expr
-  | VCont of cont
-  | VList of value list
-  | VExpr of expr
-  | VQuote of expr
-  | VFile of Unix.file_descr
-  | VInetAddr of Unix.inet_addr
-  | VSockAddr of Unix.sockaddr
-  | VSockDomain of Unix.socket_domain
-  | VSockBoolOption of Unix.socket_bool_option
-  | VShutdownCommand of Unix.shutdown_command
-  | VChannelIn of in_channel
-  | VChannelOut of out_channel
-  | VThread of Thread.t
-  | VSslProtocol of Ssl.protocol
-  | VSslSocket of Ssl.socket
-  | VSslCertificate of Ssl.certificate
-  | VSslCipher of Ssl.cipher
-  | VSslContextType of Ssl.context_type
-  | VSslContext of Ssl.context
-  | VBytes of Bytes.t
-  | VRegexp of Str.regexp
-  | VHostEntry of Unix.host_entry	
+  | ECallcc of string * expr
+  | ECar of expr
+  | ECatch of string * expr
+  | ECdr of expr
+  | EChannelIn of in_channel
+  | EChannelOut of out_channel
+  | EChar of char
+  | EClosure of env * expr
+  | ECond of clause list
+  | ECons of expr * expr
+  | ECont of cont
+  | EDefine of string * expr
+  | EEqual of expr * expr
+  | EEval of expr
+  | EFile of Unix.file_descr
+  | EHostCall of string * expr
+  | EHostEntry of Unix.host_entry
+  | EIf of expr * expr * expr
+  | EInetAddr of Unix.inet_addr
+  | EInt of int
+  | ELambda of param * expr
+  | ELambdaDot of string * expr
+  | ELet of ((string * expr) list) * expr * env
+  | EList of expr list
+  | ELoad of expr
+  | ELoadString of expr
+  | ENot of expr
+  | EQuasiQuote of expr
+  | EQuote of expr
+  | ERegexp of Str.regexp
+  | EReturnFrom of string * expr
+  | ESet of string * expr
+  | EShutdownCommand of Unix.shutdown_command
+  | ESockAddr of Unix.sockaddr
+  | ESockBoolOption of Unix.socket_bool_option
+  | ESockDomain of Unix.socket_domain
+  | ESslCertificate of Ssl.certificate
+  | ESslCipher of Ssl.cipher
+  | ESslContext of Ssl.context
+  | ESslContextType of Ssl.context_type
+  | ESslProtocol of Ssl.protocol
+  | ESslSocket of Ssl.socket
+  | EString of string
+  | EThread of Thread.t
+  | EThrow of string * expr
+  | EThunk of expr
+  | EThunkApp of expr
+  | EUnQuote of expr
+  | EUnit of unit
+  | EVar of string
 	
- and env = (string * value ref) list
+ and env = (string * expr ref) list
 
- and mem = (value ref * value) list
+ and mem = (expr ref * expr) list
 			       
- and cont = value  -> env -> mem -> value
+ and cont = expr -> env -> mem -> expr
 
 let rec string_of_param = function
   | Param s -> s
@@ -127,6 +119,7 @@ and string_of_expr = function
   | ESet (s, e) -> "(set! "^s^(string_of_expr e)^")"
   | EEval e -> "(eval "^(string_of_expr e)^")"
   | ELoad e -> "(load "^(string_of_expr e)^")"
+  | ELoadString e -> "(load-string "^(string_of_expr e)^")"
   | EIf (e1, e2, e3) -> 
      "(if "^(string_of_expr e1)^" "^(string_of_expr e2)^" "^(string_of_expr e3)^")"
   | ELet (bindings, body,_) ->
@@ -165,3 +158,26 @@ and string_of_expr = function
   | ECons (e1,e2) -> "(cons "^(string_of_expr e1)^" "^(string_of_expr e2)^")"
   | ECallcc (s, e) -> "(call/cc "^s^" "^(string_of_expr e)^")"
   | EHostCall (s, e) ->  "(hostcall " ^ s ^ " " ^ (string_of_expr e) ^ ")"
+  | EUnit _ -> "()"
+  | EClosure (_, e)-> "#CLOSURE"^(string_of_expr e)^")"
+  | ECont _ -> "#CONT"
+  | EFile _ -> "#FILE"
+  | EInetAddr _ -> "#INETADDR"
+  | ESockAddr _ -> "#SOCKADDR"
+  | ESockDomain _ -> "#SOCKDOMAIN"
+  | ESockBoolOption _ -> "#SOCK_BOOL_OPTION"
+  | EShutdownCommand _ -> "#SHUTDOWNCOMMAND"
+  | EChannelIn _ -> "#INCHANNEL"
+  | EChannelOut _ -> "#OUTCHANNEL"
+  | EThread _ -> "Thread.t"
+  | ESslProtocol _ -> "Ssl.protocol"
+  | ESslSocket _ -> "Ssl.socket"
+  | ESslCertificate _ -> "Ssl.certificate"
+  | ESslCipher _ -> "Ssl.cipher"
+  | ESslContextType _ -> "Ssl.context_type"
+  | ESslContext _ -> "Ssl.context"
+  | EBytes _ -> "#BYTES"
+  | ERegexp _ -> "#REGEXP"
+  | EHostEntry _ -> "Unix.host_entry"
+
+                                                                         

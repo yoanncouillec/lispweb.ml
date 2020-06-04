@@ -9,6 +9,9 @@
       { pos with pos_bol = lexbuf.lex_curr_pos;
                  pos_lnum = pos.pos_lnum + 1
       }
+
+  let foo () = print_endline "foo"
+    
 }
 rule token = parse
   | ';' ';' [^';']* ';' ';' { token lexbuf }
@@ -48,6 +51,7 @@ rule token = parse
   | "call/cc" { CALLCC }
   | "hostcall" { HOSTCALL }
   | "eval" { EVAL }
+  | "load-string" { LOAD_STRING }
   | "load" { LOAD }
   | "call-with-new-thread" { CALLWITHNEWTHREAD }
   | "+" { PLUS }
