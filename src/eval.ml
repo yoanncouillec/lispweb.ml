@@ -475,7 +475,7 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 	  (fun v genv' mem' ->
 	   match v with
 	   | EList (hd::_) -> cont hd genv' mem'
-	   | _ -> failwith ("Eval ECar: Should be a list: "^(string_of_expr v)))
+	   | _ -> failwith ("Eval ECar: Should be a non-empty list: "^(string_of_expr v)))
   | ECdr e ->
      eval e genv env denv mem
 	  (fun v genv' mem' ->
