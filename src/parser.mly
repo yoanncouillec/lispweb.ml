@@ -22,59 +22,69 @@
 %%
 
 start: 
-| e = expressions EOF { Some(Expr.EBegin e) }
+| e = expressions EOF { Some(Expr.EBegin (e, Some(Parsing.symbol_start_pos()))) }
 
 expressions:
 | expression { [$1] }
 | expression expressions { $1 :: $2 }
 
 expression:
-| n = ER_INT { Expr.EInt (n) }
-| ER_STRING { Expr.EString (remove_enclosing_quotes $1) }
-| ER_CHAR { Expr.EChar (String.get $1 1) }
-| ER_CHAR_ESC { Expr.EChar (match $1 with "'\\n'" -> '\n' | "'\\r'" -> '\r' | _ -> failwith "ER_CHAR_ESC") }
-| ER_IDENT { Expr.EVar ($1) }
-| CQUOTE expression { Expr.EQuote ($2) }
-| CQUASIQUOTE expression { Expr.EQuasiQuote ($2) }
-| CUNQUOTE expression { Expr.EUnQuote ($2) }
-| TRUE { Expr.EBool (true) }
-| FALSE { Expr.EBool (false) }
-| LPAREN EVAL expression RPAREN { Expr.EEval $3 }
-| LPAREN LOAD_STRING expression RPAREN { Expr.ELoadString $3 }
-| LPAREN LOAD expression RPAREN { Expr.ELoad $3 }
-| LPAREN NOT expression RPAREN { Expr.ENot ($3) }
-| LPAREN AND expression expression RPAREN { Expr.EAnd ($3, $4) }
-| LPAREN PLUS expression expression RPAREN { Expr.EBinary(Expr.OPlus,$3,$4) }
-| LPAREN MINUS expression expression RPAREN { Expr.EBinary(Expr.OMinus,$3,$4) }
-| LPAREN MULT expression expression RPAREN { Expr.EBinary(Expr.OMult,$3,$4) }
-| LPAREN DIV expression expression RPAREN { Expr.EBinary(Expr.ODiv,$3,$4) }
-| LPAREN CATCH ER_IDENT expression RPAREN { Expr.ECatch($3,$4) }
-| LPAREN THROW ER_IDENT expression RPAREN { Expr.EThrow($3,$4) }
-| LPAREN BLOCK ER_IDENT expression RPAREN { Expr.EBlock($3,$4) }
-| LPAREN RETURNFROM ER_IDENT expression RPAREN { Expr.EReturnFrom($3,$4) }
-| LPAREN CALLCC ER_IDENT expression RPAREN { Expr.ECallcc($3,$4) }
-| LPAREN CAR expression RPAREN { Expr.ECar($3) }
-| LPAREN CDR expression  RPAREN { Expr.ECdr($3) }
-| LPAREN CONS expression expression RPAREN { Expr.ECons($3,$4) }
-| LPAREN LIST RPAREN { Expr.EList([]) }
-| LPAREN LIST expressions RPAREN { Expr.EList($3) }
-| LPAREN IF expression expression expression RPAREN { Expr.EIf ($3, $4, $5) }
-| LPAREN COND clauses RPAREN { Expr.ECond ($3) }
-| LPAREN LAMBDA LPAREN RPAREN expressions RPAREN { Expr.EThunk (Expr.EBegin $5) }
-| LPAREN LAMBDA LPAREN parameters RPAREN expressions RPAREN { List.fold_left (fun a b -> Expr.ELambda(b,a)) (Expr.ELambda (List.hd ((List.rev $4)), (Expr.EBegin $6))) (List.tl (List.rev $4)) }
-| LPAREN LET LPAREN ER_IDENT expression RPAREN expressions RPAREN { Expr.ELet ([($4, $5)], Expr.EBegin $7, []) }
-| LPAREN LET LPAREN bindings RPAREN expressions RPAREN { Expr.ELet ($4, Expr.EBegin $6, []) }
-| LPAREN LETSTAR LPAREN bindings RPAREN expressions RPAREN { List.fold_left (fun a b -> Expr.ELet ([fst b, snd b], a, [])) (Expr.ELet ([fst (List.hd (List.rev $4)), snd (List.hd (List.rev $4))], Expr.EBegin $6, [])) (List.tl (List.rev $4)) }
-| LPAREN DEFINE ER_IDENT expression RPAREN { Expr.EDefine ($3, $4) }
-| LPAREN LETREC LPAREN ER_IDENT expression RPAREN expression RPAREN { Expr.ELet ([$4, Expr.EInt 0], Expr.ELet ([$4^"-rec-tmp", $5], Expr.EBegin([Expr.ESet($4,Expr.EVar ($4^"-rec-tmp"));$7]),[]),[]) }
-| LPAREN SET ER_IDENT expression RPAREN { Expr.ESet($3, $4) }
-| LPAREN EQUAL expression expression RPAREN { Expr.EEqual ($3,$4) }
-| LPAREN BEGIN expressions RPAREN { Expr.EBegin ($3) }
-| LPAREN HOSTCALL ER_IDENT RPAREN { Expr.EHostCall ($3,Expr.EList []) }
-| LPAREN HOSTCALL ER_IDENT expressions RPAREN { Expr.EHostCall ($3,Expr.EList $4) }
-| LPAREN CALLWITHNEWTHREAD expression RPAREN { Expr.ECallWithNewThread $3 }
-| LPAREN expression RPAREN { Expr.EThunkApp $2 }
-| LPAREN expression arguments RPAREN { List.fold_left (fun a b -> Expr.EApp(a,b)) (Expr.EApp ($2, List.hd $3)) (List.tl $3)}
+| n = ER_INT { Expr.EInt (n, Some(Parsing.symbol_start_pos())) }
+| ER_STRING { Expr.EString ((remove_enclosing_quotes $1), Some(Parsing.symbol_start_pos())) }
+| ER_CHAR { Expr.EChar ((String.get $1 1), Some(Parsing.symbol_start_pos())) }
+| ER_CHAR_ESC { Expr.EChar ((match $1 with "'\\n'" -> '\n' | "'\\r'" -> '\r' | _ -> failwith "ER_CHAR_ESC"), Some(Parsing.symbol_start_pos())) }
+| ER_IDENT { Expr.EVar ($1, Some(Parsing.symbol_start_pos())) }
+| CQUOTE expression { Expr.EQuote ($2, Some(Parsing.symbol_start_pos())) }
+| CQUASIQUOTE expression { Expr.EQuasiQuote ($2, Some(Parsing.symbol_start_pos())) }
+| CUNQUOTE expression { Expr.EUnQuote ($2, Some(Parsing.symbol_start_pos())) }
+| TRUE { Expr.EBool (true, Some(Parsing.symbol_start_pos())) }
+| FALSE { Expr.EBool (false, Some(Parsing.symbol_start_pos())) }
+| LPAREN EVAL expression RPAREN { Expr.EEval ($3, Some(Parsing.symbol_start_pos())) }
+| LPAREN LOAD_STRING expression RPAREN { Expr.ELoadString ($3, Some(Parsing.symbol_start_pos())) }
+| LPAREN LOAD expression RPAREN { Expr.ELoad ($3, Some(Parsing.symbol_start_pos())) }
+| LPAREN NOT expression RPAREN { Expr.ENot ($3, Some(Parsing.symbol_start_pos())) }
+| LPAREN AND expression expression RPAREN { Expr.EAnd ($3, $4, Some(Parsing.symbol_start_pos())) }
+| LPAREN PLUS expression expression RPAREN { Expr.EBinary(Expr.OPlus,$3,$4, Some(Parsing.symbol_start_pos())) }
+| LPAREN MINUS expression expression RPAREN { Expr.EBinary(Expr.OMinus,$3,$4, Some(Parsing.symbol_start_pos())) }
+| LPAREN MULT expression expression RPAREN { Expr.EBinary(Expr.OMult,$3,$4, Some(Parsing.symbol_start_pos())) }
+| LPAREN DIV expression expression RPAREN { Expr.EBinary(Expr.ODiv,$3,$4, Some(Parsing.symbol_start_pos())) }
+| LPAREN CATCH ER_IDENT expression RPAREN { Expr.ECatch($3,$4, Some(Parsing.symbol_start_pos())) }
+| LPAREN THROW ER_IDENT expression RPAREN { Expr.EThrow($3,$4, Some(Parsing.symbol_start_pos())) }
+| LPAREN BLOCK ER_IDENT expression RPAREN { Expr.EBlock($3,$4, Some(Parsing.symbol_start_pos())) }
+| LPAREN RETURNFROM ER_IDENT expression RPAREN { Expr.EReturnFrom($3,$4, Some(Parsing.symbol_start_pos())) }
+| LPAREN CALLCC ER_IDENT expression RPAREN { Expr.ECallcc($3,$4, Some(Parsing.symbol_start_pos())) }
+| LPAREN CAR expression RPAREN { Expr.ECar($3, Some(Parsing.symbol_start_pos())) }
+| LPAREN CDR expression  RPAREN { Expr.ECdr($3, Some(Parsing.symbol_start_pos())) }
+| LPAREN CONS expression expression RPAREN { Expr.ECons($3,$4, Some(Parsing.symbol_start_pos())) }
+| LPAREN LIST RPAREN { Expr.EList([], Some(Parsing.symbol_start_pos())) }
+| LPAREN LIST expressions RPAREN { Expr.EList($3, Some(Parsing.symbol_start_pos())) }
+| LPAREN IF expression expression expression RPAREN { Expr.EIf ($3, $4, $5, Some(Parsing.symbol_start_pos())) }
+| LPAREN COND clauses RPAREN { Expr.ECond ($3, Some(Parsing.symbol_start_pos())) }
+| LPAREN LAMBDA LPAREN RPAREN expressions RPAREN { Expr.EThunk (Expr.EBegin ($5, Some(Parsing.symbol_start_pos())), Some(Parsing.symbol_start_pos())) }
+
+| LPAREN LAMBDA LPAREN parameters RPAREN expressions RPAREN { List.fold_left (fun a b -> Expr.ELambda(b,a, Some(Parsing.symbol_start_pos()))) (Expr.ELambda (List.hd ((List.rev $4)), (Expr.EBegin ($6, Some(Parsing.symbol_start_pos()))), Some(Parsing.symbol_start_pos()))) (List.tl (List.rev $4)) }
+
+| LPAREN LET LPAREN ER_IDENT expression RPAREN expressions RPAREN { Expr.ELet ([($4, $5)], (Expr.EBegin ($7, Some(Parsing.symbol_start_pos()))), [], Some(Parsing.symbol_start_pos())) }
+
+| LPAREN LET LPAREN bindings RPAREN expressions RPAREN { Expr.ELet ($4, (Expr.EBegin ($6, Some(Parsing.symbol_start_pos()))), [], Some(Parsing.symbol_start_pos())) }
+
+| LPAREN LETSTAR LPAREN bindings RPAREN expressions RPAREN { List.fold_left (fun a b -> (Expr.ELet ([fst b, snd b], a, [], Some(Parsing.symbol_start_pos())))) (Expr.ELet ([fst (List.hd (List.rev $4)), snd (List.hd (List.rev $4))], (Expr.EBegin ($6, Some(Parsing.symbol_start_pos()))), [], Some(Parsing.symbol_start_pos()))) (List.tl (List.rev $4)) }
+
+| LPAREN DEFINE ER_IDENT expression RPAREN { Expr.EDefine ($3, $4, Some(Parsing.symbol_start_pos())) }
+
+| LPAREN LETREC LPAREN ER_IDENT expression RPAREN expression RPAREN { Expr.ELet ([$4, (Expr.EInt (0, Some(Parsing.symbol_start_pos())))], (Expr.ELet ([$4^"-rec-tmp", $5], Expr.EBegin ([Expr.ESet($4, (Expr.EVar ($4^"-rec-tmp", Some(Parsing.symbol_start_pos()))), Some(Parsing.symbol_start_pos()));$7], Some(Parsing.symbol_start_pos())),[], Some(Parsing.symbol_start_pos()))),[], Some(Parsing.symbol_start_pos())) }
+
+| LPAREN SET ER_IDENT expression RPAREN { Expr.ESet($3, $4, Some(Parsing.symbol_start_pos())) }
+| LPAREN EQUAL expression expression RPAREN { Expr.EEqual ($3,$4,Some(Parsing.symbol_start_pos())) }
+| LPAREN BEGIN expressions RPAREN { Expr.EBegin ($3, Some(Parsing.symbol_start_pos())) }
+| LPAREN HOSTCALL ER_IDENT RPAREN { Expr.EHostCall ($3,(Expr.EList ([], Some(Parsing.symbol_start_pos()))), Some(Parsing.symbol_start_pos())) }
+| LPAREN HOSTCALL ER_IDENT expressions RPAREN { Expr.EHostCall ($3,(Expr.EList ($4, Some(Parsing.symbol_start_pos()))), Some(Parsing.symbol_start_pos())) }
+| LPAREN CALLWITHNEWTHREAD expression RPAREN { Expr.ECallWithNewThread ($3, Some(Parsing.symbol_start_pos())) }
+| LPAREN expression RPAREN { Expr.EThunkApp ($2, Some(Parsing.symbol_start_pos())) }
+| LPAREN expression arguments RPAREN { List.fold_left (fun a b -> Expr.EApp(a,b,Some (Parsing.symbol_start_pos())))
+						      (Expr.EApp ($2, List.hd $3, Some (Parsing.symbol_start_pos())))
+						      (List.tl $3)
+				     }
 
 parameters:
 | parameter { [$1] }

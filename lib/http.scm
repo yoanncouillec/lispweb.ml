@@ -3,20 +3,17 @@
 (load "lib/channel.scm")
 (load "lib/stdout.scm")
 (load "lib/ssl.scm")
+(load "lib/file.scm")
 
 (define http-parse-queryparams
   (lambda (queryparams)
-    ;; (print "http-parse-queryparams") ;;
-    (let (xxx (split '&' queryparams))
-      (let (yyy (map (lambda (p)
-		       (let (res (split '=' p))
-			 (list
-			  (list->string (car res))
-			  (list->string (car (cdr res)))))
-		       )
-		     xxx))
-	yyy))))
-    
+      (map (lambda (p)
+	     (let (res (split '=' p))
+	       (list
+		(list->string (car res))
+		(list->string (car (cdr res)))))
+	     )
+	   (split '&' queryparams))))
 
 (define http-parse-method
   (lambda (read fd)

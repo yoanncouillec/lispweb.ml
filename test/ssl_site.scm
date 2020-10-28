@@ -57,8 +57,8 @@
 (print (concat "" (list "φ Running on http://127.0.0.1:" (int->string port))))
 
 (https-threaded-run-server port
-			   ""
-			   "/etc/letsencrypt/live/galaad.servebeer.com/cert.pem"
-			   "/etc/letsencrypt/live/galaad.servebeer.com/privkey.pem"
+			   "toto"
+			   "/etc/letsencrypt/live/mylittletarot.ddns.net/cert.pem"
+			   "/etc/letsencrypt/live/mylittletarot.ddns.net/privkey.pem"
 			   100
 			   service)

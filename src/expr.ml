@@ -11,66 +11,66 @@ and param =
 and arg =
   | Arg of expr
   | ArgOpt of string * expr
-            
-and expr =
-  | EAnd of expr * expr
-  | EApp of expr * arg
-  | EBegin of expr list
-  | EBinary of operator * expr * expr
-  | EBlock of string * expr
-  | EBool of bool
-  | EBytes of Bytes.t
-  | ECallWithNewThread of expr
-  | ECallcc of string * expr
-  | ECar of expr
-  | ECatch of string * expr
-  | ECdr of expr
-  | EChannelIn of in_channel
-  | EChannelOut of out_channel
-  | EChar of char
-  | EClosure of env * expr
-  | ECond of clause list
-  | ECons of expr * expr
-  | ECont of cont
-  | EDefine of string * expr
-  | EEqual of expr * expr
-  | EEval of expr
-  | EFile of Unix.file_descr
-  | EHostCall of string * expr
-  | EHostEntry of Unix.host_entry
-  | EIf of expr * expr * expr
-  | EInetAddr of Unix.inet_addr
-  | EInt of int
-  | ELambda of param * expr
-  | ELambdaDot of string * expr
-  | ELet of ((string * expr) list) * expr * env
-  | EList of expr list
-  | ELoad of expr
-  | ELoadString of expr
-  | ENot of expr
-  | EQuasiQuote of expr
-  | EQuote of expr
-  | ERegexp of Str.regexp
-  | EReturnFrom of string * expr
-  | ESet of string * expr
-  | EShutdownCommand of Unix.shutdown_command
-  | ESockAddr of Unix.sockaddr
-  | ESockBoolOption of Unix.socket_bool_option
-  | ESockDomain of Unix.socket_domain
-  | ESslCertificate of Ssl.certificate
-  | ESslCipher of Ssl.cipher
-  | ESslContext of Ssl.context
-  | ESslContextType of Ssl.context_type
-  | ESslProtocol of Ssl.protocol
-  | ESslSocket of Ssl.socket
-  | EString of string
-  | EThread of Thread.t
-  | EThrow of string * expr
-  | EThunk of expr
-  | EThunkApp of expr
-  | EUnQuote of expr
-  | EUnit of unit
-  | EVar of string
+  
+and expr = 
+  | EAnd of expr * expr * Lexing.position option
+  | EApp of expr * arg * Lexing.position option
+  | EBegin of expr list * Lexing.position option
+  | EBinary of operator * expr * expr * Lexing.position option
+  | EBlock of string * expr * Lexing.position option
+  | EBool of bool * Lexing.position option
+  | EBytes of Bytes.t * Lexing.position option
+  | ECallWithNewThread of expr * Lexing.position option
+  | ECallcc of string * expr * Lexing.position option
+  | ECar of expr * Lexing.position option
+  | ECatch of string * expr * Lexing.position option
+  | ECdr of expr * Lexing.position option
+  | EChannelIn of in_channel * Lexing.position option
+  | EChannelOut of out_channel * Lexing.position option
+  | EChar of char * Lexing.position option
+  | EClosure of env * expr * Lexing.position option
+  | ECond of clause list * Lexing.position option
+  | ECons of expr * expr * Lexing.position option
+  | ECont of cont * Lexing.position option
+  | EDefine of string * expr * Lexing.position option
+  | EEqual of expr * expr * Lexing.position option
+  | EEval of expr * Lexing.position option
+  | EFile of Unix.file_descr * Lexing.position option
+  | EHostCall of string * expr * Lexing.position option
+  | EHostEntry of Unix.host_entry * Lexing.position option
+  | EIf of expr * expr * expr * Lexing.position option
+  | EInetAddr of Unix.inet_addr * Lexing.position option
+  | EInt of int * Lexing.position option
+  | ELambda of param * expr * Lexing.position option
+  | ELambdaDot of string * expr * Lexing.position option
+  | ELet of ((string * expr) list) * expr * env * Lexing.position option
+  | EList of expr list * Lexing.position option
+  | ELoad of expr * Lexing.position option
+  | ELoadString of expr * Lexing.position option
+  | ENot of expr * Lexing.position option
+  | EQuasiQuote of expr * Lexing.position option
+  | EQuote of expr * Lexing.position option
+  | ERegexp of Str.regexp * Lexing.position option
+  | EReturnFrom of string * expr * Lexing.position option
+  | ESet of string * expr * Lexing.position option
+  | EShutdownCommand of Unix.shutdown_command * Lexing.position option
+  | ESockAddr of Unix.sockaddr * Lexing.position option
+  | ESockBoolOption of Unix.socket_bool_option * Lexing.position option
+  | ESockDomain of Unix.socket_domain * Lexing.position option
+  | ESslCertificate of Ssl.certificate * Lexing.position option
+  | ESslCipher of Ssl.cipher * Lexing.position option
+  | ESslContext of Ssl.context * Lexing.position option
+  | ESslContextType of Ssl.context_type * Lexing.position option
+  | ESslProtocol of Ssl.protocol * Lexing.position option
+  | ESslSocket of Ssl.socket * Lexing.position option
+  | EString of string * Lexing.position option
+  | EThread of Thread.t * Lexing.position option
+  | EThrow of string * expr * Lexing.position option
+  | EThunk of expr * Lexing.position option
+  | EThunkApp of expr * Lexing.position option
+  | EUnQuote of expr * Lexing.position option
+  | EUnit of unit * Lexing.position option
+  | EVar of string * Lexing.position option
 	
  and env = (string * expr ref) list
 
@@ -87,17 +87,17 @@ and string_of_arg = function
   | ArgOpt(s, e) -> s ^ " " ^ (string_of_expr e)
           
 and string_of_expr = function
-  | EInt n -> string_of_int n
-  | EBinary (op, e1, e2) ->
+  | EInt (n, _) -> string_of_int n
+  | EBinary (op, e1, e2, _) ->
      "("^(match op with
 	  | OPlus -> "+"
 	  | OMult -> "*"
           | ODiv -> "/"
 	  | OMinus -> "-")^" "^(string_of_expr e1)^" "^(string_of_expr e2)^")"
-  | EBool b -> string_of_bool b
-  | ENot e -> "(not "^(string_of_expr e)^")"
-  | EAnd (e1,e2) -> "(and "^(string_of_expr e1)^" "^(string_of_expr e2)^")"
-  | ECond clauses ->
+  | EBool (b, _) -> string_of_bool b
+  | ENot (e, _) -> "(not "^(string_of_expr e)^")"
+  | EAnd (e1,e2,_) -> "(and "^(string_of_expr e1)^" "^(string_of_expr e2)^")"
+  | ECond (clauses,_) ->
      "(cond "^
        (List.fold_left
           (fun a clause ->
@@ -108,76 +108,74 @@ and string_of_expr = function
           ""
           clauses)
        ^")"
-  | ECallWithNewThread e ->
+  | ECallWithNewThread (e,_) ->
      "(call-with-new-thread "^(string_of_expr e)^")"
-  | EString s -> "\"" ^ s ^ "\""
-  | EChar c -> "'" ^ (String.make 1 c) ^ "'"
-  | EQuote e -> "(quote " ^ (string_of_expr e) ^")"
-  | EQuasiQuote e -> "(quasiquote " ^ (string_of_expr e) ^")"
-  | EUnQuote e -> "(unquote " ^ (string_of_expr e) ^")"
-  | EVar s -> s
-  | ESet (s, e) -> "(set! "^s^(string_of_expr e)^")"
-  | EEval e -> "(eval "^(string_of_expr e)^")"
-  | ELoad e -> "(load "^(string_of_expr e)^")"
-  | ELoadString e -> "(load-string "^(string_of_expr e)^")"
-  | EIf (e1, e2, e3) -> 
+  | EString (s,_) -> "\"" ^ s ^ "\""
+  | EChar (c,_) -> "'" ^ (String.make 1 c) ^ "'"
+  | EQuote (e,_) -> "(quote " ^ (string_of_expr e) ^")"
+  | EQuasiQuote (e,_) -> "(quasiquote " ^ (string_of_expr e) ^")"
+  | EUnQuote (e,_) -> "(unquote " ^ (string_of_expr e) ^")"
+  | EVar (s,_) -> s
+  | ESet (s, e,_) -> "(set! "^s^(string_of_expr e)^")"
+  | EEval (e,_) -> "(eval "^(string_of_expr e)^")"
+  | ELoad (e,_) -> "(load "^(string_of_expr e)^")"
+  | ELoadString (e,_) -> "(load-string "^(string_of_expr e)^")"
+  | EIf (e1, e2, e3,_) -> 
      "(if "^(string_of_expr e1)^" "^(string_of_expr e2)^" "^(string_of_expr e3)^")"
-  | ELet (bindings, body,_) ->
+  | ELet (bindings, body,_,_) ->
      "(let ("^
        (List.fold_left
           (fun a -> function (s,e) -> a ^ "("^s^" "^(string_of_expr e)^")")
           ""
           bindings)^") "^(string_of_expr body)^")"
-  | EDefine (s, e) ->
+  | EDefine (s, e,_) ->
     "(define "^s^" "^(string_of_expr e)^")"
-  | ELambda (p, body) ->
+  | ELambda (p, body,_) ->
      "(lambda ("^(string_of_param p)^") "^(string_of_expr body)^")"
-  | ELambdaDot (s, body) ->
+  | ELambdaDot (s, body,_) ->
      "(lambda (. "^s^") "^(string_of_expr body)^")"
-  | EThunk (body) ->
+  | EThunk (body,_) ->
      "(lambda () "^(string_of_expr body)^")"
-  | EThunkApp e ->
+  | EThunkApp (e,_) ->
      "("^(string_of_expr e)^")"
-  | EApp (e1, a) ->
+  | EApp (e1, a,_) ->
      "("^(string_of_expr e1)^" "^(string_of_arg a)^")"
-  | EBegin es -> 
+  | EBegin (es,_) -> 
      "(begin"^(List.fold_left (fun acc x -> acc^" "^(string_of_expr x)) "" es)^")"
-  | ECatch (s, e) ->
+  | ECatch (s, e,_) ->
      "(catch ("^s^") "^(string_of_expr e)^")"
-  | EThrow (s, e) ->
+  | EThrow (s, e,_) ->
      "(throw ("^s^") "^(string_of_expr e)^")"
-  | EBlock (s, e) ->
+  | EBlock (s, e,_) ->
      "(block ("^s^") "^(string_of_expr e)^")"
-  | EReturnFrom (s, e) ->
+  | EReturnFrom (s, e,_) ->
      "(return-from ("^s^") "^(string_of_expr e)^")"
-  | EEqual (e1, e2) ->
+  | EEqual (e1, e2,_) ->
      "(equal? "^(string_of_expr e1)^" "^(string_of_expr e2)^")"
-  | EList es -> "(list"^(List.fold_left (fun acc e -> acc^" "^(string_of_expr e)) "" es)^")"
-  | ECar e -> "(car "^(string_of_expr e)^")"
-  | ECdr e -> "(cdr "^(string_of_expr e)^")"
-  | ECons (e1,e2) -> "(cons "^(string_of_expr e1)^" "^(string_of_expr e2)^")"
-  | ECallcc (s, e) -> "(call/cc "^s^" "^(string_of_expr e)^")"
-  | EHostCall (s, e) ->  "(hostcall " ^ s ^ " " ^ (string_of_expr e) ^ ")"
-  | EUnit _ -> "()"
-  | EClosure (_, e)-> "#CLOSURE"^(string_of_expr e)^")"
-  | ECont _ -> "#CONT"
-  | EFile _ -> "#FILE"
-  | EInetAddr _ -> "#INETADDR"
-  | ESockAddr _ -> "#SOCKADDR"
-  | ESockDomain _ -> "#SOCKDOMAIN"
-  | ESockBoolOption _ -> "#SOCK_BOOL_OPTION"
-  | EShutdownCommand _ -> "#SHUTDOWNCOMMAND"
-  | EChannelIn _ -> "#INCHANNEL"
-  | EChannelOut _ -> "#OUTCHANNEL"
-  | EThread _ -> "Thread.t"
-  | ESslProtocol _ -> "Ssl.protocol"
-  | ESslSocket _ -> "Ssl.socket"
-  | ESslCertificate _ -> "Ssl.certificate"
-  | ESslCipher _ -> "Ssl.cipher"
-  | ESslContextType _ -> "Ssl.context_type"
-  | ESslContext _ -> "Ssl.context"
-  | EBytes _ -> "#BYTES"
-  | ERegexp _ -> "#REGEXP"
-  | EHostEntry _ -> "Unix.host_entry"
-
-                                                                         
+  | EList (es,_) -> "(list"^(List.fold_left (fun acc e -> acc^" "^(string_of_expr e)) "" es)^")"
+  | ECar (e,_) -> "(car "^(string_of_expr e)^")"
+  | ECdr (e,_) -> "(cdr "^(string_of_expr e)^")"
+  | ECons (e1,e2,_) -> "(cons "^(string_of_expr e1)^" "^(string_of_expr e2)^")"
+  | ECallcc (s, e,_) -> "(call/cc "^s^" "^(string_of_expr e)^")"
+  | EHostCall (s, e,_) ->  "(hostcall " ^ s ^ " " ^ (string_of_expr e) ^ ")"
+  | EUnit (_,_) -> "()"
+  | EClosure (_, e,_) -> "#CLOSURE"^(string_of_expr e)^")"
+  | ECont (_,_) -> "#CONT"
+  | EFile (_,_) -> "#FILE"
+  | EInetAddr (_,_) -> "#INETADDR"
+  | ESockAddr (_,_) -> "#SOCKADDR"
+  | ESockDomain (_,_) -> "#SOCKDOMAIN"
+  | ESockBoolOption (_,_) -> "#SOCK_BOOL_OPTION"
+  | EShutdownCommand (_,_) -> "#SHUTDOWNCOMMAND"
+  | EChannelIn (_,_) -> "#INCHANNEL"
+  | EChannelOut (_,_) -> "#OUTCHANNEL"
+  | EThread (_,_) -> "Thread.t"
+  | ESslProtocol (_,_) -> "Ssl.protocol"
+  | ESslSocket (_,_) -> "Ssl.socket"
+  | ESslCertificate (_,_) -> "Ssl.certificate"
+  | ESslCipher (_,_) -> "Ssl.cipher"
+  | ESslContextType (_,_) -> "Ssl.context_type"
+  | ESslContext (_,_) -> "Ssl.context"
+  | EBytes (_,_) -> "#BYTES"
+  | ERegexp (_,_) -> "#REGEXP"
+  | EHostEntry (_,_) -> "Unix.host_entry"

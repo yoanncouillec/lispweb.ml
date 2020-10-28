@@ -1,20 +1,20 @@
 open Expr
-   
+
 module Pervasives = struct
 
   let string_of_int = function
-    | EList(EInt(n)::[]) -> 
-       EString(Stdlib.string_of_int n)
+    | EList(((EInt(n,_))::[]),p) -> 
+       EString(Stdlib.string_of_int n,p)
     | _ -> failwith "string_of_int: error"
 
   let string_of_val = function
-    | EList(e::[]) -> 
-       EString(Expr.string_of_expr e)
+    | EList(e::[],p) -> 
+       EString(Expr.string_of_expr e,p)
     | _ -> failwith "string_of_val: error"
 
   let int_of_string = function
-    | EList(EString(n)::[]) -> 
-       EInt(Stdlib.int_of_string n)
+    | EList(((EString(n,_))::[]),p) -> 
+       EInt(Stdlib.int_of_string n,p)
     | _ -> failwith "error"
 
   (******)
@@ -22,111 +22,111 @@ module Pervasives = struct
   (******)
 
   let stdin = function
-    | EList([]) -> 
-       EChannelIn(Stdlib.stdin)
+    | EList([],p) -> 
+       EChannelIn(Stdlib.stdin,p)
     | _ -> failwith "error"
 
   let stdout = function
-    | EList([]) -> 
-       EChannelOut(Stdlib.stdout)
+    | EList([],p) -> 
+       EChannelOut(Stdlib.stdout,p)
     | _ -> failwith "error"
 
   let stderr = function
-    | EList([]) -> 
-       EChannelOut(Stdlib.stderr)
+    | EList([],p) -> 
+       EChannelOut(Stdlib.stderr,p)
     | _ -> failwith "error"
 
   (* Output functions on standard output *)
 		    
   let print_char = function
-    | EList(EChar(c)::[]) ->
-       EUnit (Stdlib.print_char c)
+    | EList(((EChar(c,_))::[]),p) ->
+       EUnit (Stdlib.print_char c,p)
     | _ -> failwith "print_char"
 
   let print_string = function
-    | EList(EString(s)::[]) ->
-       EUnit (Stdlib.print_string s)
+    | EList(((EString(s,_))::[]),p) ->
+       EUnit (Stdlib.print_string s,p)
     | _ -> failwith "print_string"
 
   let print_endline = function
-    | EList(e::[]) ->
-       EUnit (Stdlib.print_endline (string_of_expr e))
+    | EList(e::[],p) ->
+       EUnit (Stdlib.print_endline (string_of_expr e),p)
     | _ as e -> failwith ("error print_endline: "^(string_of_expr e))
 
   let print_newline = function
-    | EList([]) ->
-       EUnit (Stdlib.print_newline())
+    | EList([],p) ->
+       EUnit (Stdlib.print_newline(),p)
     | _ -> failwith "print_newline"
 
   (* Input functions on standard input *)
 
   let read_line = function
-    | EList([]) ->
-       EString (Stdlib.read_line())
+    | EList([],p) ->
+       EString (Stdlib.read_line(),p)
     | _ -> failwith "read_line"
 
   let read_int = function
-    | EList([]) ->
-       EInt (Stdlib.read_int())
+    | EList([],p) ->
+       EInt (Stdlib.read_int(),p)
     | _ -> failwith "read_int"
 
   (* General output functions *)
 
   let open_out = function
-    | EList(EString(s)::[]) ->
-       EChannelOut (Stdlib.open_out s)
+    | EList(((EString(s,_))::[]),p) ->
+       EChannelOut (Stdlib.open_out s,p)
     | _ -> failwith "open_out"
 		    
   let open_out_bin = function
-    | EList(EString(s)::[]) ->
-       EChannelOut (Stdlib.open_out_bin s)
+    | EList(((EString(s,_))::[]),p) ->
+       EChannelOut (Stdlib.open_out_bin s,p)
     | _ -> failwith "open_out_bin"
 
   let flush = function
-    | EList(EChannelOut(oc)::[]) ->
-       EUnit (Stdlib.flush oc)
+    | EList(((EChannelOut(oc,_))::[]),p) ->
+       EUnit (Stdlib.flush oc,p)
     | _ -> failwith "flush"
 
   let output_char = function
-    | EList(EChannelOut(oc)::EChar(c)::[]) ->
-       EUnit (Stdlib.output_char oc c)
+    | EList(((EChannelOut(oc,_))::(EChar(c,_))::[]),p) ->
+       EUnit (Stdlib.output_char oc c,p)
     | _ -> failwith "output_char"
 
   let output_string = function
-    | EList(EChannelOut(oc)::EString(s)::[]) ->
-       EUnit (Stdlib.output_string oc s)
+    | EList(((EChannelOut(oc,_))::(EString(s,_))::[]),p) ->
+       EUnit (Stdlib.output_string oc s,p)
     | _ -> failwith "output_string"
 
   let close_out = function
-    | EList(EChannelOut(oc)::[]) ->
-       EUnit (Stdlib.close_out oc)
+    | EList(((EChannelOut(oc,_))::[]),p) ->
+       EUnit (Stdlib.close_out oc,p)
     | _ -> failwith "close_out"
 		    
   (* General input functions *)		    
 
   let open_in = function
-    | EList(EString(s)::[]) ->
-       EChannelIn (Stdlib.open_in s)
+    | EList(((EString(s,_))::[]),p) ->
+       EChannelIn (Stdlib.open_in s,p)
     | _ -> failwith "open_in"
 
   let open_in_bin = function
-    | EList(EString(s)::[]) ->
-       EChannelIn (Stdlib.open_in_bin s)
+    | EList(((EString(s,_))::[]),p) ->
+       EChannelIn (Stdlib.open_in_bin s,p)
     | _ -> failwith "open_in_bin"
 
   let input_char = function
-    | EList(EChannelIn(ic)::[]) ->
-       EChar(Stdlib.input_char ic);
+    | EList(((EChannelIn(ic,_))::[]),p) ->
+       EChar(Stdlib.input_char ic,p);
     | _ -> failwith "input_char"
 		    
   let input_line = function
-    | EList(EChannelIn(ic)::[]) ->
-       EString(Stdlib.input_line ic);
+    | EList(((EChannelIn(ic,_))::[]),p) ->
+       EString(Stdlib.input_line ic,p);
     | _ as params -> failwith ("input_line expecting a EChannelIn. Got "^(string_of_expr params))
 		    
   let close_in = function
-    | EList(EChannelIn(c)::[]) ->
-       EUnit (Stdlib.close_in c)
+    | EList(((EChannelIn(c,_))::[]),p) ->
+       EUnit (Stdlib.close_in c,p)
     | _ -> failwith "close_in"
 
 end
@@ -134,80 +134,70 @@ end
 module LUnix = struct
   
   let stdin = function
-    | EList([]) -> 
-       EFile(Unix.stdin)
+    | EList(([]),p) -> 
+       EFile(Unix.stdin,p)
     | _ -> failwith "unix_stdin"
 		    
   let stdout = function
-    | EList([]) -> 
-       EFile(Unix.stdout)
+    | EList(([]),p) -> 
+       EFile(Unix.stdout,p)
     | _ -> failwith "unix_stdout"
 		    
   let stderr = function
-    | EList([]) -> 
-       EFile(Unix.stderr)
+    | EList(([]),p) -> 
+       EFile(Unix.stderr,p)
     | _ -> failwith "unix_stderr"
 
   let flag_of_string_value = function
-    | EString "O_RDONLY" -> Unix.O_RDONLY
-    | EString "O_WRONLY" -> Unix.O_WRONLY
-    | EString "O_CREAT" -> Unix.O_CREAT
-    | EString "O_RDWR" -> Unix.O_RDWR
+    | EString ("O_RDONLY",_) -> Unix.O_RDONLY
+    | EString ("O_WRONLY",_) -> Unix.O_WRONLY
+    | EString ("O_CREAT",_) -> Unix.O_CREAT
+    | EString ("O_RDWR",_) -> Unix.O_RDWR
     | _ -> failwith "flag_of_string_value: not managed"
 		    
   let openfile f =
     match f with
-    | EList(EString(name)::EList(flags)::EString(perm)::[]) ->
+    | EList(((EString(name,_))::(EList(flags,_))::(EString(perm,_))::[]),p) ->
        (EFile (Unix.openfile
 		 name 
 		 (List.map flag_of_string_value flags)
-		 (int_of_string perm)))
+		 (int_of_string perm),
+               p))
     | _ -> failwith "unix_openfile"
 		    
   let close = function
-    | EList(EFile(fd)::[]) -> 
-       EUnit (Unix.close fd)
+    | EList(((EFile(fd,_))::[]),p) -> 
+       EUnit (Unix.close fd,p)
     | _ -> failwith "unix_close"
 		    
   let read = function
-    | EList(EFile(fd)::rest) ->
-       (match rest with
-	| EBytes(buff)::rest ->
-	   (match rest with
-	    | EInt(ofs)::rest->
-	       (match rest with 
-		| EInt(len)::rest -> 
-		   (match rest with 
-		    | [] -> EInt(Unix.read fd buff ofs len)
-		    | _ -> failwith "unix_read: wrong number of arguments: 4 expected")
-		| _ -> failwith "unix_read: 4th argument must be an integer")
-	    | _ -> failwith ("unix_read: 3th argument must be an integer: "^(string_of_expr (List.hd rest))))
-	| _ -> failwith "unix_read: 2nd argument must be a string")
-    | _ -> failwith "unix_read: 1st argument must be a file descriptor"
+    | EList(((EFile(fd,_))::(EBytes(buff,_))::(EInt(ofs,_))::(EInt(len,_))::[]),p) -> 
+       EInt(Unix.read fd buff ofs len,p)
+      | _ -> failwith "unix_read"
 		    
   let write = function
-    | EList(EFile(fd)::EBytes(b)::EInt(ofs)::EInt(len)::[]) -> 
-       EInt(Unix.write fd b ofs len)
+    | EList(((EFile(fd,_))::(EBytes(b,_))::(EInt(ofs,_))::(EInt(len,_))::[]),p) -> 
+       EInt(Unix.write fd b ofs len,p)
     | _ -> failwith "unix_write"
 
   let write_substring e = match e with
-    | EList(EFile(fd)::EString(s)::EInt(ofs)::EInt(len)::[]) -> 
-       EInt(Unix.write_substring fd s ofs len)
+    | EList(((EFile(fd,_))::(EString(s,_))::(EInt(ofs,_))::(EInt(len,_))::[]),p) -> 
+       EInt(Unix.write_substring fd s ofs len,p)
     | _ -> failwith ("unix_write_substring"^(string_of_expr e))
 		    		    
   let in_channel_of_descr = function
-    | EList(EFile(fd)::[]) ->
-       EChannelIn(Unix.in_channel_of_descr fd);
+    | EList(((EFile(fd,_))::[]),p) ->
+       EChannelIn(Unix.in_channel_of_descr fd,p);
     | _ -> failwith "in_channel_of_descr"
 		    
   let out_channel_of_descr = function
-    | EList(EFile(fd)::[]) ->
-       EChannelOut(Unix.out_channel_of_descr fd);
+    | EList(((EFile(fd,_))::[]),p) ->
+       EChannelOut(Unix.out_channel_of_descr fd,p);
     | _ -> failwith "out_channel_of_descr"
 
   let domain_of_sockaddr = function
-    | EList (ESockAddr(sockaddr)::[]) ->
-       ESockDomain(Unix.domain_of_sockaddr sockaddr)
+    | EList ((ESockAddr(sockaddr,_)::[]),p) ->
+       ESockDomain(Unix.domain_of_sockaddr sockaddr,p)
     | _ -> failwith "domain of sockaddr: wrong arguments"
 		    
   let domain_of_string = function
@@ -217,12 +207,12 @@ module LUnix = struct
     | _ -> failwith "domain_of_string"
 		    
   let string_of_domain = function
-    | EList(ESockDomain(domain)::[]) ->
+    | EList(((ESockDomain(domain,_))::[]),p) ->
        EString 
-         (match domain with
-          | Unix.PF_UNIX -> "PF_UNIX"
-          | Unix.PF_INET -> "PF_INET"
-          | Unix.PF_INET6 -> "PF_INET6")
+         ((match domain with
+           | Unix.PF_UNIX -> "PF_UNIX"
+           | Unix.PF_INET -> "PF_INET"
+           | Unix.PF_INET6 -> "PF_INET6"),p)
     | _ -> failwith "string_of_domain"
 		    
   let socket_type_of_string = function
@@ -243,76 +233,76 @@ module LUnix = struct
     | _ -> failwith "to be implemented"
 		    
   let inet_addr_of_sockaddr = function
-      EList(ESockAddr(sockaddr)::[]) ->
+      EList(((ESockAddr(sockaddr,_))::[]),p) ->
        (match sockaddr with
-        | Unix.ADDR_INET (n, _) -> EInetAddr(n)
-        | Unix.ADDR_UNIX _ -> EInetAddr(Unix.inet_addr_any))
+        | Unix.ADDR_INET (n, _) -> EInetAddr(n,p)
+        | Unix.ADDR_UNIX _ -> EInetAddr(Unix.inet_addr_any,p))
     | _ -> failwith "wrong arguments"
 
   let inet_addr_any = function
-    | EList([]) ->
-       EInetAddr(Unix.inet_addr_any)
+    | EList(([]),p) ->
+       EInetAddr(Unix.inet_addr_any,p)
     | _ -> failwith "unix_inet_addr_any"
 		    
   let inet_addr_loopback = function
-    | EList([]) ->
-       EInetAddr(Unix.inet_addr_loopback)
+    | EList(([]),p) ->
+       EInetAddr(Unix.inet_addr_loopback,p)
     | _ -> failwith "unix_inet_addr_loopback"
 		    
   let inet6_addr_any = function
-    | EList([]) ->
-       EInetAddr(Unix.inet6_addr_any)
+    | EList(([]),p) ->
+       EInetAddr(Unix.inet6_addr_any,p)
     | _ -> failwith "unix_inet6_addr_any"
 		    
   let inet6_addr_loopback = function
-    | EList([]) ->
-       EInetAddr(Unix.inet6_addr_loopback)
+    | EList(([]),p) ->
+       EInetAddr(Unix.inet6_addr_loopback,p)
     | _ -> failwith "unix_inet6_addr_loopback"
 		    
   let addr_unix = function
-    | EList(EString(name)::[]) ->
-       ESockAddr(Unix.ADDR_UNIX name)
+    | EList(((EString(name,_))::[]),p) ->
+       ESockAddr(Unix.ADDR_UNIX name,p)
     | _ -> failwith "unix_addr_unix"
 		    
   let addr_inet = function
-    | EList(EInetAddr(addr)::EInt(port)::[]) ->
-       ESockAddr(Unix.ADDR_INET(addr, port))
+    | EList(((EInetAddr(addr,_))::(EInt(port,_))::[]),p) ->
+       ESockAddr(Unix.ADDR_INET(addr, port),p)
     | _ -> failwith "unix_addr_inet"
 	
   let socket = function
-    | EList(EString(domain)::EString(stype)::EInt(protocol)::[]) ->
-       (EFile (Unix.socket (domain_of_string domain) (socket_type_of_string stype) protocol))
+    | EList(((EString(domain,_))::(EString(stype,_))::(EInt(protocol,_))::[]),p) ->
+       (EFile (Unix.socket (domain_of_string domain) (socket_type_of_string stype) protocol,p))
     | _ as e -> failwith ("unix_socket: arguments are wrong: "^(string_of_expr e))
 		    
   let connect = function
-    | EList(EFile(fd)::ESockAddr(saddr)::[]) ->
-       EUnit (Unix.connect fd saddr)
+    | EList(((EFile(fd,_))::(ESockAddr(saddr,_))::[]),p) ->
+       EUnit (Unix.connect fd saddr,p)
     | _ -> failwith "unix_connect"
 		    
   let bind e = match e with
-    | EList(EFile(fd)::ESockAddr(saddr)::[]) ->
-       EUnit (Unix.bind fd saddr)
+    | EList(((EFile(fd,_))::(ESockAddr(saddr,_))::[]),p) ->
+       EUnit (Unix.bind fd saddr,p)
     | _ -> failwith ("unix_bind:"^(string_of_expr e))
 		    
   let accept = function
-    | EList(EFile(fd)::[]) ->
+    | EList(((EFile(fd,_))::[]),p) ->
        let (fd,saddr) = Unix.accept fd in
-       EList(EFile(fd)::ESockAddr(saddr)::[])
+       EList((EFile(fd,p))::(ESockAddr(saddr,p)::[]),p)
     | _ -> failwith "unix_accept"
 		    
   let listen = function
-    | EList(EFile(fd)::EInt(n)::[]) ->
-       EUnit (Unix.listen fd n)
+    | EList(((EFile(fd,_))::(EInt(n,_))::[]),p) ->
+       EUnit (Unix.listen fd n,p)
     | _ -> failwith "unix_listen"
 		    
   let shutdown = function
-    | EList(EFile(fd)::EString(sc)::[]) ->
-       EUnit (Unix.shutdown fd (shutdown_command_of_string sc))
+    | EList(((EFile(fd,_))::(EString(sc,_))::[]),p) ->
+       EUnit (Unix.shutdown fd (shutdown_command_of_string sc),p)
     | _ -> failwith "unix_shutdown"
 
   let setsockopt = function
-    | EList(EFile(fd)::EString(sbo)::EBool(b)::[]) ->
-       EUnit (Unix.setsockopt fd (socket_bool_option_of_string sbo) b)
+    | EList(((EFile(fd,_))::(EString(sbo,_))::(EBool(b,_))::[]),p) ->
+       EUnit (Unix.setsockopt fd (socket_bool_option_of_string sbo) b,p)
     | _ -> failwith "unix_shutdown"
 
 end
@@ -320,38 +310,38 @@ end
 module Bytes = struct
 
   let bytes_of_string = function
-    |  EList(EString(s)::[]) ->
-	EBytes(Bytes.of_string s)
+    |  EList(((EString(s,_))::[]),p) ->
+	EBytes(Bytes.of_string s,p)
     | _ -> failwith "wrong arguments"		    
   
   let bytes_to_string = function
-    |  EList(EBytes(b)::[]) ->
-	EString(Bytes.to_string b)
+    |  EList(((EBytes(b,_))::[]),p) ->
+	EString(Bytes.to_string b,p)
     | _ -> failwith "wrong arguments"		    
   
   let bytes_create = function
-    |  EList(EInt(n)::[]) ->
-	EBytes(Bytes.create n)
+    |  EList(((EInt(n,_))::[]),p) ->
+	EBytes(Bytes.create n,p)
     | _ -> failwith "wrong arguments"		    
   
   let bytes_make = function
-    |  EList(EInt(n)::EChar(c)::[]) ->
-	EBytes(Bytes.make n c)
+    |  EList(((EInt(n,_))::(EChar(c,_))::[]),p) ->
+	EBytes(Bytes.make n c,p)
     | _ -> failwith "wrong arguments"		    
   
   let bytes_to_string = function
-    |  EList(EBytes(b)::[]) ->
-	EString(Bytes.to_string b)
+    |  EList(((EBytes(b,_))::[]),p) ->
+	EString(Bytes.to_string b,p)
     | _ -> failwith "wrong arguments"		    
   
   let bytes_length = function
-    |  EList(EBytes(b)::[]) ->
-	EInt(Bytes.length b)
+    |  EList(((EBytes(b,_))::[]),p) ->
+	EInt(Bytes.length b,p)
     | _ -> failwith "wrong arguments"		    
   
   let bytes_get = function
-    |  EList(EBytes(b)::EInt(n)::[]) ->
-	EChar(Bytes.get b n)
+    |  EList(((EBytes(b,_))::(EInt(n,_))::[]),p) ->
+	EChar(Bytes.get b n,p)
     | _ -> failwith "wrong arguments"		    
   
 end
@@ -359,28 +349,28 @@ end
 module HString = struct
   
   let make = function
-    |  EList(EInt(n)::EChar(c)::[]) ->
-	EString(String.make n c)
+    |  EList(((EInt(n,_))::(EChar(c,_))::[]),p) ->
+	EString(String.make n c,p)
     | _ -> failwith "string_make"		    
 		    
   let length = function
-    |  EList(EString(s)::[]) ->
-	EInt(String.length s)
+    |  EList(((EString(s,_))::[]),p) ->
+	EInt(String.length s,p)
     | _ as e -> failwith ("string_length: wrong arguments: "^(string_of_expr e))
 		    
   let get = function
-    |  EList(EString(s)::EInt(n)::[]) ->
-	EChar(String.get s n)
+    |  EList(((EString(s,_))::(EInt(n,_))::[]),p) ->
+	EChar(String.get s n,p)
     | _ -> failwith "string_get"
 		    		    
   let sub = function
-    |  EList(EString(s)::EInt(ofs)::EInt(len)::[]) ->
-	EString(String.sub s ofs len)
+    |  EList(((EString(s,_))::(EInt(ofs,_))::(EInt(len,_))::[]),p) ->
+	EString(String.sub s ofs len,p)
     | _ -> failwith "string_sub"
 		    		    
   let concat = function
-    |  EList(EString(s)::EList(l)::[]) ->
-	EString(String.concat s (List.map (function EString s' -> s'|_ -> failwith "Should be a string") l))
+    |  EList(((EString(s,_))::(EList(l,_))::[]),p) ->
+	EString(String.concat s (List.map (function EString (s',_) -> s'|_ -> failwith "Should be a string") l),p)
     | _ -> failwith "string_concat"
 		    		    
 end
@@ -388,13 +378,13 @@ end
 module Str = struct
 
   let regexp = function
-    | EList(EString(s)::[]) ->
-       ERegexp(Str.regexp(s))
+    | EList(((EString(s,_))::[]),p) ->
+       ERegexp(Str.regexp(s),p)
     | _ -> failwith "regexp"
 
   let global_replace = function
-    | EList(ERegexp(old)::EString(niou)::EString(s)::[]) ->
-       EString(Str.global_replace old niou s)
+    | EList(((ERegexp(old,_))::(EString(niou,_))::(EString(s,_))::[]),p) ->
+       EString(Str.global_replace old niou s,p)
     | _ -> failwith "global_replace"
   
 end
@@ -402,107 +392,107 @@ end
 module Char = struct
   
   let char_to_string = function
-    | EList(EChar(c)::[]) ->
-       EString(Char.escaped c)
+    | EList(((EChar(c,_))::[]),p) ->
+       EString(Char.escaped c,p)
     | _ -> failwith "char_to_string"
 end
                 
 module Ssl = struct
   
   let init = function
-    | EList([]) ->
-       EUnit(Ssl_threads.init();Ssl.init())
+    | EList(([]),p) ->
+       EUnit((Ssl_threads.init();Ssl.init()),p)
     | _ -> failwith "Ssl.init"
 
   let protocol_v23 = function
-    | EList([]) ->
-       ESslProtocol(Ssl.SSLv23)
+    | EList(([]),p) ->
+       ESslProtocol(Ssl.SSLv23,p)
     | _ -> failwith "wrong arguments"
 
   let context_type_server = function
-    | EList([]) ->
-       ESslContextType(Ssl.Server_context)
+    | EList(([]),p) ->
+       ESslContextType(Ssl.Server_context,p)
     | _ -> failwith "wrong arguments"
 
   let open_connection = function
-    | EList(ESslProtocol(protocol)::ESockAddr(sockaddr)::[]) ->
-       ESslSocket(Ssl.open_connection protocol sockaddr)
+    | EList(((ESslProtocol(protocol,_))::(ESockAddr(sockaddr,_))::[]),p) ->
+       ESslSocket(Ssl.open_connection protocol sockaddr,p)
     | _ -> failwith "wrong arguments"
 
   let get_certificate = function
-    | EList(ESslSocket(socket)::[]) ->
-       ESslCertificate(Ssl.get_certificate socket)
+    | EList(((ESslSocket(socket,_))::[]),p) ->
+       ESslCertificate(Ssl.get_certificate socket,p)
     | _ -> failwith "wrong arguments"
 
   let get_cipher = function
-    | EList(ESslSocket(socket)::[]) ->
-       ESslCipher(Ssl.get_cipher socket)
+    | EList(((ESslSocket(socket,_))::[]),p) ->
+       ESslCipher(Ssl.get_cipher socket,p)
     | _ -> failwith "wrong arguments"
 
   let get_issuer = function
-    | EList(ESslCertificate(cert)::[]) ->
-       EString(Ssl.get_issuer cert)
+    | EList(((ESslCertificate(cert,_))::[]),p) ->
+       EString(Ssl.get_issuer cert,p)
     | _ -> failwith "wrong arguments"
 
   let get_subject = function
-    | EList(ESslCertificate(cert)::[]) ->
-       EString(Ssl.get_subject cert)
+    | EList(((ESslCertificate(cert,_))::[]),p) ->
+       EString(Ssl.get_subject cert,p)
     | _ -> failwith "wrong arguments"
 
   let get_cipher_name = function
-    | EList(ESslCipher(cipher)::[]) ->
-       EString(Ssl.get_cipher_name cipher)
+    | EList(((ESslCipher(cipher,_))::[]),p) ->
+       EString(Ssl.get_cipher_name cipher,p)
     | _ -> failwith "wrong arguments"
 
   let get_cipher_version = function
-    | EList(ESslCipher(cipher)::[]) ->
-       EString(Ssl.get_cipher_version cipher)
+    | EList(((ESslCipher(cipher,_))::[]),p) ->
+       EString(Ssl.get_cipher_version cipher,p)
     | _ -> failwith "wrong arguments"
 
   let get_cipher_description = function
-    | EList(ESslCipher(cipher)::[]) ->
-       EString(Ssl.get_cipher_description cipher)
+    | EList(((ESslCipher(cipher,_))::[]),p) ->
+       EString(Ssl.get_cipher_description cipher,p)
     | _ -> failwith "wrong arguments"
 
   let write = function
-    | EList(ESslSocket(socket)::EBytes(bytes)::EInt(offset)::EInt(length)::[]) ->
-       EInt(Ssl.write socket bytes offset length)
+    | EList(((ESslSocket(socket,_))::(EBytes(bytes,_))::(EInt(offset,_))::(EInt(length,_))::[]),p) ->
+       EInt(Ssl.write socket bytes offset length,p)
     | _ -> failwith "wrong arguments"
 
   let read = function
-    | EList(ESslSocket(socket)::EBytes(bytes)::EInt(offset)::EInt(length)::[]) ->
+    | EList(((ESslSocket(socket,_))::(EBytes(bytes,_))::(EInt(offset,_))::(EInt(length,_))::[]),p) ->
        let r = Ssl.read socket bytes offset length in
-       EInt(r)
+       EInt(r,p)
     | _ -> failwith "wrong arguments"
 
   let shutdown = function
-    | EList(ESslSocket(socket)::[]) ->
-       EUnit(Ssl.shutdown socket)
+    | EList(((ESslSocket(socket,_))::[]),p) ->
+       EUnit(Ssl.shutdown socket,p)
     | _ -> failwith "wrong arguments"
 
   let create_context = function
-    | EList(ESslProtocol(protocol)::ESslContextType(contextType)::[]) ->
-       ESslContext(Ssl.create_context protocol contextType)
+    | EList(((ESslProtocol(protocol,_))::(ESslContextType(contextType,_))::[]),p) ->
+       ESslContext(Ssl.create_context protocol contextType,p)
     | _ -> failwith "wrong arguments"
 
   let embed_socket = function
-    | EList(EFile(fd)::ESslContext(ctx)::[]) ->
-       ESslSocket(Ssl.embed_socket fd ctx)
+    | EList(((EFile(fd,_))::(ESslContext(ctx,_))::[]),p) ->
+       ESslSocket(Ssl.embed_socket fd ctx,p)
     | _ -> failwith "wrong arguments"
 
   let accept e = match e with
-    | EList(ESslSocket(sock)::[]) ->
-       EUnit(Ssl.accept sock)
+    | EList(((ESslSocket(sock,_))::[]),p) ->
+       EUnit(Ssl.accept sock,p)
     | _ -> failwith ("Ssl.accept: wrong arguments: "^(string_of_expr e))
 
   let use_certificate = function
-    | EList(ESslContext(context)::EString(cert)::EString(privkey)::[]) ->
-       EUnit(Ssl.use_certificate context cert privkey)
+    | EList(((ESslContext(context,_))::(EString(cert,_))::(EString(privkey,_))::[]),p) ->
+       EUnit(Ssl.use_certificate context cert privkey,p)
     | _ -> failwith "wrong arguments"
 
   let set_password = function
-    | EList(ESslContext(ctx)::EString(pwd)::[]) ->
-       EUnit(Ssl.set_password_callback ctx (fun _ -> print_endline pwd ; pwd))
+    | EList(((ESslContext(ctx,_))::(EString(pwd,_))::[]),p) ->
+       EUnit(Ssl.set_password_callback ctx (fun _ -> print_endline pwd ; pwd),p)
     | _ -> failwith "wrong arguments"
 
 end
@@ -510,13 +500,13 @@ end
 module Misc = struct
 
   let inet_addr_of_host_entry = function
-    | EList(EHostEntry(hostentry)::[]) ->
-       EInetAddr(hostentry.h_addr_list.(0))
+    | EList(((EHostEntry(hostentry,_))::[]),p) ->
+       EInetAddr(hostentry.h_addr_list.(0),p)
     | _ -> failwith "wrong arguments"
 
   let gethostbyname = function
-    | EList(EString(hostname)::[]) ->
-       EHostEntry(Unix.gethostbyname hostname)
+    | EList(((EString(hostname,_))::[]),p) ->
+       EHostEntry(Unix.gethostbyname hostname,p)
     | _ -> failwith "wrong arguments"
 	    
 end
@@ -536,8 +526,8 @@ end
 module HThread = struct
 
   let join = function
-    | EList(EThread(t)::[]) ->
-       EUnit(Thread.join(t))
+    | EList(((EThread(t,_))::[]),p) ->
+       EUnit(Thread.join(t),p)
     | _ -> failwith "Thread.join: wrong arguments"
 end
 
