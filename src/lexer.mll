@@ -52,6 +52,8 @@ rule token = parse
   | "load-string" { LOAD_STRING }
   | "load" { LOAD }
   | "call-with-new-thread" { CALLWITHNEWTHREAD }
+  | "current-env" { CURRENTENV }
+  | "get" { GET }
   | "+" { PLUS }
   | "-" { MINUS }
   | "*" { MULT }

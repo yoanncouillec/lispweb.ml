@@ -71,6 +71,9 @@ and expr =
   | EUnQuote of expr * Lexing.position option
   | EUnit of unit * Lexing.position option
   | EVar of string * Lexing.position option
+  | ECurrentEnv of Lexing.position option
+  | EEnv of env * Lexing.position option
+  | EGet of expr * Lexing.position option
 	
  and env = (string * expr ref) list
 
@@ -87,7 +90,9 @@ and string_of_arg = function
   | ArgOpt(s, e) -> s ^ " " ^ (string_of_expr e)
           
 and string_of_expr = function
+  | ECurrentEnv _ -> "(current-env)"
   | EInt (n, _) -> string_of_int n
+  | EGet (e, _) -> "(get "^(string_of_expr e)^")"
   | EBinary (op, e1, e2, _) ->
      "("^(match op with
 	  | OPlus -> "+"

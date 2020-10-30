@@ -1,0 +1,3 @@
+(load "lib/stdout.scm")
+
+(print "test - autocomplete")

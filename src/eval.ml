@@ -289,6 +289,24 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 
   match e with
 
+  | ECurrentEnv (p) -> cont (EEnv (env, p)) genv mem
+
+  | EEnv (env', p) -> cont (EEnv (env', p)) genv mem
+
+  | EGet (e1, p) ->
+     eval e1 genv env denv mem
+       (fun v1 genv' mem' ->
+         match v1 with
+         | EString (s,p') ->
+            (match get_env s env with
+             | EnvAddr addr -> cont (get_mem addr mem') genv' mem'
+             | EnvNotFound _ -> 
+	        (match get_env s genv with
+	         | EnvAddr addr -> cont (get_mem addr mem') genv' mem'
+	         | EnvNotFound id -> cont (EBool (false, p')) genv' mem'))
+         | _ as e -> failwith ("eval EGet: must be a string "^(string_of_expr e)))
+
+    
   | EInt (n,p) -> cont (EInt (n,p)) genv mem
 
   | EBinary (op, e1, e2,p) ->

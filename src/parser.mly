@@ -16,6 +16,7 @@
 %token CATCH THROW CALLCC BLOCK RETURNFROM HOSTCALL CALLWITHNEWTHREAD
 %token PLUS MINUS MULT DIV
 %token CQUOTE CQUASIQUOTE CUNQUOTE
+%token CURRENTENV GET
 %start start
 %type <Expr.expr option> start
     
@@ -39,6 +40,8 @@ expression:
 | CUNQUOTE expression { Expr.EUnQuote ($2, Some(Parsing.symbol_start_pos())) }
 | TRUE { Expr.EBool (true, Some(Parsing.symbol_start_pos())) }
 | FALSE { Expr.EBool (false, Some(Parsing.symbol_start_pos())) }
+| LPAREN CURRENTENV RPAREN { Expr.ECurrentEnv (Some(Parsing.symbol_start_pos())) }
+| LPAREN GET expression RPAREN { Expr.EGet ($3, Some(Parsing.symbol_start_pos())) }
 | LPAREN EVAL expression RPAREN { Expr.EEval ($3, Some(Parsing.symbol_start_pos())) }
 | LPAREN LOAD_STRING expression RPAREN { Expr.ELoadString ($3, Some(Parsing.symbol_start_pos())) }
 | LPAREN LOAD expression RPAREN { Expr.ELoad ($3, Some(Parsing.symbol_start_pos())) }
