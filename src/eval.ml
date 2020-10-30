@@ -289,24 +289,6 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 
   match e with
 
-  | ECurrentEnv (p) -> cont (EEnv (env, p)) genv mem
-
-  | EEnv (env', p) -> cont (EEnv (env', p)) genv mem
-
-  | EGet (e1, p) ->
-     eval e1 genv env denv mem
-       (fun v1 genv' mem' ->
-         match v1 with
-         | EString (s,p') ->
-            (match get_env s env with
-             | EnvAddr addr -> cont (get_mem addr mem') genv' mem'
-             | EnvNotFound _ -> 
-	        (match get_env s genv with
-	         | EnvAddr addr -> cont (get_mem addr mem') genv' mem'
-	         | EnvNotFound id -> cont (EBool (false, p')) genv' mem'))
-         | _ as e -> failwith ("eval EGet: must be a string "^(string_of_expr e)))
-
-    
   | EInt (n,p) -> cont (EInt (n,p)) genv mem
 
   | EBinary (op, e1, e2,p) ->
@@ -358,6 +340,33 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 	     (match get_env s genv with
 	      | EnvAddr addr -> cont v genv' (extend_mem addr v mem')
 	      | EnvNotFound id -> failwith ("binding not found: "^id))))
+
+  | EGet (e1, p) ->
+     eval e1 genv env denv mem
+       (fun v1 genv' mem' ->
+         (match v1 with
+          | EString (s, p) -> 
+             (match get_env s env with
+              | EnvAddr addr -> cont (get_mem addr mem) genv mem
+              | EnvNotFound _ -> 
+	         (match get_env s genv with
+	          | EnvAddr addr -> cont (get_mem addr mem) genv mem
+	          | EnvNotFound id -> failwith ("eval EGet: binding not found: "^id)))
+          | _ as e -> failwith ("eval EGet: should be EString: "^(string_of_expr e))))
+
+  | EStartWith (e1, p) ->
+     eval e1 genv env denv mem
+       (fun v1 genv' mem' ->
+         (match v1 with
+          | EString (s,p) ->
+             cont (EList (List.map
+                            (fun id -> EString (id,p))
+                            (List.concat [get_env_start_with s genv [];
+                                          get_env_start_with s env [];
+                                          get_env_start_with s denv []]), p))
+               genv
+               mem
+          | _ as e -> failwith ("eval EStartWith: should be EString: "^(string_of_expr e))))
 
   | EIf (a, b, c,p) -> 
      eval a genv env denv mem

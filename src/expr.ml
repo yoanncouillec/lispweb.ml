@@ -53,6 +53,8 @@ and expr =
   | ERegexp of Str.regexp * Lexing.position option
   | EReturnFrom of string * expr * Lexing.position option
   | ESet of string * expr * Lexing.position option
+  | EGet of expr * Lexing.position option
+  | EStartWith of expr * Lexing.position option
   | EShutdownCommand of Unix.shutdown_command * Lexing.position option
   | ESockAddr of Unix.sockaddr * Lexing.position option
   | ESockBoolOption of Unix.socket_bool_option * Lexing.position option
@@ -71,9 +73,6 @@ and expr =
   | EUnQuote of expr * Lexing.position option
   | EUnit of unit * Lexing.position option
   | EVar of string * Lexing.position option
-  | ECurrentEnv of Lexing.position option
-  | EEnv of env * Lexing.position option
-  | EGet of expr * Lexing.position option
 	
  and env = (string * expr ref) list
 
@@ -90,9 +89,7 @@ and string_of_arg = function
   | ArgOpt(s, e) -> s ^ " " ^ (string_of_expr e)
           
 and string_of_expr = function
-  | ECurrentEnv _ -> "(current-env)"
   | EInt (n, _) -> string_of_int n
-  | EGet (e, _) -> "(get "^(string_of_expr e)^")"
   | EBinary (op, e1, e2, _) ->
      "("^(match op with
 	  | OPlus -> "+"
@@ -122,6 +119,8 @@ and string_of_expr = function
   | EUnQuote (e,_) -> "(unquote " ^ (string_of_expr e) ^")"
   | EVar (s,_) -> s
   | ESet (s, e,_) -> "(set! "^s^(string_of_expr e)^")"
+  | EGet (e, _) -> "(get "^(string_of_expr e)^")"
+  | EStartWith (e, _) -> "(start-with "^(string_of_expr e)^")"
   | EEval (e,_) -> "(eval "^(string_of_expr e)^")"
   | ELoad (e,_) -> "(load "^(string_of_expr e)^")"
   | ELoadString (e,_) -> "(load-string "^(string_of_expr e)^")"

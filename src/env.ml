@@ -19,12 +19,12 @@ let start_with s2 s1 =
        (String.sub s2 0 (String.length s1))
        s1 == 0)
 
-let rec env_start_with s env accu =
+let rec get_env_start_with s env accu =
   match env with
   | [] -> accu
   | (id, _)::rest ->
      if start_with id s then
-       env_start_with s rest (id::accu)
+       get_env_start_with s rest (id::accu)
      else
-       accu
+       get_env_start_with s rest accu
 

@@ -11,12 +11,12 @@
 %token<string> ER_CHAR_ESC
 %token<string> ER_IDENT ER_STRING ER_CHAR ER_IDENT_OPT
 %token LPAREN RPAREN LAMBDA LET LETREC DEFINE LETSTAR LOAD_STRING LOAD EVAL
-%token TRUE FALSE IF COND ELSE EOF BEGIN EQUAL SET NOT AND
+%token TRUE FALSE IF COND ELSE EOF BEGIN EQUAL NOT AND
 %token CAR CDR CONS LIST
 %token CATCH THROW CALLCC BLOCK RETURNFROM HOSTCALL CALLWITHNEWTHREAD
 %token PLUS MINUS MULT DIV
 %token CQUOTE CQUASIQUOTE CUNQUOTE
-%token CURRENTENV GET
+%token GET SET STARTWITH
 %start start
 %type <Expr.expr option> start
     
@@ -34,14 +34,11 @@ expression:
 | ER_STRING { Expr.EString ((remove_enclosing_quotes $1), Some(Parsing.symbol_start_pos())) }
 | ER_CHAR { Expr.EChar ((String.get $1 1), Some(Parsing.symbol_start_pos())) }
 | ER_CHAR_ESC { Expr.EChar ((match $1 with "'\\n'" -> '\n' | "'\\r'" -> '\r' | _ -> failwith "ER_CHAR_ESC"), Some(Parsing.symbol_start_pos())) }
-| ER_IDENT { Expr.EVar ($1, Some(Parsing.symbol_start_pos())) }
 | CQUOTE expression { Expr.EQuote ($2, Some(Parsing.symbol_start_pos())) }
 | CQUASIQUOTE expression { Expr.EQuasiQuote ($2, Some(Parsing.symbol_start_pos())) }
 | CUNQUOTE expression { Expr.EUnQuote ($2, Some(Parsing.symbol_start_pos())) }
 | TRUE { Expr.EBool (true, Some(Parsing.symbol_start_pos())) }
 | FALSE { Expr.EBool (false, Some(Parsing.symbol_start_pos())) }
-| LPAREN CURRENTENV RPAREN { Expr.ECurrentEnv (Some(Parsing.symbol_start_pos())) }
-| LPAREN GET expression RPAREN { Expr.EGet ($3, Some(Parsing.symbol_start_pos())) }
 | LPAREN EVAL expression RPAREN { Expr.EEval ($3, Some(Parsing.symbol_start_pos())) }
 | LPAREN LOAD_STRING expression RPAREN { Expr.ELoadString ($3, Some(Parsing.symbol_start_pos())) }
 | LPAREN LOAD expression RPAREN { Expr.ELoad ($3, Some(Parsing.symbol_start_pos())) }
@@ -78,6 +75,9 @@ expression:
 | LPAREN LETREC LPAREN ER_IDENT expression RPAREN expression RPAREN { Expr.ELet ([$4, (Expr.EInt (0, Some(Parsing.symbol_start_pos())))], (Expr.ELet ([$4^"-rec-tmp", $5], Expr.EBegin ([Expr.ESet($4, (Expr.EVar ($4^"-rec-tmp", Some(Parsing.symbol_start_pos()))), Some(Parsing.symbol_start_pos()));$7], Some(Parsing.symbol_start_pos())),[], Some(Parsing.symbol_start_pos()))),[], Some(Parsing.symbol_start_pos())) }
 
 | LPAREN SET ER_IDENT expression RPAREN { Expr.ESet($3, $4, Some(Parsing.symbol_start_pos())) }
+| LPAREN GET expression RPAREN { Expr.EGet ($3, Some(Parsing.symbol_start_pos())) }
+| LPAREN STARTWITH expression RPAREN { Expr.EStartWith ($3, Some(Parsing.symbol_start_pos())) }
+
 | LPAREN EQUAL expression expression RPAREN { Expr.EEqual ($3,$4,Some(Parsing.symbol_start_pos())) }
 | LPAREN BEGIN expressions RPAREN { Expr.EBegin ($3, Some(Parsing.symbol_start_pos())) }
 | LPAREN HOSTCALL ER_IDENT RPAREN { Expr.EHostCall ($3,(Expr.EList ([], Some(Parsing.symbol_start_pos()))), Some(Parsing.symbol_start_pos())) }
@@ -88,6 +88,7 @@ expression:
 						      (Expr.EApp ($2, List.hd $3, Some (Parsing.symbol_start_pos())))
 						      (List.tl $3)
 				     }
+| ER_IDENT { Expr.EVar ($1, Some(Parsing.symbol_start_pos())) }
 
 parameters:
 | parameter { [$1] }
