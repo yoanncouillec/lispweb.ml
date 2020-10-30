@@ -286,8 +286,13 @@ let rec eval_quasi_quote e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont)
 and js_of_scheme e =
 
   match e with
+  | EVar(s1,_) -> JsVar(s1)
+  | EDot (s1,s2) -> JsDot(s1,s2)
   | EString (e,_) -> JsString(e)
-  | EApp(EVar("print",p),Arg(e),p2) -> JsApp(JsDot(JsVar("console"),"log"), js_of_scheme e)
+  | EBegin(es,_) -> JsSequence(List.map js_of_scheme es)
+  | ELambda(Param param,e1,_) -> JsFunction([param],js_of_scheme e1)
+  | EApp(EVar("print",p),Arg(e1),p2) -> JsApp(JsDot("console","log"), [js_of_scheme e1])
+  | EApp(e1,Arg(e2),_) -> JsApp(js_of_scheme e1,[js_of_scheme e2])
   | _ -> failwith ("not implemented: "^(string_of_expr e))
 
 and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
@@ -296,6 +301,8 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 
   match e with
 
+  | EDot (s1, s2) -> failwith "not implemented"
+    
   | EJsToString (e1) ->
      eval e1 genv env denv mem
        (fun v1 genv' mem' ->

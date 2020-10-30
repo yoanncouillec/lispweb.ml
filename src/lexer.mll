@@ -23,6 +23,7 @@ rule token = parse
   (* | "quote" { CQUOTE }
    * | "quasiquote" { CQUASIQUOTE }
    * | "unquote" { CUNQUOTE } *)
+  | "->" { DOT }
   | "equal?" { EQUAL }
   | "#t" { TRUE }
   | "#f" { FALSE }
@@ -52,7 +53,7 @@ rule token = parse
   | "load-string" { LOAD_STRING }
   | "load" { LOAD }
   | "call-with-new-thread" { CALLWITHNEWTHREAD }
-  | "get" { GET }
+  | "get-env" { GET }
   | "start-with" { STARTWITH }
   | "scheme->js" { SCHEMETOJS }
   | "js->string" { JSTOSTRING }
@@ -64,7 +65,7 @@ rule token = parse
   | ''' '\\'['A'-'Z''a'-'z''0'-'9'' '] ''' { ER_CHAR_ESC (Lexing.lexeme lexbuf) }
   | '\"' (('\\' _) | [^'\"'])* '\"' { ER_STRING (Lexing.lexeme lexbuf) }
   | ['0'-'9']+ { ER_INT (int_of_string (Lexing.lexeme lexbuf)) }
-  | ['A'-'Z''a'-'z''<''/''-']['A'-'Z''a'-'z''+''-''*''/''#''-''@''{'']''*''&''%''$''!''?''_''0'-'9''>''.']* { ER_IDENT (Lexing.lexeme lexbuf) }
+  | ['A'-'Z''a'-'z''<''/''-''$']['A'-'Z''a'-'z''+''-''*''/''#''-''@''{'']''*''&''%''$''!''?''_''0'-'9''>''.']* { ER_IDENT (Lexing.lexeme lexbuf) }
   | [':']['A'-'Z''a'-'z''+''-''*''/''#''-''@''{'']''*''&''%''$''!''?''_''0'-'9''>''.']* { ER_IDENT_OPT (Lexing.lexeme lexbuf) }
   | _ { raise (SyntaxError ("Unexpected char: " ^ Lexing.lexeme lexbuf)) }
   | eof { EOF }

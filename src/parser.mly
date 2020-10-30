@@ -18,6 +18,7 @@
 %token CQUOTE CQUASIQUOTE CUNQUOTE
 %token GET SET STARTWITH
 %token SCHEMETOJS JSTOSTRING
+%token DOT
 %start start
 %type <Expr.expr option> start
     
@@ -34,7 +35,7 @@ expression:
 | n = ER_INT { Expr.EInt (n, Some(Parsing.symbol_start_pos())) }
 | ER_STRING { Expr.EString ((remove_enclosing_quotes $1), Some(Parsing.symbol_start_pos())) }
 | ER_CHAR { Expr.EChar ((String.get $1 1), Some(Parsing.symbol_start_pos())) }
-| ER_CHAR_ESC { Expr.EChar ((match $1 with "'\\n'" -> '\n' | "'\\r'" -> '\r' | _ -> failwith "ER_CHAR_ESC"), Some(Parsing.symbol_start_pos())) }
+  | ER_CHAR_ESC { Expr.EChar ((match $1 with "'\\n'" -> '\n' | "'\\r'" -> '\r' | _ -> failwith "ER_CHAR_ESC"), Some(Parsing.symbol_start_pos())) }
 | CQUOTE expression { Expr.EQuote ($2, Some(Parsing.symbol_start_pos())) }
 | CQUASIQUOTE expression { Expr.EQuasiQuote ($2, Some(Parsing.symbol_start_pos())) }
 | CUNQUOTE expression { Expr.EUnQuote ($2, Some(Parsing.symbol_start_pos())) }
@@ -77,6 +78,7 @@ expression:
 
 | LPAREN SET ER_IDENT expression RPAREN { Expr.ESet($3, $4, Some(Parsing.symbol_start_pos())) }
 | LPAREN GET expression RPAREN { Expr.EGet ($3, Some(Parsing.symbol_start_pos())) }
+| LPAREN DOT ER_IDENT ER_IDENT RPAREN { Expr.EDot($3, $4) }
 | LPAREN STARTWITH expression RPAREN { Expr.EStartWith ($3, Some(Parsing.symbol_start_pos())) }
 
 | LPAREN SCHEMETOJS expression RPAREN { Expr.ESchemeToJs ($3, Some(Parsing.symbol_start_pos())) }
