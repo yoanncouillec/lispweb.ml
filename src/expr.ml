@@ -7,12 +7,19 @@ type clause =
 and param =
   | Param of string
   | ParamOpt of string * expr
-                 
+
 and arg =
   | Arg of expr
   | ArgOpt of string * expr
-  
-and expr = 
+
+and js_expr =
+  | JsVar of string
+  | JsDot of js_expr * string
+  | JsString of string
+  | JsApp of js_expr * js_expr
+
+and expr =
+  | EJsExpr of js_expr
   | EAnd of expr * expr * Lexing.position option
   | EApp of expr * arg * Lexing.position option
   | EBegin of expr list * Lexing.position option
@@ -55,6 +62,8 @@ and expr =
   | ESet of string * expr * Lexing.position option
   | EGet of expr * Lexing.position option
   | EStartWith of expr * Lexing.position option
+  | ESchemeToJs of expr * Lexing.position option
+  | EJsToString of expr
   | EShutdownCommand of Unix.shutdown_command * Lexing.position option
   | ESockAddr of Unix.sockaddr * Lexing.position option
   | ESockBoolOption of Unix.socket_bool_option * Lexing.position option
@@ -87,8 +96,17 @@ let rec string_of_param = function
 and string_of_arg = function
   | Arg e -> string_of_expr e
   | ArgOpt(s, e) -> s ^ " " ^ (string_of_expr e)
-          
+
+and string_of_jsexpr = function
+  | JsVar(s) -> s
+  | JsDot(e1,s1) -> "("^(string_of_jsexpr e1)^")."^s1
+  | JsString(s) -> "\""^s^"\""
+  | JsApp(e1,arg) -> "("^(string_of_jsexpr e1)^")"^"("^(string_of_jsexpr arg)^")"
+
 and string_of_expr = function
+  | EJsToString(e1) -> "(js->string "^(string_of_expr e1)^")"
+  | EJsExpr(js_expr) -> string_of_jsexpr js_expr
+  | ESchemeToJs (e, _) -> "(scheme->js "^(string_of_expr e)^")"
   | EInt (n, _) -> string_of_int n
   | EBinary (op, e1, e2, _) ->
      "("^(match op with

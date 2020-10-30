@@ -54,6 +54,8 @@ rule token = parse
   | "call-with-new-thread" { CALLWITHNEWTHREAD }
   | "get" { GET }
   | "start-with" { STARTWITH }
+  | "scheme->js" { SCHEMETOJS }
+  | "js->string" { JSTOSTRING }
   | "+" { PLUS }
   | "-" { MINUS }
   | "*" { MULT }

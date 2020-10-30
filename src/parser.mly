@@ -17,6 +17,7 @@
 %token PLUS MINUS MULT DIV
 %token CQUOTE CQUASIQUOTE CUNQUOTE
 %token GET SET STARTWITH
+%token SCHEMETOJS JSTOSTRING
 %start start
 %type <Expr.expr option> start
     
@@ -77,6 +78,9 @@ expression:
 | LPAREN SET ER_IDENT expression RPAREN { Expr.ESet($3, $4, Some(Parsing.symbol_start_pos())) }
 | LPAREN GET expression RPAREN { Expr.EGet ($3, Some(Parsing.symbol_start_pos())) }
 | LPAREN STARTWITH expression RPAREN { Expr.EStartWith ($3, Some(Parsing.symbol_start_pos())) }
+
+| LPAREN SCHEMETOJS expression RPAREN { Expr.ESchemeToJs ($3, Some(Parsing.symbol_start_pos())) }
+| LPAREN JSTOSTRING expression RPAREN { Expr.EJsToString ($3) }
 
 | LPAREN EQUAL expression expression RPAREN { Expr.EEqual ($3,$4,Some(Parsing.symbol_start_pos())) }
 | LPAREN BEGIN expressions RPAREN { Expr.EBegin ($3, Some(Parsing.symbol_start_pos())) }

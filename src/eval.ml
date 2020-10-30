@@ -283,11 +283,30 @@ let rec eval_quasi_quote e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont)
       
 (* EVAL *)
 
+and js_of_scheme e =
+
+  match e with
+  | EString (e,_) -> JsString(e)
+  | EApp(EVar("print",p),Arg(e),p2) -> JsApp(JsDot(JsVar("console"),"log"), js_of_scheme e)
+  | _ -> failwith ("not implemented: "^(string_of_expr e))
+
 and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 
   (*(print_endline ("evaluate: "^(string_of_expr e)));*)
 
   match e with
+
+  | EJsToString (e1) ->
+     eval e1 genv env denv mem
+       (fun v1 genv' mem' ->
+         (match v1 with
+          | EJsExpr (js_expr) ->
+             cont (EString((string_of_jsexpr js_expr), None)) genv mem
+          | _ -> failwith ("eval EJsToString: type error, should be EJsExpr: "^(string_of_expr e1))))
+    
+  | EJsExpr (_) -> cont e genv mem
+    
+  | ESchemeToJs (e,p) -> cont (EJsExpr (js_of_scheme e)) genv mem
 
   | EInt (n,p) -> cont (EInt (n,p)) genv mem
 
