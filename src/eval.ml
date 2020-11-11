@@ -27,22 +27,31 @@ let print_position out_channel (lexbuf:Lexing.lexbuf) =
   Printf.fprintf out_channel "%s:%d:%d" 
     pos.pos_fname pos.pos_lnum (pos.pos_cnum - pos.pos_bol + 1)
   
-let parse_with_error lexbuf =
-  try Parser.start Lexer.token lexbuf with
-    Lexer.SyntaxError msg ->
-     Printf.fprintf stderr "%a: %s\n" print_position lexbuf msg; None
-  | Parser.Error -> 
-     Printf.fprintf stderr "%a: syntax error\n" print_position lexbuf; None
+let parse_with_error language lexbuf =
+  match language with
+    | "lisp" -> 
+       (try Parser.start Lexer.token lexbuf with
+          Lexer.SyntaxError msg ->
+           Printf.fprintf stderr "%a: %s\n" print_position lexbuf msg; None
+        | Parser.Error -> 
+           Printf.fprintf stderr "%a: syntax error\n" print_position lexbuf; None)
+    | "js" -> 
+       (try ParserJs.start LexerJs.token lexbuf with
+          LexerJs.SyntaxError msg ->
+           Printf.fprintf stderr "%a: %s\n" print_position lexbuf msg; None
+        | ParserJs.Error -> 
+           Printf.fprintf stderr "%a: syntax error\n" print_position lexbuf; None)
+    | _ -> failwith "unknown language"
      
-let rec parse_and_print lexbuf =
-  match parse_with_error lexbuf with
-  | Some _ -> parse_and_print lexbuf
+let rec parse_and_print language lexbuf =
+  match parse_with_error language lexbuf with
+  | Some _ -> parse_and_print language lexbuf
   | None -> ()
   
-let expr_of_filename language filename : expr option = 
+let expr_of_filename language filename : expr option =
   let lexbuf = Lexing.from_string (string_of_channel (open_in filename) "") in
   lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
-  parse_with_error lexbuf
+  parse_with_error language lexbuf
 
 let rec apply_bin_op op v1 v2 = 
   match (v1, v2) with
@@ -665,14 +674,19 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
          eval v genv' env denv mem' cont)
 
   | ELoad (l,e) ->
-     eval e genv env denv mem
-       (fun v genv' mem' ->
-         match v with
-         | EString (s,p) ->
-            (match expr_of_filename l s with
-             | Some e -> eval e genv' env denv mem' cont
-             | None -> failwith "ELoad: cannot parse")
-         | _ -> failwith "eval ELoad: should be a string")
+     eval l genv env denv mem
+       (fun vl genv' mem' ->
+         match vl with
+         | EString (language,_) ->
+            (eval e genv' env denv mem'
+               (fun v genv'' mem'' ->
+                 match v with
+                 | EString (filename,_) ->
+                    (match expr_of_filename language filename with
+                     | Some e -> eval e genv' env denv mem' cont
+                     | None -> failwith "ELoad: cannot parse")
+                 | _ -> failwith "eval ELoad: should be a string"))
+         | _ -> failwith "eval ELoad: parameter 1 should be a string")
 
   | ELoadString (e,p) ->
      eval e genv env denv mem

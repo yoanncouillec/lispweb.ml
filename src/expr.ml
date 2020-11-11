@@ -20,8 +20,6 @@ and js_expr =
   | JsApp of js_expr * js_expr list
   | JsFunction of string list * js_expr
 
-and language = Lisp | Javascript
-
 and expr =
   | EDot of string * string
   | EJsExpr of js_expr
@@ -57,7 +55,7 @@ and expr =
   | ELambdaDot of string * expr * Lexing.position option
   | ELet of ((string * expr) list) * expr * env * Lexing.position option
   | EList of expr list * Lexing.position option
-  | ELoad of language * expr
+  | ELoad of expr * expr
   | ELoadString of expr * Lexing.position option
   | ENot of expr * Lexing.position option
   | EQuasiQuote of expr * Lexing.position option
@@ -155,7 +153,7 @@ and string_of_expr = function
   | EGet (e, _) -> "(get "^(string_of_expr e)^")"
   | EStartWith (e, _) -> "(start-with "^(string_of_expr e)^")"
   | EEval (e,_) -> "(eval "^(string_of_expr e)^")"
-  | ELoad (l, e) -> "(load "^(string_of_expr e)^")"
+  | ELoad (l, e) -> "(load "^(string_of_expr l)^" "^(string_of_expr e)^")"
   | ELoadString (e,_) -> "(load-string "^(string_of_expr e)^")"
   | EIf (e1, e2, e3,_) -> 
      "(if "^(string_of_expr e1)^" "^(string_of_expr e2)^" "^(string_of_expr e3)^")"

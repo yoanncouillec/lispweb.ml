@@ -6,9 +6,10 @@ let _ =
   let version = "1.0" in
   let help = "Usage: "^execname^" [options] [files]\nOptions:\n  --help Print this message and exit" in 
   let sargs = List.tl (Array.to_list Sys.argv) in
+  let language = EDefine ("--language", EString ("lisp", None), None) in
   let rec expr_of_args accu = function
     | "--file"::filename::rest ->
-       expr_of_args (ELoad (Lisp, (EString(filename,None)))::accu) rest
+       expr_of_args (ELoad (EVar("--language",None), (EString(filename,None)))::accu) rest
     | "--file"::[] ->
        failwith "expr_of_args"
     | "--version"::rest ->
@@ -21,7 +22,7 @@ let _ =
     | _ ->
        failwith "expr_of_args"
   in
-  let e = (expr_of_args [] sargs) in
+  let e = (expr_of_args [language] sargs) in
   print_endline(string_of_expr e);
   eval e [] [] [] []
     (fun v _ _ -> print_endline (string_of_expr v) ; v)

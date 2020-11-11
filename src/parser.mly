@@ -43,7 +43,8 @@ expression:
 | FALSE { Expr.EBool (false, Some(Parsing.symbol_start_pos())) }
 | LPAREN EVAL expression RPAREN { Expr.EEval ($3, Some(Parsing.symbol_start_pos())) }
 | LPAREN LOAD_STRING expression RPAREN { Expr.ELoadString ($3, Some(Parsing.symbol_start_pos())) }
-| LPAREN LOAD expression RPAREN { Expr.ELoad (Lisp, $3) }
+| LPAREN LOAD expression RPAREN { Expr.ELoad (EString("lisp",None), $3) }
+| LPAREN LOAD expression expression RPAREN { Expr.ELoad ($3, $4) }
 | LPAREN NOT expression RPAREN { Expr.ENot ($3, Some(Parsing.symbol_start_pos())) }
 | LPAREN AND expression expression RPAREN { Expr.EAnd ($3, $4, Some(Parsing.symbol_start_pos())) }
 | LPAREN PLUS expression expression RPAREN { Expr.EBinary(Expr.OPlus,$3,$4, Some(Parsing.symbol_start_pos())) }
