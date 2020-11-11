@@ -8,7 +8,7 @@ let _ =
   let sargs = List.tl (Array.to_list Sys.argv) in
   let rec expr_of_args accu = function
     | "--file"::filename::rest ->
-       expr_of_args (ELoad (EString(filename,None),None)::accu) rest
+       expr_of_args (ELoad (Lisp, (EString(filename,None)))::accu) rest
     | "--file"::[] ->
        failwith "expr_of_args"
     | "--version"::rest ->
@@ -21,6 +21,8 @@ let _ =
     | _ ->
        failwith "expr_of_args"
   in
-  eval (expr_of_args [] sargs) [] [] [] []
+  let e = (expr_of_args [] sargs) in
+  print_endline(string_of_expr e);
+  eval e [] [] [] []
     (fun v _ _ -> print_endline (string_of_expr v) ; v)
 

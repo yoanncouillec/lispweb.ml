@@ -39,7 +39,7 @@ let rec parse_and_print lexbuf =
   | Some _ -> parse_and_print lexbuf
   | None -> ()
   
-let expr_of_filename filename : expr option = 
+let expr_of_filename language filename : expr option = 
   let lexbuf = Lexing.from_string (string_of_channel (open_in filename) "") in
   lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
   parse_with_error lexbuf
@@ -271,22 +271,22 @@ let rec eval_quasi_quote e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont)
   | EEval (e1,p) ->
      eval_quasi_quote e1 genv env denv mem
        (fun v1 genv1 mem1 ->
-         cont (EEval (e1,p)) genv1 mem1)
+         cont (EEval (v1,p)) genv1 mem1)
 
-  | ELoad (e1,p) ->
+  | ELoad (l,e1) ->
      eval_quasi_quote e1 genv env denv mem
        (fun v1 genv1 mem1 ->
-         cont (ELoad (e1,p)) genv1 mem1)
+         cont (ELoad (l,v1)) genv1 mem1)
 
   | ELoadString (e1,p) ->
      eval_quasi_quote e1 genv env denv mem
        (fun v1 genv1 mem1 ->
-         cont (ELoadString (e1,p)) genv1 mem1)
+         cont (ELoadString (v1,p)) genv1 mem1)
 
   | ECallWithNewThread (e1,p) ->
      eval_quasi_quote e1 genv env denv mem
        (fun v1 genv1 mem1 ->
-         cont (ECallWithNewThread (e1,p)) genv1 mem1)
+         cont (ECallWithNewThread (v1,p)) genv1 mem1)
 
   | EUnQuote (e,p) ->
      eval e genv env denv mem cont
@@ -360,7 +360,8 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 
   | EChar (c,p) -> cont (EChar (c,p)) genv mem
 
-  | EVar (s,p) -> 
+  | EVar (s,p) ->
+     (*print_endline("env="^(string_of_env mem env));*)
      (match get_env s env with
       | EnvAddr addr -> cont (get_mem addr mem) genv mem
       | EnvNotFound _ -> 
@@ -479,9 +480,13 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
        (fun v genv' mem' -> 
 	 (match v with
 	  | EClosure (env', ELambda (Param s, body,_),_) ->
+             (*print_endline("env="^(string_of_env mem' env'));
+             print_endline("body="^(string_of_expr body));*)
 	     eval e2 genv' env denv mem'
 	       (fun v genv'' mem'' ->
 		 let addr = ref v in
+                 (*print_endline("s([])="^s);
+                 print_endline("v([])="^(string_of_expr v));*)
 		 eval body 
 		   genv''
 		   (extend_env s addr env')
@@ -490,18 +495,51 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 		   cont)
 	  | EClosure (env', ELambda (ParamOpt (s, e3), body,_),_) ->
 	     eval e3 genv' env denv mem'
-	       (fun v genv'' mem'' ->
-		 let addr = ref v in
+	       (fun v3 genv'' mem'' ->
+		 let addr = ref v3 in
 		 eval (EApp (body, (Arg e2)::[]))
 		   genv''
                    (extend_env (String.sub s 1 ((String.length s) - 1)) addr env')
 		   denv
-		   (extend_mem addr v mem'')
+		   (extend_mem addr v3 mem'')
 		   cont)
 	  | ECont (k,_) ->
 	     eval e2 genv' env denv mem' k
 	  | _ -> failwith ("Not a closure: "^(string_of_expr v))))
 
+  | EApp (e1, (Arg e2)::rest) ->
+     (*print_endline("EApp");*)
+     eval e1 genv env denv mem
+       (fun v genv' mem' -> 
+	 (match v with
+	  | EClosure (env', ELambda (Param s, body,_),_) ->
+             (*print_endline("env="^(string_of_env mem' env'));
+             print_endline("body="^(string_of_expr body));*)
+	     eval e2 genv' env denv mem'
+	       (fun v2 genv'' mem'' ->
+		 let addr = ref v2 in
+                 (*print_endline("s="^s);
+                 print_endline("v="^(string_of_expr v));*)
+		 eval (EApp(body, rest))
+		   genv''
+		   (extend_env s addr env')
+		   denv
+		   (extend_mem addr v2 mem'')
+                   cont)
+	  | EClosure (env', ELambda (ParamOpt (s, _), body,_),_) ->
+	     eval e2 genv' env denv mem'
+	       (fun v2 genv'' mem'' ->
+		 let addr = ref v2 in
+		 eval (EApp(body,rest))
+		   genv''
+		   (extend_env (String.sub s 1 ((String.length s) - 1)) addr env')
+		   denv
+		   (extend_mem addr v mem'')
+		   cont)
+	  | ECont (k,_) ->
+	     eval e2 genv' env denv mem' k
+	  | _ -> failwith ("222Not a closure: "^(string_of_expr v))))
+             
   | EApp (e1, (ArgOpt(s, e2)::[])) ->
      eval e1 genv env denv mem
        (fun v genv' mem' -> 
@@ -626,12 +664,12 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
        (fun v genv' mem' ->
          eval v genv' env denv mem' cont)
 
-  | ELoad (e,p) ->
+  | ELoad (l,e) ->
      eval e genv env denv mem
        (fun v genv' mem' ->
          match v with
          | EString (s,p) ->
-            (match expr_of_filename s with
+            (match expr_of_filename l s with
              | Some e -> eval e genv' env denv mem' cont
              | None -> failwith "ELoad: cannot parse")
          | _ -> failwith "eval ELoad: should be a string")

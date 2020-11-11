@@ -28,3 +28,6 @@ let rec get_env_start_with s env accu =
      else
        get_env_start_with s rest accu
 
+let rec string_of_env mem = function
+  | [] -> ""
+  | (s,addr)::rest -> "("^s^","^(string_of_expr (Mem.get_mem addr mem))^")"

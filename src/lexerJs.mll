@@ -17,34 +17,23 @@ rule token = parse
   | ['\n'] { next_line lexbuf; token lexbuf }
   | '(' { LPAREN }
   | ')' { RPAREN }
-  | '\'' { CQUOTE }
-  | "`" { CQUASIQUOTE }
-  | "," { CUNQUOTE }
-  | "->" { DOT }
-  | "equal?" { EQUAL }
-  | "#t" { TRUE }
-  | "#f" { FALSE }
+  | "," { COMMA }
+  | "." { DOT }
+  | "true" { TRUE }
+  | "false" { FALSE }
   | "if" { IF }
-  | "cond" { COND }
   | "else" { ELSE }
-  | "lambda" { LAMBDA }
+  | "=>" { ARROW }
   | "let" { LET }
-  | "let*" { LETSTAR }
-  | "define" { DEFINE }
-  | "letrec" { LETREC }
-  | "set!" { SET }
-  | "list" { LIST }
-  | "car" { CAR }
-  | "cdr" { CDR }
-  | "cons" { CONS }
-  | "not" { NOT }
-  | "and" { AND }
-  | "begin" { BEGIN }
-  | "throw" { THROW }  
+  | "var" { VAR }
+  | "=" { ASSIGNMENT }
+  | "!" { NOT }
+  | "&&" { AND }
+  | "{" { LCBRACKET }
+  | "{" { RCBRACKET }	
+  | "throw" { THROW }
+  | "try" { TRY }		
   | "catch" { CATCH }  
-  | "block" { BLOCK }  
-  | "return-from" { RETURNFROM }  
-  | "call/cc" { CALLCC }
   | "hostcall" { HOSTCALL }
   | "eval" { EVAL }
   | "load-string" { LOAD_STRING }
