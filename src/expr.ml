@@ -24,7 +24,7 @@ and expr =
   | EDot of string * string
   | EJsExpr of js_expr
   | EAnd of expr * expr * Lexing.position option
-  | EApp of expr * arg * Lexing.position option
+  | EApp of expr * arg list
   | EBegin of expr list * Lexing.position option
   | EBinary of operator * expr * expr * Lexing.position option
   | EBlock of string * expr * Lexing.position option
@@ -173,8 +173,10 @@ and string_of_expr = function
      "(lambda () "^(string_of_expr body)^")"
   | EThunkApp (e,_) ->
      "("^(string_of_expr e)^")"
-  | EApp (e1, a,_) ->
-     "("^(string_of_expr e1)^" "^(string_of_arg a)^")"
+  | EApp (e1, []) ->
+     "("^(string_of_expr e1)^")"
+  | EApp (e1, e2::rest) ->
+     "("^(string_of_expr e1)^" "^(string_of_arg e2)^(List.fold_left (fun a -> function Arg(e3) -> " "^(string_of_expr e3)) "" rest)^")"
   | EBegin (es,_) -> 
      "(begin"^(List.fold_left (fun acc x -> acc^" "^(string_of_expr x)) "" es)^")"
   | ECatch (s, e,_) ->

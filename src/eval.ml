@@ -169,19 +169,30 @@ let rec eval_quasi_quote e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont)
        (fun v1 genv1 mem1 ->
          cont (EThunk(v1,p)) genv1 mem1)
 
-  | EApp (e1, Arg e2,p) ->
+  | EApp (e1, []) ->
      eval_quasi_quote e1 genv env denv mem
        (fun v1 genv1 mem1 ->
-         eval_quasi_quote e1 genv1 env denv mem1
-           (fun v2 genv2 mem2 ->
-             cont (EApp(v1, Arg v2,p)) genv2 mem2))
+         cont (EApp(v1, [])) genv1 mem1)
 
-  | EApp (e1, ArgOpt(s, e2),p) ->
-     eval_quasi_quote e1 genv env denv mem
-       (fun v1 genv1 mem1 ->
-         eval_quasi_quote e1 genv1 env denv mem1
-           (fun v2 genv2 mem2 ->
-             cont (EApp(v1, ArgOpt(s, v2),p)) genv2 mem2))
+  | EApp (e1, (Arg(e2))::rest) ->
+     eval_quasi_quote e2 genv env denv mem
+       (fun v2 genv2 mem2 ->
+         eval_quasi_quote (EApp(e1,rest)) genv2 env denv mem2
+           (fun v3 genv3 mem3 ->
+             match v3 with
+             | EApp(v1,vrest) ->
+                cont (EApp(v1, (Arg v2)::vrest)) genv3 mem3
+             | _ -> failwith "chuck norris help me"))
+
+  | EApp (e1, ArgOpt(s, e2)::rest) ->
+     eval_quasi_quote e2 genv env denv mem
+       (fun v2 genv2 mem2 ->
+         eval_quasi_quote (EApp(e1,rest)) genv2 env denv mem2
+           (fun v3 genv3 mem3 ->
+             match v3 with
+             | EApp(v1,vrest) ->
+                cont (EApp(v1, ArgOpt(s, v2)::vrest)) genv3 mem3
+             | _ -> failwith "bruce lee help me"))
 
   | EBegin (e1::rest,p) ->
      eval_quasi_quote e1 genv env denv mem
@@ -291,8 +302,8 @@ and js_of_scheme e =
   | EString (e,_) -> JsString(e)
   | EBegin(es,_) -> JsSequence(List.map js_of_scheme es)
   | ELambda(Param param,e1,_) -> JsFunction([param],js_of_scheme e1)
-  | EApp(EVar("print",p),Arg(e1),p2) -> JsApp(JsDot("console","log"), [js_of_scheme e1])
-  | EApp(e1,Arg(e2),_) -> JsApp(js_of_scheme e1,[js_of_scheme e2])
+  | EApp(EVar("print",p),Arg(e1)::[]) -> JsApp(JsDot("console","log"), [js_of_scheme e1])
+  | EApp(e1,Arg(e2)::[]) -> JsApp(js_of_scheme e1,[js_of_scheme e2])
   | _ -> failwith ("not implemented: "^(string_of_expr e))
 
 and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
@@ -463,7 +474,7 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 		   cont)
 	  | _ -> failwith "eval EThunkApp: should be a thunk"))
 
-  | EApp (e1, Arg e2,p) ->
+  | EApp (e1, (Arg e2)::[]) ->
      eval e1 genv env denv mem
        (fun v genv' mem' -> 
 	 (match v with
@@ -481,7 +492,7 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 	     eval e3 genv' env denv mem'
 	       (fun v genv'' mem'' ->
 		 let addr = ref v in
-		 eval (EApp (body, Arg e2,p))
+		 eval (EApp (body, (Arg e2)::[]))
 		   genv''
                    (extend_env (String.sub s 1 ((String.length s) - 1)) addr env')
 		   denv
@@ -491,7 +502,7 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 	     eval e2 genv' env denv mem' k
 	  | _ -> failwith ("Not a closure: "^(string_of_expr v))))
 
-  | EApp (e1, ArgOpt(s, e2),p) ->
+  | EApp (e1, (ArgOpt(s, e2)::[])) ->
      eval e1 genv env denv mem
        (fun v genv' mem' -> 
 	 (match v with

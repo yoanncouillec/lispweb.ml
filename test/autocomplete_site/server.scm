@@ -10,7 +10,6 @@
      (html-page->string
       (load "test/autocomplete_site/home.scm")))))
 
-
 (define service
   (lambda (client method path queryparams protocol headers)
     (/home client)))
