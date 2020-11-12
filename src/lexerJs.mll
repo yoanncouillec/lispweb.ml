@@ -23,7 +23,8 @@ rule token = parse
   | "," { COMMA }
   | ";" { SEMICOLON }
   | "." { DOT }
-  | "function" { FUNCTION } 
+  | "function" { FUNCTION }
+  | "return" { RETURN }	
   | "true" { TRUE }
   | "false" { FALSE }
   | "if" { IF }

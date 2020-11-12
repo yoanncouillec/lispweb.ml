@@ -17,7 +17,8 @@
 %token PLUS MINUS MULT DIV
 %token CQUOTE CQUASIQUOTE CUNQUOTE
 %token GET SET STARTWITH
-%token SCHEMETOJS JSTOSTRING FUNCTION
+%token SCHEMETOJS JSTOSTRING
+%token FUNCTION RETURN
 %token DOT SEMICOLON COMMA ARROW VAR ASSIGNMENT LCBRACKET RCBRACKET TRY LBRACKET RBRACKET
 %start start
 %type <Expr.expr option> start
@@ -45,9 +46,10 @@ expression:
   | n = ER_INT { Expr.EInt (n, Some(Parsing.symbol_start_pos())) }
   | e1=expression PLUS e2=expression { Expr.EBinary(OPlus,e1,e2,None) } 
   | IF LPAREN expression RPAREN LCBRACKET expression RCBRACKET ELSE LCBRACKET expression RCBRACKET { Expr.EIf ($3, $6, $10, Some(Parsing.symbol_start_pos())) }
+  | RETURN e=expression { Expr.EAnonymousReturnFrom(e) }
   | FUNCTION LPAREN p=parameters RPAREN LCBRACKET e=expression RCBRACKET {
 				   List.fold_left (fun a b -> Expr.ELambda(b,a, Some(Parsing.symbol_start_pos())))
-						  (Expr.ELambda ((List.hd (List.rev p)), e, Some(Parsing.symbol_start_pos())))
+						  (Expr.ELambda ((List.hd (List.rev p)), Expr.EAnonymousBlock(e), Some(Parsing.symbol_start_pos())))
 						  (List.tl (List.rev p)) }
 
   | LPAREN p=parameters RPAREN ARROW e=expression { List.fold_left (fun a b -> Expr.ELambda(b,a, Some(Parsing.symbol_start_pos())))

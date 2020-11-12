@@ -1,2 +1,2 @@
-let id = function (x){x};
+let id = function (x){return x};
 id(12);
