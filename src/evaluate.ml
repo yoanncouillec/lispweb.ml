@@ -8,6 +8,7 @@ let _ =
   let sargs = List.tl (Array.to_list Sys.argv) in
   let from_syntax = EDefine ("--from-syntax", EString ("lisp", None), None) in
   let rec expr_of_args accu = function
+    | "--repl"::rest -> expr_of_args (ELoad(EString("lisp",None),EString("lib/repl.scm",None))::accu) rest
     | "--load"::filename::rest ->
        expr_of_args (ELoad (EVar("--from-syntax",None), (EString(filename,None)))::accu) rest
     | "--load"::[] ->
