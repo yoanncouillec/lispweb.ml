@@ -18,7 +18,7 @@
 %token CQUOTE CQUASIQUOTE CUNQUOTE
 %token GET SET STARTWITH
 %token SCHEMETOJS JSTOSTRING
-%token DOT COMMA ARROW VAR ASSIGNMENT LCBRACKET RCBRACKET TRY
+%token DOT SEMICOLON COMMA ARROW VAR ASSIGNMENT LCBRACKET RCBRACKET TRY
 %start start
 %type <Expr.expr option> start
 
@@ -29,10 +29,13 @@ start:
 
 expressions:
   | expression { [$1] }
-  | expression COMMA expressions { $1 :: $3 }
+  | expression SEMICOLON{ [$1] }
+  | expression SEMICOLON expressions { $1 :: $3 }
 
 expression:
   | LPAREN e=expression RPAREN { e }
+  | LCBRACKET es=expressions RCBRACKET { Expr.EBegin(es,None) }
+  | LET id=ER_IDENT ASSIGNMENT e=expression SEMICOLON body=expressions { Expr.ELet([(id,e)],EBegin(body,None),[],None) }
   | n = ER_INT { Expr.EInt (n, Some(Parsing.symbol_start_pos())) }
   | e1=expression PLUS e2=expression { Expr.EBinary(OPlus,e1,e2,None) } 
   | IF LPAREN expression RPAREN LCBRACKET expression RCBRACKET ELSE LCBRACKET expression RCBRACKET { Expr.EIf ($3, $6, $10, Some(Parsing.symbol_start_pos())) }

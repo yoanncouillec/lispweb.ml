@@ -24,10 +24,10 @@ mrproper: clean
 	rm -rf *~
 
 native: sanity
-	$(OCB) src/lispwebeval.native
+	$(OCB) src/evaluate.native
 
 byte: sanity
-	$(OCB) lispwebeval.byte
+	$(OCB) evaluate.byte
 
 profile: sanity
 	$(OCB) -tag profile main.native
@@ -42,16 +42,16 @@ sanity:
 install: install-bin install-lib
 
 install-bin:
-	cp lispwebeval.native /usr/local/bin/lispwebeval.$(VERSION).native
-	rm -f /usr/local/bin/lispwebeval.native
-	ln -s /usr/local/bin/lispwebeval.$(VERSION).native /usr/local/bin/lispwebeval.native
-	rm -f /usr/local/bin/lispwebeval
-	ln -s /usr/local/bin/lispwebeval.$(VERSION).native /usr/local/bin/lispwebeval
+	cp evaluate.native /usr/local/bin/evaluate.$(VERSION).native
+	rm -f /usr/local/bin/evaluate.native
+	ln -s /usr/local/bin/evaluate.$(VERSION).native /usr/local/bin/evaluate.native
+	rm -f /usr/local/bin/evaluate
+	ln -s /usr/local/bin/evaluate.$(VERSION).native /usr/local/bin/evaluate
 
 uninstall-bin:
-	rm -f /usr/local/bin/lispwebeval
-	rm -f  /usr/local/bin/lispwebeval.native
-	rm -f /usr/local/bin/lispwebeval.$(VERSION).native
+	rm -f /usr/local/bin/evaluate
+	rm -f  /usr/local/bin/evaluate.native
+	rm -f /usr/local/bin/evaluate.$(VERSION).native
 
 install-lib:
 	mkdir -p /usr/local/lib/lispweb
@@ -63,26 +63,16 @@ uninstall-lib:
 uninstall: uninstall-bin uninstall-lib
 
 test: native
-	./lispwebeval.native test/add.scm
-	./lispwebeval.native test/first.scm
-	./lispwebeval.native test/let.scm
-	./lispwebeval.native test/callcc.scm
-	./lispwebeval.native test/catch.scm
-	./lispwebeval.native test/block.scm
-	./lispwebeval.native test/all.scm
-	./lispwebeval.native test/add.scm
-#	./lispwebeval.native test/cond.scm
-#	./lispwebeval.native test/host.scm
-	./lispwebeval.native test/library.scm
-#	./lispwebeval.native test/module.scm
-	./lispwebeval.native test/define.scm
-	./lispwebeval.native test/basic.scm
-	./lispwebeval.native test/string.scm
-	./lispwebeval.native test/file.scm
-#	./lispwebeval.native test/socket.scm
-#	./lispwebeval.native test/echo.scm
-	./lispwebeval.native test/list.scm
-	./lispwebeval.native test/html.scm
-	./lispwebeval.native test/test.scm
-#	./lispwebeval.native test/http.scm
-	./lispwebeval.native test/load.scm
+	./evaluate.native --file test/add.scm
+	./evaluate.native --file test/first.scm
+	./evaluate.native --file test/let.scm
+	./evaluate.native --file test/callcc.scm
+	./evaluate.native --file test/catch.scm
+	./evaluate.native --file test/block.scm
+	./evaluate.native --file test/all.scm
+	./evaluate.native --file test/add.scm
+	./evaluate.native --file test/library.scm
+	./evaluate.native --file test/define.scm
+	./evaluate.native --file test/basic.scm
+	./evaluate.native --from-syntax js --file test/add.js
+	./evaluate.native --from-syntax js --file test/test_lambda.js

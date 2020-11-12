@@ -16,7 +16,10 @@ rule token = parse
   | ['\n'] { next_line lexbuf; token lexbuf }
   | '(' { LPAREN }
   | ')' { RPAREN }
+  | "{" { LCBRACKET }
+  | "}" { RCBRACKET }	
   | "," { COMMA }
+  | ";" { SEMICOLON }
   | "." { DOT }
   | "true" { TRUE }
   | "false" { FALSE }
@@ -28,8 +31,6 @@ rule token = parse
   | "=" { ASSIGNMENT }
   | "!" { NOT }
   | "&&" { AND }
-  | "{" { LCBRACKET }
-  | "{" { RCBRACKET }	
   | "throw" { THROW }
   | "try" { TRY }		
   | "catch" { CATCH }  
