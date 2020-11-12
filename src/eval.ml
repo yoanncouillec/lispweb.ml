@@ -452,13 +452,15 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
      eval expr genv env denv mem
        (fun v genv' mem' ->
 	 let addr = ref v in
-	 eval (ELet(rest,body,(extend_env s addr tenv),p)) genv' env denv (extend_mem addr v mem') cont)
+	 eval
+           (ELet(rest,body,(extend_env (Some s) addr tenv),p))
+           genv' env denv (extend_mem addr v mem') cont)
 
   | EDefine (s, expr,p) ->
      eval expr genv env denv mem
        (fun v genv' mem' -> 
 	 let addr = ref v in
-	 cont (EUnit((),p)) (extend_env s addr genv') (extend_mem addr v mem'))
+	 cont (EUnit((),p)) (extend_env (Some s) addr genv') (extend_mem addr v mem'))
 
   | ELambda (_, _,p) as e -> cont (EClosure (env, e,p)) genv mem
 
@@ -478,7 +480,7 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 		 let addr = ref v in
 		 eval body 
 		   genv''
-		   (extend_env (String.sub s 1 ((String.length s) - 1)) addr env')
+		   (extend_env (Some (String.sub s 1 ((String.length s) - 1))) addr env')
 		   denv
 		   (extend_mem addr v mem'')
 		   cont)
@@ -498,7 +500,7 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
                  print_endline("v([])="^(string_of_expr v));*)
 		 eval body 
 		   genv''
-		   (extend_env s addr env')
+		   (extend_env (Some s) addr env')
 		   denv
 		   (extend_mem addr v mem'')
 		   cont)
@@ -508,7 +510,7 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 		 let addr = ref v3 in
 		 eval (EApp (body, (Arg e2)::[]))
 		   genv''
-                   (extend_env (String.sub s 1 ((String.length s) - 1)) addr env')
+                   (extend_env (Some (String.sub s 1 ((String.length s) - 1))) addr env')
 		   denv
 		   (extend_mem addr v3 mem'')
 		   cont)
@@ -531,7 +533,7 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
                  print_endline("v="^(string_of_expr v));*)
 		 eval (EApp(body, rest))
 		   genv''
-		   (extend_env s addr env')
+		   (extend_env (Some s) addr env')
 		   denv
 		   (extend_mem addr v2 mem'')
                    cont)
@@ -541,7 +543,7 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 		 let addr = ref v2 in
 		 eval (EApp(body,rest))
 		   genv''
-		   (extend_env (String.sub s 1 ((String.length s) - 1)) addr env')
+		   (extend_env (Some (String.sub s 1 ((String.length s) - 1))) addr env')
 		   denv
 		   (extend_mem addr v mem'')
 		   cont)
@@ -559,7 +561,7 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 		 let addr = ref v in
 		 eval body
 		   genv''
-		   (extend_env s addr env')
+		   (extend_env (Some s) addr env')
 		   denv
 		   (extend_mem addr v mem'')
 		   cont)
@@ -569,7 +571,7 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 		 let addr = ref v in
 		 eval body
 		   genv''
-		   (extend_env (String.sub s 1 ((String.length s) - 1)) addr env')
+		   (extend_env (Some (String.sub s 1 ((String.length s) - 1))) addr env')
 		   denv
 		   (extend_mem addr v mem'')
 		   cont)
@@ -588,7 +590,7 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 
   | ECatch (s, expression,p) -> 
      let addr = ref (ECont (cont,p)) in
-     eval expression genv env (extend_env s addr denv) (extend_mem addr !addr mem) cont
+     eval expression genv env (extend_env (Some s) addr denv) (extend_mem addr !addr mem) cont
 
   | EThrow (s, expression,p) ->
      eval expression genv env denv mem
@@ -602,7 +604,7 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 
   | EBlock (s, expression,p) -> 
      let addr = ref (ECont (cont,p)) in
-     eval expression genv (extend_env s addr env) denv (extend_mem addr !addr mem) cont
+     eval expression genv (extend_env (Some s) addr env) denv (extend_mem addr !addr mem) cont
 
   | EReturnFrom (s, expression,p) ->
      eval expression genv env denv mem
@@ -614,9 +616,20 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 	      | _ -> failwith "Not a continuation")
 	  | EnvNotFound id -> failwith ("eval EReturnFrom: binding not found: "^id)))
 
+  | EAnonymousBlock (expression) -> 
+     let addr = ref (ECont (cont,None)) in
+     eval expression genv (extend_env None addr env) denv (extend_mem addr !addr mem) cont
+
+  | EAnonymousReturnFrom (expression) ->
+     eval expression genv env denv mem
+       (fun v genv' mem' -> 
+	 (match get_env_top_cont env mem' with
+	  | EnvTopContFound cont -> cont v genv' mem'
+	  | EnvTopContNotFound -> failwith ("eval EAnonymousReturnFrom: no top cont")))
+
   | ECallcc (s, expression,p) ->
      let addr = ref (ECont (cont,p)) in
-     eval expression genv (extend_env s addr env) denv (extend_mem addr !addr mem) cont
+     eval expression genv (extend_env (Some s) addr env) denv (extend_mem addr !addr mem) cont
 
   | EEqual (e1, e2,p) ->
      eval e1 genv env denv mem

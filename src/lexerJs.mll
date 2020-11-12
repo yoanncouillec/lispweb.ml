@@ -18,9 +18,12 @@ rule token = parse
   | ')' { RPAREN }
   | "{" { LCBRACKET }
   | "}" { RCBRACKET }	
+  | "[" { LBRACKET }
+  | "]" { RBRACKET }	
   | "," { COMMA }
   | ";" { SEMICOLON }
   | "." { DOT }
+  | "function" { FUNCTION } 
   | "true" { TRUE }
   | "false" { FALSE }
   | "if" { IF }

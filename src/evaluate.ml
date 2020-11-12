@@ -8,9 +8,9 @@ let _ =
   let sargs = List.tl (Array.to_list Sys.argv) in
   let from_syntax = EDefine ("--from-syntax", EString ("lisp", None), None) in
   let rec expr_of_args accu = function
-    | "--file"::filename::rest ->
+    | "--load"::filename::rest ->
        expr_of_args (ELoad (EVar("--from-syntax",None), (EString(filename,None)))::accu) rest
-    | "--file"::[] ->
+    | "--load"::[] ->
        failwith "expr_of_args"
     | "--version"::rest ->
        expr_of_args ((EHostCall("Pervasives.print_endline",EList([EString(version,None)],None),None))::accu) rest

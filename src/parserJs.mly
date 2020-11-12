@@ -17,8 +17,8 @@
 %token PLUS MINUS MULT DIV
 %token CQUOTE CQUASIQUOTE CUNQUOTE
 %token GET SET STARTWITH
-%token SCHEMETOJS JSTOSTRING
-%token DOT SEMICOLON COMMA ARROW VAR ASSIGNMENT LCBRACKET RCBRACKET TRY
+%token SCHEMETOJS JSTOSTRING FUNCTION
+%token DOT SEMICOLON COMMA ARROW VAR ASSIGNMENT LCBRACKET RCBRACKET TRY LBRACKET RBRACKET
 %start start
 %type <Expr.expr option> start
 
@@ -29,21 +29,31 @@ start:
 
 expressions:
   | expression { [$1] }
-  | expression SEMICOLON{ [$1] }
+  | expression SEMICOLON { [$1] }
   | expression SEMICOLON expressions { $1 :: $3 }
 
+list_expressions:
+  | expression { [$1] }
+  | expression COMMA { [$1] }
+  | expression COMMA expressions { $1 :: $3 }
+
 expression:
-  | LPAREN e=expression RPAREN { e }
   | LCBRACKET es=expressions RCBRACKET { Expr.EBegin(es,None) }
+  | ER_IDENT { Expr.EVar ($1, Some(Parsing.symbol_start_pos())) }
+  | LBRACKET es=list_expressions RBRACKET { Expr.EList(es,None) }
   | LET id=ER_IDENT ASSIGNMENT e=expression SEMICOLON body=expressions { Expr.ELet([(id,e)],EBegin(body,None),[],None) }
   | n = ER_INT { Expr.EInt (n, Some(Parsing.symbol_start_pos())) }
   | e1=expression PLUS e2=expression { Expr.EBinary(OPlus,e1,e2,None) } 
   | IF LPAREN expression RPAREN LCBRACKET expression RCBRACKET ELSE LCBRACKET expression RCBRACKET { Expr.EIf ($3, $6, $10, Some(Parsing.symbol_start_pos())) }
+  | FUNCTION LPAREN p=parameters RPAREN LCBRACKET e=expression RCBRACKET {
+				   List.fold_left (fun a b -> Expr.ELambda(b,a, Some(Parsing.symbol_start_pos())))
+						  (Expr.ELambda ((List.hd (List.rev p)), e, Some(Parsing.symbol_start_pos())))
+						  (List.tl (List.rev p)) }
+
   | LPAREN p=parameters RPAREN ARROW e=expression { List.fold_left (fun a b -> Expr.ELambda(b,a, Some(Parsing.symbol_start_pos())))
 								   (Expr.ELambda ((List.hd (List.rev p)), e, Some(Parsing.symbol_start_pos())))
 								   (List.tl (List.rev p)) }
   | e=expression LPAREN a=arguments RPAREN { Expr.EApp(e,a) }
-  | ER_IDENT { Expr.EVar ($1, Some(Parsing.symbol_start_pos())) }
 
 parameters:
   | p=parameter { [p] }

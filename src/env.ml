@@ -4,14 +4,27 @@ type env_addr =
   | EnvAddr of expr ref
   | EnvNotFound of string
 
+type top_cont = 
+  | EnvTopContNotFound
+  | EnvTopContFound of cont
+
 let extend_env id r env = (id, r)::env
 
 let rec get_env id env =
     match env with
     | [] -> EnvNotFound id
-    | (id', r)::rest ->
+    | (Some(id'), r)::rest ->
        if id = id' then EnvAddr r else get_env id rest
-				       
+    | (None,_)::rest ->  get_env id rest
+
+let rec get_env_top_cont env mem =
+  match env with
+  | [] -> EnvTopContNotFound
+  | (_,addr)::rest->
+     match Mem.get_mem addr mem with
+     | ECont(cont,_) -> EnvTopContFound cont
+     | _ -> get_env_top_cont rest mem
+
 let start_with s2 s1 =
   (String.length s2 >= String.length s1)
   &&
@@ -22,11 +35,12 @@ let start_with s2 s1 =
 let rec get_env_start_with s env accu =
   match env with
   | [] -> accu
-  | (id, _)::rest ->
+  | (Some(id), _)::rest ->
      if start_with id s then
        get_env_start_with s rest (id::accu)
      else
        get_env_start_with s rest accu
+  | (None,_)::rest -> get_env_start_with s rest accu
 
 let rec string_of_env mem = function
   | [] -> ""

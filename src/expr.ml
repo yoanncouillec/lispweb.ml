@@ -28,6 +28,7 @@ and expr =
   | EBegin of expr list * Lexing.position option
   | EBinary of operator * expr * expr * Lexing.position option
   | EBlock of string * expr * Lexing.position option
+  | EAnonymousBlock of expr
   | EBool of bool * Lexing.position option
   | EBytes of Bytes.t * Lexing.position option
   | ECallWithNewThread of expr * Lexing.position option
@@ -62,6 +63,7 @@ and expr =
   | EQuote of expr * Lexing.position option
   | ERegexp of Str.regexp * Lexing.position option
   | EReturnFrom of string * expr * Lexing.position option
+  | EAnonymousReturnFrom of expr
   | ESet of string * expr * Lexing.position option
   | EGet of expr * Lexing.position option
   | EStartWith of expr * Lexing.position option
@@ -86,7 +88,7 @@ and expr =
   | EUnit of unit * Lexing.position option
   | EVar of string * Lexing.position option
 	
- and env = (string * expr ref) list
+ and env = (string option * expr ref) list
 
  and mem = (expr ref * expr) list
 			       
