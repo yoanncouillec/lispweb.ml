@@ -20,6 +20,22 @@ and js_expr =
   | JsApp of js_expr * js_expr list
   | JsFunction of string list * js_expr
 
+and c_type =
+  | CtVoid
+  | CtInteger
+  | CtChar
+  | CtPointer of c_type
+
+and c_expr =
+  | CInt of int
+  | CVar of string
+  | CBinOp of operator * c_expr * c_expr
+  | CBegin of c_expr list
+  | CVarDecl of c_type * string * c_expr * c_expr
+  | CFunction of c_type * string * ((c_type * string)list) * c_expr
+  | CReturn of c_expr
+  | CCall of c_expr * c_expr list
+
 and expr =
   | EDot of string * string
   | EJsExpr of js_expr
@@ -94,6 +110,33 @@ and expr =
 			       
  and cont = expr -> env -> mem -> expr
 
+let rec c_expr_of_expr = function
+  | EVar (s,_) -> CVar(s)
+  | EInt (n,_) -> CInt(n)
+  | EBinary(op,e1,e2,_) -> CBinOp(op,c_expr_of_expr e1,c_expr_of_expr e2)
+  | EBegin(es,_) -> CBegin(List.map c_expr_of_expr es)
+  | ELet([],body,_,_) -> c_expr_of_expr body
+  | ELet((s,e)::rest,body,env,p) -> CVarDecl (CtInteger,s, c_expr_of_expr e, c_expr_of_expr (ELet(rest,body,env,p)))
+
+let rec string_of_c_type = function
+  | CtVoid -> "void"
+  | CtInteger -> "int"
+  | CtChar -> "char"
+  | CtPointer(t) -> (string_of_c_type t)^" *"
+
+let rec string_of_c_expr = function
+  | CInt(n) -> string_of_int n
+  | CVar(s) -> s
+  | CBinOp(OPlus,e1,e2) -> "("^(string_of_c_expr e1)^" + "^(string_of_c_expr e2)^");"
+  | CBegin(es) -> "{"^(List.fold_left (fun accu e -> accu^(string_of_c_expr e)) "" es)^"}"
+  | CVarDecl(t, s, e, body) ->
+     "{"^(string_of_c_type t)^" "^s^" = "^(string_of_c_expr e)^";"^(string_of_c_expr body)^"}"
+  | CFunction(t,s,args,body) ->
+     (string_of_c_type t)^" "^s^"()"^(string_of_c_expr body)
+  | CReturn (e) -> "return "^(string_of_c_expr e)^";"
+  (*| CCall of c_expr * c_expr list*)
+
+  
 let rec string_of_param = function
   | Param s -> s
   | ParamOpt(s, e) -> s ^ " " ^ (string_of_expr e)

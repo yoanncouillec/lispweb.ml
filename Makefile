@@ -25,9 +25,11 @@ mrproper: clean
 
 native: sanity
 	$(OCB) src/evaluate.native
+	$(OCB) src/compile.native
 
 byte: sanity
 	$(OCB) evaluate.byte
+	$(OCB) compile.byte
 
 profile: sanity
 	$(OCB) -tag profile main.native
