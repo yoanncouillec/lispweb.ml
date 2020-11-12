@@ -1,3 +1,13 @@
+(load "lib/string.scm")
+
+(define stdin
+  (lambda ()
+    (hostcall Pervasives.stdin)))
+
+(define stdout
+  (lambda ()
+    (hostcall Pervasives.stdout)))
+
 (define open-out
   (lambda (s)
     (hostcall Pervasives.open_out s)))
@@ -54,7 +64,7 @@
 (define input-line
   (lambda (channel)
     (let* ((s (hostcall Pervasives.input_line channel)))
-      (sub-string s 0 (- (string-length s) 1)))))
+      (sub-string s 0 (string-length s)))))
 
 (define close-in
   (lambda (channel)
