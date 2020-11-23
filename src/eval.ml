@@ -317,9 +317,9 @@ and js_of_scheme e =
 
 and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 
-  (print_newline());
+  (*(print_newline());
   (print_endline ("evaluate: "^(string_of_expr e)));
-  (print_endline ("env: "^(string_of_env mem env)));
+  (print_endline ("env: "^(string_of_env mem env)));*)
 
   match e with
 
@@ -493,8 +493,6 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
        (fun v genv' mem' -> 
 	 (match v with
 	  | EClosure (env', ELambda (Param s, body)) ->
-             print_endline("0000000000 env="^(string_of_env mem' env'));
-             print_endline("0000000000 body="^(string_of_expr body));
 	     eval e2 genv' env denv mem'
 	       (fun v genv'' mem'' ->
 		 let addr = ref v in
@@ -523,22 +521,22 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
   | EApp (e1, (Arg e2)::rest) ->
      (*print_endline("EApp");*)
      eval e1 genv env denv mem
-       (fun v genv' mem' -> 
-	 (match v with
+       (fun v1 genv' mem' -> 
+	 (match v1 with
 	  | EClosure (env', ELambda (Param s, body)) ->
-             print_endline("1111111111 env="^(string_of_env mem' env'));
-             print_endline("1111111111 body="^(string_of_expr body));
 	     eval e2 genv' env denv mem'
 	       (fun v2 genv'' mem'' ->
-		 let addr = ref v2 in
+		 let addr2 = ref v2 in
                  (*print_endline("s="^s);
                  print_endline("v="^(string_of_expr v));*)
-		 eval (EApp(body, rest))
-		   genv''
-		   (extend_env (Some s) addr env')
-		   denv
-		   (extend_mem addr v2 mem'')
-                   cont)
+                 eval body genv'' (extend_env (Some s) addr2 env') denv (extend_mem addr2 v2 mem'')
+                   (fun vbody genv''' mem''' ->
+		     eval (EApp(vbody, rest))
+		       genv'''
+                       env
+		       denv
+		       mem'''
+                       cont))
 	  | EClosure (env', ELambda (ParamOpt (s, _), body)) ->
 	     eval e2 genv' env denv mem'
 	       (fun v2 genv'' mem'' ->
@@ -547,11 +545,11 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 		   genv''
 		   (extend_env (Some (String.sub s 1 ((String.length s) - 1))) addr env')
 		   denv
-		   (extend_mem addr v mem'')
+		   (extend_mem addr v2 mem'')
 		   cont)
 	  | ECont (k) ->
 	     eval e2 genv' env denv mem' k
-	  | _ -> failwith ("222Not a closure: "^(string_of_expr v))))
+	  | _ -> failwith ("222Not a closure: "^(string_of_expr v1))))
              
   | EApp (e1, (ArgOpt(s, e2)::[])) ->
      eval e1 genv env denv mem
