@@ -81,5 +81,5 @@ test: native
 	./evaluate.native --from-syntax js --load test/first.js
 	./evaluate.native --from-syntax js --load test/let.js
 	./evaluate.native --from-syntax js --load test/function.js
-#	./evaluate.native --load test/list.scm
+	./evaluate.native --load test/list.scm
 #	./evaluate.native --load test/string.scm	

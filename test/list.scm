@@ -4,6 +4,7 @@
 (list
  (length (list))
  (length (list 1 2 3))
+ (index-of 'x' (list 2 2 2 2 2 'x' 2 2 2))
  (catch not-found (index-of 'x' (list 2 2 2 2 2 'x' 2 2 2)))
  (catch not-found (index-of 1 (list 2 2 2)))
  (first-slice 3 (list 1 2 3 4 5))
