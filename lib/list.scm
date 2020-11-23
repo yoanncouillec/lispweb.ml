@@ -59,7 +59,6 @@
 
 (define split-into-two
   (lambda (l0 l)
-    (print l)
     (if (pair? l)
 	(if (is-begin-of? l0 l)
 	    (list (list) (drop l (length l0)))

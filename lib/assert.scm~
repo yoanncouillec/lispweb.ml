@@ -1,0 +1,5 @@
+(define assert
+  (lambda (value expected_value)
+    (if (not (equal? value expected_value))
+	(print "pas bien")
+	(print "bien"))))
