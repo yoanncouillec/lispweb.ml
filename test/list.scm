@@ -1,4 +1,5 @@
 (load "lib/list.scm")
+(load "lib/stdout.scm")
 
 (list
  (length (list))

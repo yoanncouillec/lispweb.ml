@@ -8,6 +8,7 @@
 
 (define url-get-content
   (lambda (fd read write host path)
+    (print "url-get-content")
     (let* ((s (concat 
 	       "" 
 	       (list "GET " path " HTTP/1.1" (make-string 1 '\n') 
@@ -28,8 +29,15 @@
 (define wget
   (lambda (scheme host port path)
     (if (equal? scheme "https")
-	(let* ((fd (ssl-make-client host port))
-	       (read ssl-read)
-	       (write ssl-write))
-	  (url-get-content fd read write host path))
+	(begin
+	  (print scheme)
+	  (print host)
+	  (print port)
+	  (print path)
+	  (print "111")
+	  (let (fd (ssl-make-client host port))
+	    (print "222")
+	    (let (read ssl-read)
+	      (let (write ssl-write)
+		(url-get-content fd read write host path)))))
 	(begin (print "error")))))

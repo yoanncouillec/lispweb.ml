@@ -52,6 +52,14 @@
 	      ""
 	      (concat "" (list (make-string 1 c) (read-line read fd))))))))
 
+(define read-all
+  (lambda (ssl)
+    (let* ((bufsize 1024)
+	   (buff (bytes-create bufsize))
+	   (r (ssl-read ssl buff 0 bufsize))
+	   (s (bytes-to-string buff)))
+      (read-all ssl))))
+
 (define write
   (lambda (fd b ofs len)
     (hostcall Unix.write fd b ofs len)))

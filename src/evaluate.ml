@@ -6,24 +6,24 @@ let _ =
   let version = "1.0" in
   let help = "Usage: "^execname^" [options] [files]\nOptions:\n  --help Print this message and exit" in 
   let sargs = List.tl (Array.to_list Sys.argv) in
-  let from_syntax = EDefine ("--from-syntax", EString ("lisp", None), None) in
+  let from_syntax = EDefine ("--from-syntax", EString ("lisp")) in
   let rec expr_of_args accu args =
     match args with
     | "--load"::filename::rest ->
-       expr_of_args (ELoad (EVar("--from-syntax",None), (EString(filename,None)))::accu) rest
+       expr_of_args (ELoad (EVar("--from-syntax"), (EString(filename)))::accu) rest
     | "--load"::[] ->
        failwith "expr_of_args"
     | "--version"::rest ->
-       expr_of_args ((EHostCall("Pervasives.print_endline",EList([EString(version,None)],None),None))::accu) rest
+       expr_of_args ((EHostCall("Pervasives.print_endline",EList([EString(version)])))::accu) rest
     | "--help"::rest ->
-       expr_of_args ((EHostCall("Pervasives.print_endline",EList([EString(help,None)],None),None))::accu) rest
+       expr_of_args ((EHostCall("Pervasives.print_endline",EList([EString(help)])))::accu) rest
     | key::rest ->
        (match (String.get key 0, String.get key 1,rest) with
         | ('-','-',value::rest') ->
-           expr_of_args (EDefine (key, EString (value, None), None)::accu) rest'
+           expr_of_args (EDefine (key, EString (value))::accu) rest'
         | ('-','l',rest') ->
-           expr_of_args (ELoad(EString("lisp",None),EString("lib/"^(String.sub key 2 ((String.length key) - 2))^".scm",None))::accu) rest')
-    | [] -> Expr.EBegin (List.rev accu,None)
+           expr_of_args (ELoad(EString("lisp"),EString("lib/"^(String.sub key 2 ((String.length key) - 2))^".scm"))::accu) rest')
+    | [] -> Expr.EBegin (List.rev accu)
     | _ ->
        failwith "expr_of_args"
   in
@@ -31,4 +31,3 @@ let _ =
   print_endline(string_of_expr e);
   eval e [] [] [] []
     (fun v _ _ -> print_endline (string_of_expr v) ; v)
-

@@ -1,3 +1,5 @@
+(load "lib/stdout.scm")
+
 (define pair?
   (lambda (l)
     (not (equal? (length l) 0))))
@@ -10,10 +12,21 @@
 
 (define index-of
   (lambda (e l)
+    (print "111")
+    (print l)
+    (print "222")
     (if (pair? l)
-	(if (equal? e (car l))
-	    0
-	    (+ 1 (index-of e (cdr l))))
+	(begin
+	  (print l)	  
+	  (print "333")
+	  (if (equal? e (car l))
+	      0
+	      (begin
+		(print "444")
+		(print l)
+		(print (index-of l l))
+		(print "555")
+		(+ 1 (index-of e (cdr l))))))
 	(throw not-found 'not-found))))
 
 (define first-slice
