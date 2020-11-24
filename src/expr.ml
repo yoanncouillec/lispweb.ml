@@ -14,7 +14,7 @@ and arg =
 
 and js_expr =
   | JsVar of string
-  | JsDot of string * string
+  | JsDot of js_expr * js_expr
   | JsString of string
   | JsSequence of js_expr list
   | JsApp of js_expr * js_expr list
@@ -37,7 +37,7 @@ and c_expr =
   | CCall of c_expr * c_expr list
 
 and expr =
-  | EDot of string * string
+  | EDot of expr * expr
   | EJsExpr of js_expr
   | EAnd of expr * expr
   | EApp of expr * arg list
@@ -147,21 +147,21 @@ and string_of_arg = function
 
 and string_of_jsexpr = function
   | JsVar(s) -> s
-  | JsDot(s1,s2) -> "("^s1^")."^s2
+  | JsDot(e1,e2) -> "("^(string_of_jsexpr e1)^")."^(string_of_jsexpr e2)
   | JsString(s) -> "\""^s^"\""
-  | JsSequence(es) ->
-     List.fold_left (fun a e -> a^";"^(string_of_jsexpr e)) "" es
+  | JsSequence(e1::rest) ->
+     List.fold_left (fun a e -> a^";"^(string_of_jsexpr e)) (string_of_jsexpr e1) rest
   | JsApp(e1,[]) ->
      "("^(string_of_jsexpr e1)^")"^"()"
   | JsApp(e1,arg::rest) ->
      "("^(string_of_jsexpr e1)^")"^"("^(string_of_jsexpr arg)^(List.fold_left (fun a arg -> a^", "^(string_of_jsexpr arg)) "" rest)^")"
   | JsFunction([],e1) ->
-     "function (){"^(string_of_jsexpr e1)^"}"
+     "function (){return "^(string_of_jsexpr e1)^"}"
   | JsFunction(param::rest,e1) ->
-     "function ("^param^(List.fold_left (fun a param -> a^", "^param) "" rest)^"){"^(string_of_jsexpr e1)^"}"
+     "function ("^param^(List.fold_left (fun a param -> a^", "^param) "" rest)^"){return "^(string_of_jsexpr e1)^"}"
 
 and string_of_expr = function
-  | EDot (s1, s2) -> "(-> "^s1^" "^s2^")"
+  | EDot (e1, e2) -> "(-> "^(string_of_expr e1)^" "^(string_of_expr e2)^")"
   | EJsToString(e1) -> "(js->string "^(string_of_expr e1)^")"
   | EJsExpr(js_expr) -> string_of_jsexpr js_expr
   | ESchemeToJs (e) -> "(scheme->js "^(string_of_expr e)^")"

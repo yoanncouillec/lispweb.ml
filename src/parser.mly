@@ -75,7 +75,7 @@ expression:
 
   | LPAREN SET ER_IDENT expression RPAREN { Expr.ESet($3, $4) }
   | LPAREN GET expression RPAREN { Expr.EGet ($3) }
-  | LPAREN DOT ER_IDENT ER_IDENT RPAREN { Expr.EDot($3, $4) }
+  | LPAREN DOT e1=expression e2=expression RPAREN { Expr.EDot(e1, e2) }
   | LPAREN STARTWITH expression RPAREN { Expr.EStartWith ($3) }
 
   | LPAREN SCHEMETOJS expression RPAREN { Expr.ESchemeToJs ($3) }

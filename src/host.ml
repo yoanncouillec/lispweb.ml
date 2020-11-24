@@ -263,10 +263,10 @@ module LUnix = struct
        ESockAddr(Unix.ADDR_UNIX name)
     | _ -> failwith "unix_addr_unix"
 		    
-  let addr_inet = function
+  let addr_inet e = match e with
     | EList(((EInetAddr(addr))::(EInt(port))::[])) ->
        ESockAddr(Unix.ADDR_INET(addr, port))
-    | _ -> failwith "unix_addr_inet"
+    | _ -> failwith ("unix_addr_inet: "^(string_of_expr e))
 	
   let socket = function
     | EList(((EString(domain))::(EString(stype))::(EInt(protocol))::[])) ->

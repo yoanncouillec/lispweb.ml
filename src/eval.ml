@@ -307,13 +307,15 @@ and js_of_scheme e =
 
   match e with
   | EVar(s1) -> JsVar(s1)
-  | EDot (s1,s2) -> JsDot(s1,s2)
+  | EDot (e1,e2) -> JsDot(js_of_scheme e1, js_of_scheme e2)
   | EString (e) -> JsString(e)
   | EBegin(es) -> JsSequence(List.map js_of_scheme es)
   | ELambda(Param param,e1) -> JsFunction([param],js_of_scheme e1)
-  | EApp(EVar("print"),Arg(e1)::[]) -> JsApp(JsDot("console","log"), [js_of_scheme e1])
+  | EApp(EVar("print"),Arg(e1)::[]) -> JsApp(JsDot(JsVar "console", JsVar "log"), [js_of_scheme e1])
   | EApp(e1,Arg(e2)::[]) -> JsApp(js_of_scheme e1,[js_of_scheme e2])
-  | _ -> failwith ("not implemented: "^(string_of_expr e))
+  | EApp(e1,[]) -> JsApp(js_of_scheme e1,[])
+  | EThunkApp(e1) -> JsApp(js_of_scheme e1,[])
+  | _ -> failwith ("js_of_scheme: not implemented: "^(string_of_expr e))
 
 and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 
@@ -655,8 +657,7 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
        (fun v genv' mem' ->
 	 match v with
 	 | EList ((hd::_)) -> cont hd genv' mem'
-	 | _ -> failwith "ECar" (*("Eval ECar: Should be a list: "^(string_of_expr v)^":"^(string_of_position p)))*)
-       )
+	 | _ -> failwith ("Eval ECar: Should be a list: "^(string_of_expr v)))
 
   | ECdr (e) ->
      eval e genv env denv mem

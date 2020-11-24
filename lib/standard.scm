@@ -6,3 +6,5 @@
 (load "lib/file.scm")
 (load "lib/http.scm")
 (load "lib/wget.scm")
+(load "lib/assert.scm")
+(load "lib/html.scm")
