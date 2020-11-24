@@ -310,6 +310,7 @@ and js_of_scheme e =
   | EDot (e1,e2) -> JsDot(js_of_scheme e1, js_of_scheme e2)
   | EString (e) -> JsString(e)
   | EBegin(es) -> JsSequence(List.map js_of_scheme es)
+  | EDefine(s,e) -> JsAssignement(s, js_of_scheme e)
   | ELambda(Param param,e1) -> JsFunction([param],js_of_scheme e1)
   | EApp(EVar("print"),Arg(e1)::[]) -> JsApp(JsDot(JsVar "console", JsVar "log"), [js_of_scheme e1])
   | EApp(e1,Arg(e2)::[]) -> JsApp(js_of_scheme e1,[js_of_scheme e2])

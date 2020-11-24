@@ -23,7 +23,8 @@ rule token = parse
   (* | "quote" { CQUOTE }
    * | "quasiquote" { CQUASIQUOTE }
    * | "unquote" { CUNQUOTE } *)
-  | "->" { DOT }
+  | "->" { ARROW }
+  | "." { DOT }
   | "equal?" { EQUAL }
   | "#t" { TRUE }
   | "#f" { FALSE }

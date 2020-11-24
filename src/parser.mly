@@ -18,7 +18,7 @@
 %token CQUOTE CQUASIQUOTE CUNQUOTE
 %token GET SET STARTWITH
 %token SCHEMETOJS JSTOSTRING
-%token DOT
+%token DOT ARROW
 %start start
 %type <Expr.expr option> start
 
@@ -75,7 +75,8 @@ expression:
 
   | LPAREN SET ER_IDENT expression RPAREN { Expr.ESet($3, $4) }
   | LPAREN GET expression RPAREN { Expr.EGet ($3) }
-  | LPAREN DOT e1=expression e2=expression RPAREN { Expr.EDot(e1, e2) }
+  | LPAREN ARROW e1=expression e2=expression RPAREN { Expr.EDot(e1, e2) }
+  | e1=expression DOT e2=expression { Expr.EDot(e1, e2) }
   | LPAREN STARTWITH expression RPAREN { Expr.EStartWith ($3) }
 
   | LPAREN SCHEMETOJS expression RPAREN { Expr.ESchemeToJs ($3) }

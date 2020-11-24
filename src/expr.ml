@@ -18,6 +18,7 @@ and js_expr =
   | JsString of string
   | JsSequence of js_expr list
   | JsApp of js_expr * js_expr list
+  | JsAssignement of string * js_expr
   | JsFunction of string list * js_expr
 
 and c_type =
@@ -156,9 +157,11 @@ and string_of_jsexpr = function
   | JsApp(e1,arg::rest) ->
      "("^(string_of_jsexpr e1)^")"^"("^(string_of_jsexpr arg)^(List.fold_left (fun a arg -> a^", "^(string_of_jsexpr arg)) "" rest)^")"
   | JsFunction([],e1) ->
-     "function (){return "^(string_of_jsexpr e1)^"}"
+     "(() => "^(string_of_jsexpr e1)^")"
   | JsFunction(param::rest,e1) ->
-     "function ("^param^(List.fold_left (fun a param -> a^", "^param) "" rest)^"){return "^(string_of_jsexpr e1)^"}"
+     "(("^param^(List.fold_left (fun a param -> a^", "^param) "" rest)^") => "^(string_of_jsexpr e1)^")"
+  | JsAssignement(s,e) ->
+     s ^ " = " ^ (string_of_jsexpr e)
 
 and string_of_expr = function
   | EDot (e1, e2) -> "(-> "^(string_of_expr e1)^" "^(string_of_expr e2)^")"
