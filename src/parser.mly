@@ -14,6 +14,14 @@
       in
       split_params_aux [] [] params
     
+    let split_args args =
+      let rec split_args_aux posargs optargs = function
+	| [] -> (posargs, optargs)
+	| (Expr.Arg(e))::rest -> split_args_aux (e::posargs) optargs rest
+    	| (Expr.ArgOpt(s,e))::rest -> split_args_aux posargs ((s,e)::optargs) rest
+      in
+      split_args_aux [] [] args
+    
 %}
 
 %token<int> ER_INT
@@ -105,7 +113,7 @@ Expr.EThunk (Expr.EBegin ($5)) }
   | LPAREN expression RPAREN {
 Expr.EThunkApp ($2) }
 
-  | LPAREN expression arguments RPAREN { Expr.EApp($2,$3) }
+  | LPAREN expression args=arguments RPAREN { let (posargs, optargs) = split_args args in Expr.EApp($2, posargs, optargs) }
 
   | ER_IDENT { Expr.EVar ($1) }
 

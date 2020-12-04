@@ -43,7 +43,7 @@ and expr =
   | EDot of expr * expr
   | EJsExpr of js_expr
   | EAnd of expr * expr
-  | EApp of expr * arg list
+  | EApp of expr * (expr list) * ((string * expr) list)
   | EBegin of expr list
   | EBinary of operator * expr * expr
   | EBlock of string * expr
@@ -223,10 +223,10 @@ and string_of_expr = function
      "(lambda () "^(string_of_expr body)^")"
   | EThunkApp (e) ->
      "("^(string_of_expr e)^")"
-  | EApp (e1, []) ->
-     "("^(string_of_expr e1)^")"
-  | EApp (e1, e2::rest) ->
-  "("^(string_of_expr e1)^" "^(string_of_arg e2)^(List.fold_left (fun a -> function Arg(e3) -> a^" "^(string_of_expr e3) | ArgOpt(s,e3) -> a^" "^s^" "^(string_of_expr e3)) "" rest)^")"
+
+  | EApp (e1, fst::posparams, optparams) ->
+     "("^(string_of_expr e1)^" "^(string_of_expr fst)^(List.fold_left (fun a -> function e3 -> a^" "^(string_of_expr e3)) "" posparams)^")"
+
   | EBegin (es) -> 
      "(begin"^(List.fold_left (fun acc x -> acc^" "^(string_of_expr x)) "" es)^")"
   | ECatch (s, e) ->
