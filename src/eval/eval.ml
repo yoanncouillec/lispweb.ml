@@ -626,6 +626,7 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
   | EQuote (e) -> cont e genv mem
   | EQuasiQuote (e) -> eval_quasi_quote e genv env denv mem cont
   | EUnQuote (e) -> failwith "eval EUnQuote: must be inside a quasiquote"
+
   | EEval (e1) ->
      eval e1 genv env denv mem
        (fun v genv' mem' ->
@@ -652,7 +653,7 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
          match v with
          | EString (s) ->
             (match expr_of_string s with
-             | Some e -> eval e genv' env denv mem' cont
+             | Some e -> cont e genv' mem' (*eval e genv' env denv mem' cont*)
              | None -> failwith "ELoadString: cannot parse")
          | _ -> failwith "eval ELoadString: should be a string")
 

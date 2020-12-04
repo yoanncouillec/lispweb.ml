@@ -27,7 +27,7 @@
 %token<int> ER_INT
 %token<string> ER_CHAR_ESC
 %token<string> ER_IDENT ER_STRING ER_CHAR ER_IDENT_OPT
-%token LPAREN RPAREN LAMBDA LET LETREC DEFINE LETSTAR LOAD_STRING LOAD EVAL
+%token LPAREN RPAREN LAMBDA LET LETREC DEFINE LETSTAR LOAD EVAL
 %token TRUE FALSE IF COND ELSE EOF BEGIN EQUAL NOT AND
 %token CAR CDR CONS LIST
 %token CATCH THROW CALLCC BLOCK RETURNFROM HOSTCALL CALLWITHNEWTHREAD
@@ -35,6 +35,7 @@
 %token CQUOTE CQUASIQUOTE CUNQUOTE
 %token GET SET STARTWITH
 %token SCHEMETOJS JSTOSTRING
+%token STRINGTOEXPR
 %token DOT ARROW
 %left DOT
 
@@ -61,7 +62,7 @@ expression:
   | TRUE { Expr.EBool (Parsing.symbol_start(), true) }
   | FALSE { Expr.EBool (Parsing.symbol_start(), false) }
   | LPAREN EVAL expression RPAREN { Expr.EEval ($3) }
-  | LPAREN LOAD_STRING expression RPAREN { Expr.ELoadString ($3) }
+  | LPAREN STRINGTOEXPR expression RPAREN { Expr.ELoadString ($3) }
   | LPAREN LOAD expression RPAREN { Expr.ELoad (EString("lisp"), $3) }
   | LPAREN LOAD expression expression RPAREN { Expr.ELoad ($3, $4) }
   | LPAREN NOT expression RPAREN { Expr.ENot ($3) }
