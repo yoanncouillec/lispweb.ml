@@ -492,6 +492,26 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
    *         | _ -> failwith "eval EThunkApp: should be a thunk")) *)
 
 
+  | EApp(f, [], (optarg_s, optarg_expr)::optargs) ->
+     eval f genv env denv mem
+       (fun vf genv' mem' ->
+         (match vf with
+          | EClosure (env', ELambda ([], optparams, body)) ->
+             let _ = List.assoc optarg_s optparams in
+             eval optarg_expr genv' env denv mem'
+               (fun voptarg_expr genv'' mem'' ->
+                 eval
+                   (EApp (EClosure (env', ELambda ([], List.remove_assoc optarg_s optparams, body)),
+                          [],
+                          optargs))
+                   genv''
+                   env
+                   denv
+                   mem''
+                   cont)))
+             
+
+
   | EApp(f, fstposarg::posargs, optargs) ->
      eval f genv env denv mem
        (fun vf genv' mem' ->
