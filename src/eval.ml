@@ -315,7 +315,6 @@ and js_of_scheme e =
   | EApp(EVar("print"), e1::[],_) -> JsApp(JsDot(JsVar "console", JsVar "log"), [js_of_scheme e1])
   | EApp(e1, e2::[],_) -> JsApp(js_of_scheme e1,[js_of_scheme e2])
   | EApp(e1,[],[]) -> JsApp(js_of_scheme e1,[])
-  | EThunkApp(e1) -> JsApp(js_of_scheme e1,[])
   | _ -> failwith ("js_of_scheme: not implemented: "^(string_of_expr e))
 
 and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
@@ -796,7 +795,7 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
      eval e1 genv env denv mem
        (fun v1 genv' mem' ->
          match v1 with
-         | EClosure(env', EThunk (e2)) ->
+         | EClosure(env', ELambda ([],[],e2)) ->
             let t = Thread.create (fun _ -> eval e2 genv' env' denv mem' (fun v _ _ -> v)) () in
             cont (EThread (t)) genv' mem'
          | _  -> failwith "eval ECallWithNewThread")

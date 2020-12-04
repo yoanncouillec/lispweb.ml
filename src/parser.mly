@@ -106,12 +106,12 @@ expression:
   | LPAREN CALLWITHNEWTHREAD expression RPAREN { Expr.ECallWithNewThread ($3) }
 
   | LPAREN LAMBDA LPAREN RPAREN expressions RPAREN {
-Expr.EThunk (Expr.EBegin ($5)) }
+Expr.ELambda ([],[],Expr.EBegin ($5)) }
 
   | LPAREN LAMBDA LPAREN parameters=parameters RPAREN body=expressions RPAREN { let (posparams, optparams) = split_params parameters in ELambda (posparams, optparams, EBegin(body)) }
 
   | LPAREN expression RPAREN {
-Expr.EThunkApp ($2) }
+Expr.EApp ($2,[],[]) }
 
   | LPAREN expression args=arguments RPAREN { let (posargs, optargs) = split_args args in Expr.EApp($2, posargs, optargs) }
 

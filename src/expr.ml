@@ -101,8 +101,6 @@ and expr =
   | EString of string
   | EThread of Thread.t
   | EThrow of string * expr
-  | EThunk of expr
-  | EThunkApp of expr
   | EUnQuote of expr
   | EUnit of unit
   | EVar of string
@@ -219,11 +217,6 @@ and string_of_expr = function
      "(lambda ("^(List.fold_left (fun accu param -> accu^" "^param) fst rest)^") "^(string_of_expr body)^")"
   | ELambdaDot (s, body) ->
      "(lambda (. "^s^") "^(string_of_expr body)^")"
-  | EThunk (body) ->
-     "(lambda () "^(string_of_expr body)^")"
-  | EThunkApp (e) ->
-     "("^(string_of_expr e)^")"
-
   | EApp (e1, fst::posparams, optparams) ->
      "("^(string_of_expr e1)^" "^(string_of_expr fst)^(List.fold_left (fun a -> function e3 -> a^" "^(string_of_expr e3)) "" posparams)^")"
 
