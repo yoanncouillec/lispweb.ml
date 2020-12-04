@@ -300,7 +300,7 @@ module LUnix = struct
     | _ -> failwith "unix_shutdown"
 
   let setsockopt = function
-    | EList(((EFile(fd))::(EString(sbo))::(EBool(b))::[])) ->
+    | EList(((EFile(fd))::(EString(sbo))::(EBool(_,b))::[])) ->
        EUnit (Unix.setsockopt fd (socket_bool_option_of_string sbo) b)
     | _ -> failwith "unix_shutdown"
 

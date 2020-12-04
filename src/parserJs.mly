@@ -5,6 +5,16 @@
     let replace_escape s =
       let r = Str.regexp "\\\\\"" in
       Str.global_replace r s "\""
+
+    let split_params params =
+      let rec split_params_aux posparams optparams = function
+	| [] -> (posparams, optparams)
+	| (Expr.Param(s))::rest -> split_params_aux (s::posparams) optparams rest
+    	| (Expr.ParamOpt(s,e))::rest -> split_params_aux posparams ((s,e)::optparams) rest
+      in
+      split_params_aux [] [] params
+    
+
       %}
 
 %token<int> ER_INT
@@ -47,14 +57,10 @@ expression:
   | e1=expression PLUS e2=expression { Expr.EBinary(OPlus,e1,e2) } 
   | IF LPAREN expression RPAREN LCBRACKET expression RCBRACKET ELSE LCBRACKET expression RCBRACKET { Expr.EIf ($3, $6, $10) }
   | RETURN e=expression { Expr.EAnonymousReturnFrom(e) }
-  | FUNCTION LPAREN p=parameters RPAREN LCBRACKET e=expression RCBRACKET {
-				   List.fold_left (fun a b -> Expr.ELambda(b,a))
-						  (Expr.ELambda ((List.hd (List.rev p)), Expr.EAnonymousBlock(e)))
-						  (List.tl (List.rev p)) }
+  | FUNCTION LPAREN parameters=parameters RPAREN LCBRACKET body=expression RCBRACKET { let (posparams, optparams) = split_params parameters in 
+								 Expr.ELambda (posparams, optparams, Expr.EAnonymousBlock(body)) } 
 
-  | LPAREN p=parameters RPAREN ARROW e=expression { List.fold_left (fun a b -> Expr.ELambda(b,a))
-								   (Expr.ELambda ((List.hd (List.rev p)), e))
-								   (List.tl (List.rev p)) }
+  | LPAREN parameters=parameters RPAREN ARROW body=expression { let (posparams, optparams) = split_params parameters in ELambda (posparams, optparams, body) }
   | e=expression LPAREN a=arguments RPAREN { Expr.EApp(e,a) }
 
 parameters:

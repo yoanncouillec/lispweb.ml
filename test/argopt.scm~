@@ -1,0 +1,5 @@
+(define foo
+  (lambda (x :k1 11 y :k2 22 :k3 33 z)
+    (+ x :k1 y :k2 :k3 z)))
+
+(foo 1 2 :k1 111 3 :k2 222)

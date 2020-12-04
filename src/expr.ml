@@ -37,6 +37,8 @@ and c_expr =
   | CReturn of c_expr
   | CCall of c_expr * c_expr list
 
+and info = int
+
 and expr =
   | EDot of expr * expr
   | EJsExpr of js_expr
@@ -46,7 +48,7 @@ and expr =
   | EBinary of operator * expr * expr
   | EBlock of string * expr
   | EAnonymousBlock of expr
-  | EBool of bool
+  | EBool of info * bool
   | EBytes of Bytes.t
   | ECallWithNewThread of expr
   | ECallcc of string * expr
@@ -69,7 +71,7 @@ and expr =
   | EIf of expr * expr * expr
   | EInetAddr of Unix.inet_addr
   | EInt of int
-  | ELambda of param * expr
+  | ELambda of (string list) * ((string * expr) list) * expr
   | ELambdaDot of string * expr
   | ELet of ((string * expr) list) * expr * env
   | EList of expr list
@@ -175,7 +177,7 @@ and string_of_expr = function
 	  | OMult -> "*"
           | ODiv -> "/"
 	  | OMinus -> "-")^" "^(string_of_expr e1)^" "^(string_of_expr e2)^")"
-  | EBool (b) -> string_of_bool b
+  | EBool (_,b) -> string_of_bool b
   | ENot (e) -> "(not "^(string_of_expr e)^")"
   | EAnd (e1,e2) -> "(and "^(string_of_expr e1)^" "^(string_of_expr e2)^")"
   | ECond (clauses) ->
@@ -213,8 +215,8 @@ and string_of_expr = function
           bindings)^") "^(string_of_expr body)^")"
   | EDefine (s, e) ->
     "(define "^s^" "^(string_of_expr e)^")"
-  | ELambda (p, body) ->
-     "(lambda ("^(string_of_param p)^") "^(string_of_expr body)^")"
+  | ELambda (fst::rest, _, body) ->
+     "(lambda ("^(List.fold_left (fun accu param -> accu^" "^param) fst rest)^") "^(string_of_expr body)^")"
   | ELambdaDot (s, body) ->
      "(lambda (. "^s^") "^(string_of_expr body)^")"
   | EThunk (body) ->
@@ -224,7 +226,7 @@ and string_of_expr = function
   | EApp (e1, []) ->
      "("^(string_of_expr e1)^")"
   | EApp (e1, e2::rest) ->
-  "("^(string_of_expr e1)^" "^(string_of_arg e2)^(List.fold_left (fun a -> function Arg(e3) -> a^" "^(string_of_expr e3)) "" rest)^")"
+  "("^(string_of_expr e1)^" "^(string_of_arg e2)^(List.fold_left (fun a -> function Arg(e3) -> a^" "^(string_of_expr e3) | ArgOpt(s,e3) -> a^" "^s^" "^(string_of_expr e3)) "" rest)^")"
   | EBegin (es) -> 
      "(begin"^(List.fold_left (fun acc x -> acc^" "^(string_of_expr x)) "" es)^")"
   | ECatch (s, e) ->

@@ -5,7 +5,16 @@
     let replace_escape s =
       let r = Str.regexp "\\\\\"" in
       Str.global_replace r s "\""
-      %}
+
+    let split_params params =
+      let rec split_params_aux posparams optparams = function
+	| [] -> (posparams, optparams)
+	| (Expr.Param(s))::rest -> split_params_aux (s::posparams) optparams rest
+    	| (Expr.ParamOpt(s,e))::rest -> split_params_aux posparams ((s,e)::optparams) rest
+      in
+      split_params_aux [] [] params
+    
+%}
 
 %token<int> ER_INT
 %token<string> ER_CHAR_ESC
@@ -39,8 +48,8 @@ expression:
   | CQUOTE expression { Expr.EQuote ($2) }
   | CQUASIQUOTE expression { Expr.EQuasiQuote ($2) }
   | CUNQUOTE expression { Expr.EUnQuote ($2) }
-  | TRUE { Expr.EBool (true) }
-  | FALSE { Expr.EBool (false) }
+  | TRUE { Expr.EBool (Parsing.symbol_start(), true) }
+  | FALSE { Expr.EBool (Parsing.symbol_start(), false) }
   | LPAREN EVAL expression RPAREN { Expr.EEval ($3) }
   | LPAREN LOAD_STRING expression RPAREN { Expr.ELoadString ($3) }
   | LPAREN LOAD expression RPAREN { Expr.ELoad (EString("lisp"), $3) }
@@ -91,12 +100,7 @@ expression:
   | LPAREN LAMBDA LPAREN RPAREN expressions RPAREN {
 Expr.EThunk (Expr.EBegin ($5)) }
 
-  | LPAREN LAMBDA LPAREN parameters=parameters RPAREN expressions=expressions RPAREN {
-List.fold_left
-  (fun a b -> Expr.ELambda(b,a))
-  (Expr.ELambda (List.hd ((List.rev parameters)),
-		 Expr.EBegin (expressions)))
-  (List.tl (List.rev parameters)) }
+  | LPAREN LAMBDA LPAREN parameters=parameters RPAREN body=expressions RPAREN { let (posparams, optparams) = split_params parameters in ELambda (posparams, optparams, EBegin(body)) }
 
   | LPAREN expression RPAREN {
 Expr.EThunkApp ($2) }
@@ -111,7 +115,7 @@ parameters:
 
 parameter:
   | ER_IDENT { Expr.Param($1) }
-  | ER_IDENT_OPT expression { Expr.ParamOpt($1, $2) }
+  | ER_IDENT_OPT expression { Expr.ParamOpt(String.sub $1 1 ((String.length $1) - 1), $2) }
 
 arguments:
   | argument { [$1] }
@@ -119,7 +123,7 @@ arguments:
 
 argument:
   | expression { Expr.Arg($1) }
-  | ER_IDENT_OPT expression { Expr.ArgOpt($1, $2) }
+  | ER_IDENT_OPT expression { Expr.ArgOpt(String.sub $1 1 ((String.length $1) - 1), $2) }
 
 bindings:
   | LPAREN ER_IDENT expression RPAREN { [($2, $3)] }

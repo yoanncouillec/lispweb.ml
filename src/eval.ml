@@ -151,32 +151,32 @@ let rec eval_quasi_quote e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont)
        (fun v1 genv1 mem1 -> 
 	 cont (EDefine (s, v1)) genv1 mem1)
 
-  | ELambda (Param(s), e1) ->
-     eval_quasi_quote e1 genv env denv mem
-       (fun v1 genv1 mem1 ->
-         cont (ELambda (Param(s), v1)) genv1 mem1)
-
-  | ELambda (ParamOpt(s, e1), e2) ->
-     eval_quasi_quote e1 genv env denv mem
-       (fun v1 genv1 mem1 ->
-         eval_quasi_quote e1 genv1 env denv mem1
-           (fun v2 genv2 mem2 ->
-             cont (ELambda (ParamOpt(s, v1), v2)) genv2 mem2))
+  (* | ELambda (Param(s), e1) ->
+   *    eval_quasi_quote e1 genv env denv mem
+   *      (fun v1 genv1 mem1 ->
+   *        cont (ELambda (Param(s), v1)) genv1 mem1)
+   * 
+   * | ELambda (ParamOpt(s, e1), e2) ->
+   *    eval_quasi_quote e1 genv env denv mem
+   *      (fun v1 genv1 mem1 ->
+   *        eval_quasi_quote e1 genv1 env denv mem1
+   *          (fun v2 genv2 mem2 ->
+   *            cont (ELambda (ParamOpt(s, v1), v2)) genv2 mem2)) *)
 
   | ELambdaDot (s, e1) ->
      eval_quasi_quote e1 genv env denv mem
        (fun v1 genv1 mem1 ->
          cont (ELambdaDot (s, v1)) genv1 mem1)
 
-  | EThunk (e1) ->
-     eval_quasi_quote e1 genv env denv mem
-       (fun v1 genv1 mem1 ->
-         cont (EThunk(v1)) genv1 mem1)
-
-  | EThunkApp (e1) ->
-     eval_quasi_quote e1 genv env denv mem
-       (fun v1 genv1 mem1 ->
-         cont (EThunk(v1)) genv1 mem1)
+  (* | EThunk (e1) ->
+   *    eval_quasi_quote e1 genv env denv mem
+   *      (fun v1 genv1 mem1 ->
+   *        cont (EThunk(v1)) genv1 mem1)
+   * 
+   * | EThunkApp (e1) ->
+   *    eval_quasi_quote e1 genv env denv mem
+   *      (fun v1 genv1 mem1 ->
+   *        cont (EThunk(v1)) genv1 mem1) *)
 
   | EApp (e1, []) ->
      eval_quasi_quote e1 genv env denv mem
@@ -311,7 +311,7 @@ and js_of_scheme e =
   | EString (e) -> JsString(e)
   | EBegin(es) -> JsSequence(List.map js_of_scheme es)
   | EDefine(s,e) -> JsAssignement(s, js_of_scheme e)
-  | ELambda(Param param,e1) -> JsFunction([param],js_of_scheme e1)
+  | ELambda(posparams, optparams, e1) -> JsFunction(posparams ,js_of_scheme e1)
   | EApp(EVar("print"),Arg(e1)::[]) -> JsApp(JsDot(JsVar "console", JsVar "log"), [js_of_scheme e1])
   | EApp(e1,Arg(e2)::[]) -> JsApp(js_of_scheme e1,[js_of_scheme e2])
   | EApp(e1,[]) -> JsApp(js_of_scheme e1,[])
@@ -349,24 +349,24 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 	   (fun v2 genv'' mem'' ->
 	     cont (apply_bin_op op v1 v2) genv'' mem''))
 
-  | EBool (b) -> cont (EBool (b)) genv mem
+  | EBool (p,b) -> cont (EBool (p,b)) genv mem
 
   | ENot (e) ->
      eval e genv env denv mem
        (fun v genv' mem' ->
 	 match v with
-	 | EBool (b) -> cont (EBool (not b)) genv' mem'
+	 | EBool (p,b) -> cont (EBool (p,not b)) genv' mem'
 	 | _ -> failwith ("eval ENot: boolean expected: "^(string_of_expr v)))
 
   | EAnd (e1,e2) ->
      eval e1 genv env denv mem
        (fun v1 genv' mem' ->
 	 (match v1 with
-	  | EBool (b1) -> 
+	  | EBool (p1, b1) -> 
              eval e2 genv' env denv mem'
 	       (fun v2 genv'' mem'' ->
 	         (match v2 with
-	          | EBool (b2) -> cont (EBool (b1 && b2)) genv'' mem''
+	          | EBool (p2, b2) -> cont (EBool (p1, b1 && b2)) genv'' mem''
 	          | _ -> failwith ("eval ENot: boolean expected: "^(string_of_expr v2))))
 	  | _ -> failwith ("eval ENot: boolean expected: "^(string_of_expr v1))))
 
@@ -424,7 +424,7 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
      eval a genv env denv mem
        (fun v genv' mem' -> 
 	 (match v with 
-	  | EBool (x) -> if x then eval b genv' env denv mem' cont 
+	  | EBool (p,x) -> if x then eval b genv' env denv mem' cont 
 			   else eval c genv' env denv mem' cont
 	  | _ -> failwith "eval EIf: expecting a boolean"))
 
@@ -438,7 +438,7 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
      eval e1 genv env denv mem
        (fun v genv' mem' -> 
 	 (match v with 
-	  | EBool (x) -> if x then eval e2 genv' env denv mem' cont 
+	  | EBool (p,x) -> if x then eval e2 genv' env denv mem' cont 
 			 else cont (EUnit(())) genv' mem'
 	  | _ -> failwith "eval ECond: expecting a boolean"))
 
@@ -446,7 +446,7 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
      eval e1 genv env denv mem
        (fun v genv' mem' -> 
 	 (match v with 
-	  | EBool (x) -> if x then eval e2 genv' env denv mem' cont 
+	  | EBool (p,x) -> if x then eval e2 genv' env denv mem' cont 
 			   else eval (ECond(rest)) genv' env denv mem' cont
 	  | _ -> failwith "eval ECond: expecting a boolean"))
 
@@ -467,47 +467,49 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 	 let addr = ref v in
 	 cont (EUnit(())) (extend_env (Some s) addr genv') (extend_mem addr v mem'))
 
-  | ELambda (_, _) as e -> cont (EClosure (env, e)) genv mem
+  | ELambda (_, _, _) as e -> cont (EClosure (env, e)) genv mem
 
   | ELambdaDot (_, _) as e -> cont (EClosure (env, e)) genv mem
 
-  | EThunk (_) as e -> cont (EClosure (env, e)) genv mem
+  (* | EThunk (_) as e -> cont (EClosure (env, e)) genv mem
+   * 
+   * | EThunkApp (e1) ->
+   *    eval e1 genv env denv mem
+   *      (fun v genv' mem' -> 
+   *        (match v with
+   *         | EClosure (env', EThunk (body)) ->
+   *            eval body genv' env denv mem' cont
+   *         | EClosure (env', ELambda (ParamOpt (s, e2), body)) ->
+   *            eval e2 genv' env denv mem'
+   *              (fun v genv'' mem'' ->
+   *       	 let addr = ref v in
+   *       	 eval body 
+   *       	   genv''
+   *       	   (extend_env (Some (String.sub s 1 ((String.length s) - 1))) addr env')
+   *       	   denv
+   *       	   (extend_mem addr v mem'')
+   *       	   cont)
+   *         | _ -> failwith "eval EThunkApp: should be a thunk")) *)
 
-  | EThunkApp (e1) ->
-     eval e1 genv env denv mem
-       (fun v genv' mem' -> 
-	 (match v with
-	  | EClosure (env', EThunk (body)) ->
-	     eval body genv' env denv mem' cont
-	  | EClosure (env', ELambda (ParamOpt (s, e2), body)) ->
-	     eval e2 genv' env denv mem'
-	       (fun v genv'' mem'' ->
-		 let addr = ref v in
-		 eval body 
-		   genv''
-		   (extend_env (Some (String.sub s 1 ((String.length s) - 1))) addr env')
-		   denv
-		   (extend_mem addr v mem'')
-		   cont)
-	  | _ -> failwith "eval EThunkApp: should be a thunk"))
+
+
+
 
   | EApp (e1, (Arg e2)::[]) ->
      eval e1 genv env denv mem
-       (fun v genv' mem' -> 
-	 (match v with
-	  | EClosure (env', ELambda (Param s, body)) ->
+       (fun v1 genv' mem' -> 
+	 (match v1 with
+	  | EClosure (env', ELambda ((Param s)::[], body)) ->
 	     eval e2 genv' env denv mem'
-	       (fun v genv'' mem'' ->
-		 let addr = ref v in
-                 (*print_endline("s([])="^s);
-                 print_endline("v([])="^(string_of_expr v));*)
+	       (fun v2 genv'' mem'' ->
+		 let addr2 = ref v2 in
 		 eval body 
 		   genv''
-		   (extend_env (Some s) addr env')
+		   (extend_env (Some s) addr2 env')
 		   denv
-		   (extend_mem addr v mem'')
+		   (extend_mem addr2 v2 mem'')
 		   cont)
-	  | EClosure (env', ELambda (ParamOpt (s, e3), body)) ->
+	  | EClosure (env', ELambda (ParamOpt (s, e3)::[], body)) ->
 	     eval e3 genv' env denv mem'
 	       (fun v3 genv'' mem'' ->
 		 let addr = ref v3 in
@@ -519,19 +521,16 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 		   cont)
 	  | ECont (k) ->
 	     eval e2 genv' env denv mem' k
-	  | _ -> failwith ("Not a closure: "^(string_of_expr v))))
+	  | _ -> failwith ("Not a closure: "^(string_of_expr v1))))
 
   | EApp (e1, (Arg e2)::rest) ->
-     (*print_endline("EApp");*)
      eval e1 genv env denv mem
        (fun v1 genv' mem' -> 
 	 (match v1 with
-	  | EClosure (env', ELambda (Param s, body)) ->
+	  | EClosure (env', ELambda ((Param s)::prest, body)) ->
 	     eval e2 genv' env denv mem'
 	       (fun v2 genv'' mem'' ->
 		 let addr2 = ref v2 in
-                 (*print_endline("s="^s);
-                 print_endline("v="^(string_of_expr v));*)
                  eval body genv'' (extend_env (Some s) addr2 env') denv (extend_mem addr2 v2 mem'')
                    (fun vbody genv''' mem''' ->
 		     eval (EApp(vbody, rest))
@@ -540,7 +539,7 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 		       denv
 		       mem'''
                        cont))
-	  | EClosure (env', ELambda (ParamOpt (s, _), body)) ->
+	  | EClosure (env', ELambda ((ParamOpt (s, _))::prest, body)) ->
 	     eval e2 genv' env denv mem'
 	       (fun v2 genv'' mem'' ->
 		 let addr = ref v2 in
@@ -552,23 +551,13 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 		   cont)
 	  | ECont (k) ->
 	     eval e2 genv' env denv mem' k
-	  | _ -> failwith ("222Not a closure: "^(string_of_expr v1))))
+	  | _ -> failwith ("111Not a closure: "^(string_of_expr v1))))
              
   | EApp (e1, (ArgOpt(s, e2)::[])) ->
      eval e1 genv env denv mem
-       (fun v genv' mem' -> 
-	 (match v with
-	  | EClosure (env', ELambda (Param s, body)) ->
-	     eval e2 genv' env denv mem'
-	       (fun v genv'' mem'' ->
-		 let addr = ref v in
-		 eval body
-		   genv''
-		   (extend_env (Some s) addr env')
-		   denv
-		   (extend_mem addr v mem'')
-		   cont)
-	  | EClosure (env', ELambda (ParamOpt (s, _), body)) ->
+       (fun v1 genv' mem' -> 
+	 (match v1 with
+	  | EClosure (env', ELambda ((ParamOpt (s, _))::[], body)) ->
 	     eval e2 genv' env denv mem'
 	       (fun v genv'' mem'' ->
 		 let addr = ref v in
@@ -580,7 +569,41 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 		   cont)
 	  | ECont (k) ->
 	     eval e2 genv' env denv mem' k
-	  | _ -> failwith ("222Not a closure: "^(string_of_expr v))))
+	  | _ -> failwith ("222Not a closure: "^(string_of_expr v1))))
+
+  | EApp (e1, (ArgOpt (s, e2)::rest)) ->
+     eval e1 genv env denv mem
+       (fun v1 genv' mem' -> 
+	 (match v1 with
+	  | EClosure (env', ELambda ((Param s)::[], body)) ->
+	     eval e2 genv' env denv mem'
+	       (fun v2 genv'' mem'' ->
+		 let addr2 = ref v2 in
+                 eval body genv'' (extend_env (Some s) addr2 env') denv (extend_mem addr2 v2 mem'')
+                   (fun vbody genv''' mem''' ->
+		     eval (EApp(vbody, rest))
+		       genv'''
+                       env
+		       denv
+		       mem'''
+                       cont))
+	  | EClosure (env', ELambda ((ParamOpt (s, _))::[], body)) ->
+	     eval e2 genv' env denv mem'
+	       (fun v2 genv'' mem'' ->
+		 let addr = ref v2 in
+		 eval (EApp(body,rest))
+		   genv''
+		   (extend_env (Some (String.sub s 1 ((String.length s) - 1))) addr env')
+		   denv
+		   (extend_mem addr v2 mem'')
+		   cont)
+	  | ECont (k) ->
+	     eval e2 genv' env denv mem' k
+	  | _ -> failwith ("333Not a closure: "^(string_of_expr v1))))
+             
+
+
+
 
   | EBegin ([]) -> cont (EUnit(())) genv mem
 
@@ -639,7 +662,7 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
        (fun v genv' mem' -> 
 	 eval e2 genv' env denv mem'
 	   (fun v' genv'' mem'' ->
-	     cont (EBool (v = v')) genv'' mem''))
+	     cont (EBool (0, v = v')) genv'' mem''))
 
   | EList ([]) -> cont (EList ([])) genv mem
 
@@ -651,7 +674,7 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 	     match vs with 
 	     | EList (vs) ->
 		cont (EList (v::vs)) genv'' mem''
-	     | _ -> failwith "Should only be a EList"))
+	     | _ -> failwith "eval: EList: Should only be evaluated as a EList"))
 
   | ECar (e) ->
      eval e genv env denv mem
@@ -744,3 +767,4 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
   | ESslSocket (a) ->  cont (ESslSocket (a)) genv mem
   | EThread (a) ->  cont (EThread (a)) genv mem
   | EUnit (a) ->  cont (EUnit (a)) genv mem
+  | _ -> failwith ("eval: not implemented: "^(string_of_expr e))
