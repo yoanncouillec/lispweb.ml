@@ -1,6 +1,10 @@
 (load "lib/file.scm")
 (load "lib/wget.scm")
 
+(define load-string
+  (lambda (string)
+    (eval (string->expr string))))
+
 (define load-file
   (lambda (filename)
     (eval (string->expr (read-file (openfile filename "O_RDONLY" "0666"))))))
