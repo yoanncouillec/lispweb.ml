@@ -36,6 +36,8 @@
 %token GET SET STARTWITH
 %token SCHEMETOJS JSTOSTRING
 %token DOT ARROW
+%left DOT
+
 %start start
 %type <Expr.expr option> start
 
@@ -53,9 +55,9 @@ expression:
   | ER_STRING { Expr.EString ((remove_enclosing_quotes $1)) }
   | ER_CHAR { Expr.EChar ((String.get $1 1)) }
   | ER_CHAR_ESC { Expr.EChar ((match $1 with "'\\n'" -> '\n' | "'\\r'" -> '\r' | _ -> failwith "ER_CHAR_ESC")) }
-  | CQUOTE expression { Expr.EQuote ($2) }
-  | CQUASIQUOTE expression { Expr.EQuasiQuote ($2) }
-  | CUNQUOTE expression { Expr.EUnQuote ($2) }
+  | LPAREN CQUOTE expression=expression RPAREN { Expr.EQuote (expression) }
+  | LPAREN CQUASIQUOTE expression=expression RPAREN { Expr.EQuasiQuote (expression) }
+  | LPAREN CUNQUOTE expression=expression RPAREN { Expr.EUnQuote (expression) }
   | TRUE { Expr.EBool (Parsing.symbol_start(), true) }
   | FALSE { Expr.EBool (Parsing.symbol_start(), false) }
   | LPAREN EVAL expression RPAREN { Expr.EEval ($3) }

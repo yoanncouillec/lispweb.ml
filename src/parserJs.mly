@@ -33,6 +33,8 @@
 %token IF ELSE EOF
 %token PLUS
 %token FUNCTION RETURN
+%left PLUS
+
 %start start
 %type <Expr.expr option> start
 
@@ -42,6 +44,7 @@ start:
   | e = expressions EOF { Some(Expr.EBegin (e)) }
 
 expressions:
+  | expression { [$1] }
   | expression SEMICOLON { [$1] }
   | expression SEMICOLON expressions { $1 :: $3 }
 

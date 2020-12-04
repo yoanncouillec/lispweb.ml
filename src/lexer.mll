@@ -17,12 +17,12 @@ rule token = parse
   | ['\n'] { next_line lexbuf; token lexbuf }
   | '(' { LPAREN }
   | ')' { RPAREN }
-  | '\'' { CQUOTE }
+  (*| '\'' { CQUOTE }
   | "`" { CQUASIQUOTE }
-  | "," { CUNQUOTE }
-  (* | "quote" { CQUOTE }
-   * | "quasiquote" { CQUASIQUOTE }
-   * | "unquote" { CUNQUOTE } *)
+  | "," { CUNQUOTE }*)
+  | "quote" { CQUOTE }
+  | "quasiquote" { CQUASIQUOTE }
+  | "unquote" { CUNQUOTE }
   | "->" { ARROW }
   | "." { DOT }
   | "equal?" { EQUAL }
