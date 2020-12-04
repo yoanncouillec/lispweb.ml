@@ -42,12 +42,10 @@ start:
   | e = expressions EOF { Some(Expr.EBegin (e)) }
 
 expressions:
-  | expression { [$1] }
   | expression SEMICOLON { [$1] }
   | expression SEMICOLON expressions { $1 :: $3 }
 
 list_expressions:
-  | expression { [$1] }
   | expression COMMA { [$1] }
   | expression COMMA expressions { $1 :: $3 }
 
