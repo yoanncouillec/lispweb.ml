@@ -1,8 +1,0 @@
-import file
-import http
-
-port = 8081
-
-def home(client):
-   return https-send-response(client, "200",...)
-

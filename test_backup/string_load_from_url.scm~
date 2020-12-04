@@ -1,4 +1,0 @@
-(load "lib/string.scm")
-
-(let (s "hello world")
-  (string->list s))
