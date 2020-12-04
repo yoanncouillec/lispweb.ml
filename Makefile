@@ -76,10 +76,10 @@ test: native
 	./evaluate.native --load test/library.scm
 	./evaluate.native --load test/define.scm
 	./evaluate.native --load test/basic.scm
-#	./evaluate.native --from-syntax js --load test/add.js
+	./evaluate.native --from-syntax js --load test/add.js
 	./evaluate.native --from-syntax js --load test/first.js
 	./evaluate.native --from-syntax js --load test/let.js
 	./evaluate.native --from-syntax js --load test/function.js
 	./evaluate.native --load test/list.scm
-	./evaluate.native --load test/callcc.scm
 	./evaluate.native --load test/string.scm	
+	./evaluate.native --load test/callcc.scm

@@ -31,7 +31,7 @@
       ;; (print (concat "=" (list "  protocol" (val->string protocol)))) ;;
       (if (equal? "GET" method)
 	  (list method path queryparams protocol)
-	  (throw error 'wrong-http-first-line)))))
+	  (throw error (quote wrong-http-first-line))))))
 
 (define http-parse-response-status
   (lambda (l)
