@@ -2,11 +2,11 @@
 (load "lib/stdout.scm")
 
 (define assert
-  (lambda (value expected_value)
-    (if (not (equal? value expected_value))
+  (lambda (value :expects #f)
+    (if (not (equal? value expects))
 	(concat " " (list
 		     "FAILED: expected value is"
-		     (val->string expected_value)
+		     (val->string expects)
 		     "but found"
 		     (val->string value)))
 	"SUCCESS")))
