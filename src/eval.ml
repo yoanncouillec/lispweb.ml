@@ -492,25 +492,44 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
    *         | _ -> failwith "eval EThunkApp: should be a thunk")) *)
 
 
+  | EApp(f, [], []) ->
+     eval f genv env denv mem
+       (fun vf genv' mem' ->
+         (match vf with
+          | EClosure (env', ELambda ([], (fstoptparam_s, fstoptparam_expr)::optparams, body)) ->
+             eval fstoptparam_expr genv' env denv mem'
+               (fun vfstoptparam_expr genv'' mem'' ->
+                 let addr_vfstoptparam_expr = ref vfstoptparam_expr in
+                 eval (EApp (EClosure (extend_env (Some fstoptparam_s) addr_vfstoptparam_expr env', ELambda ([], optparams, body)),
+                             [],
+                             []))
+                         genv''
+                         env
+                         denv
+                         (extend_mem addr_vfstoptparam_expr vfstoptparam_expr mem'')
+                         cont)
+          | EClosure (env', ELambda ([], [], body)) ->
+             eval body genv' env' denv mem' cont))
+
   | EApp(f, [], (optarg_s, optarg_expr)::optargs) ->
      eval f genv env denv mem
        (fun vf genv' mem' ->
          (match vf with
           | EClosure (env', ELambda ([], optparams, body)) ->
-             let _ = List.assoc optarg_s optparams in
              eval optarg_expr genv' env denv mem'
                (fun voptarg_expr genv'' mem'' ->
+                 let addr_voptarg_expr = ref voptarg_expr in
                  eval
-                   (EApp (EClosure (env', ELambda ([], List.remove_assoc optarg_s optparams, body)),
+                   (EApp (EClosure (extend_env (Some optarg_s) addr_voptarg_expr env', ELambda ([], List.remove_assoc optarg_s optparams, body)),
                           [],
                           optargs))
                    genv''
                    env
                    denv
-                   mem''
-                   cont)))
-             
-
+                   (extend_mem addr_voptarg_expr voptarg_expr mem'')
+                   cont)
+          | EClosure (env', ELambda ([], [], body)) ->
+             failwith "eval EApp: empty optional parameters"))
 
   | EApp(f, fstposarg::posargs, optargs) ->
      eval f genv env denv mem
@@ -519,14 +538,15 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
           | EClosure (env', ELambda (fstposparam::posparams, optparams, body)) ->
              eval fstposarg genv' env denv mem'
                (fun vfstposarg genv'' mem'' ->
+                 let addr_vfstposarg = ref vfstposarg in
                  eval
-                   (EApp (EClosure (env', ELambda (posparams, optparams, body)),
+                   (EApp (EClosure (extend_env (Some fstposparam) addr_vfstposarg env', ELambda (posparams, optparams, body)),
                           posargs,
                           optargs))
                    genv''
                    env
                    denv
-                   mem''
+                   (extend_mem addr_vfstposarg vfstposarg mem'')
                    cont)))
 
 
