@@ -168,16 +168,6 @@ let rec eval_quasi_quote e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont)
        (fun v1 genv1 mem1 ->
          cont (ELambdaDot (s, v1)) genv1 mem1)
 
-  (* | EThunk (e1) ->
-   *    eval_quasi_quote e1 genv env denv mem
-   *      (fun v1 genv1 mem1 ->
-   *        cont (EThunk(v1)) genv1 mem1)
-   * 
-   * | EThunkApp (e1) ->
-   *    eval_quasi_quote e1 genv env denv mem
-   *      (fun v1 genv1 mem1 ->
-   *        cont (EThunk(v1)) genv1 mem1) *)
-
   (* | EApp (e1, [],[]) ->
    *    eval_quasi_quote e1 genv env denv mem
    *      (fun v1 genv1 mem1 ->
@@ -470,27 +460,6 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 
   | ELambdaDot (_, _) as e -> cont (EClosure (env, e)) genv mem
 
-  (* | EThunk (_) as e -> cont (EClosure (env, e)) genv mem
-   * 
-   * | EThunkApp (e1) ->
-   *    eval e1 genv env denv mem
-   *      (fun v genv' mem' -> 
-   *        (match v with
-   *         | EClosure (env', EThunk (body)) ->
-   *            eval body genv' env denv mem' cont
-   *         | EClosure (env', ELambda (ParamOpt (s, e2), body)) ->
-   *            eval e2 genv' env denv mem'
-   *              (fun v genv'' mem'' ->
-   *       	 let addr = ref v in
-   *       	 eval body 
-   *       	   genv''
-   *       	   (extend_env (Some (String.sub s 1 ((String.length s) - 1))) addr env')
-   *       	   denv
-   *       	   (extend_mem addr v mem'')
-   *       	   cont)
-   *         | _ -> failwith "eval EThunkApp: should be a thunk")) *)
-
-
   | EApp(f, [], []) ->
      eval f genv env denv mem
        (fun vf genv' mem' ->
@@ -549,6 +518,8 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
                    denv
                    (extend_mem addr_vfstposarg vfstposarg mem'')
                    cont)
+          | ECont (k) ->
+             eval fstposarg genv' env denv mem' k
           | _ -> failwith "eval EApp: wrong numbers of positional arguments"))
 
   | EBegin ([]) -> cont (EUnit(())) genv mem
