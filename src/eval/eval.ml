@@ -469,16 +469,18 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
                (fun vfstoptparam_expr genv'' mem'' ->
                  let addr_vfstoptparam_expr = ref vfstoptparam_expr in
                  eval (EApp (EClosure (extend_env (Some fstoptparam_s) addr_vfstoptparam_expr env', ELambda ([], optparams, body)),
-                             [],
-                             []))
-                         genv''
-                         env
-                         denv
-                         (extend_mem addr_vfstoptparam_expr vfstoptparam_expr mem'')
-                         cont)
+                                  [],
+                                  []))
+                   genv''
+                   env
+                   denv
+                   (extend_mem addr_vfstoptparam_expr vfstoptparam_expr mem'')
+                   cont)
           | EClosure (env', ELambda ([], [], body)) ->
              eval body genv' env' denv mem' cont
           | _ -> failwith "eval EApp: should be a closure"))
+
+
 
   | EApp(f, [], (optarg_s, optarg_expr)::optargs) ->
      eval f genv env denv mem

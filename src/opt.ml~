@@ -1,4 +1,0 @@
-type opt =
-  | Opt of string * opt
-  | ValueOpt of string * string * opt
-  | NilOpt
