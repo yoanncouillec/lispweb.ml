@@ -70,7 +70,6 @@ test: native
 	./evaluate.native --load test/add.scm
 	./evaluate.native --load test/first.scm
 	./evaluate.native --load test/let.scm
-	./evaluate.native --load test/callcc.scm
 	./evaluate.native --load test/catch.scm
 	./evaluate.native --load test/block.scm
 	./evaluate.native --load test/all.scm
@@ -82,4 +81,5 @@ test: native
 	./evaluate.native --from-syntax js --load test/let.js
 	./evaluate.native --from-syntax js --load test/function.js
 	./evaluate.native --load test/list.scm
-#	./evaluate.native --load test/string.scm	
+	./evaluate.native --load test/callcc.scm
+	./evaluate.native --load test/string.scm	

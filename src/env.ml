@@ -15,6 +15,7 @@ let extend_env id r env =
 let rec string_of_env2 = function
   | [] -> ""
   | (Some s,_)::rest -> "["^s^"->_]"^(string_of_env2 rest)
+  | _ -> ""
 
 let rec get_env id env =
   (*print_endline("get_env("^id^", "^(string_of_env2 env)^")");*)
@@ -54,4 +55,5 @@ let rec string_of_env mem = function
   | (Some s,addr)::rest ->
      "("^s^","^(string_of_expr (Mem.get_mem addr mem))^")"
      ^(string_of_env mem rest)
+  | _ -> ""
 

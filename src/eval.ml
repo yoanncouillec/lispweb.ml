@@ -508,7 +508,8 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
                          (extend_mem addr_vfstoptparam_expr vfstoptparam_expr mem'')
                          cont)
           | EClosure (env', ELambda ([], [], body)) ->
-             eval body genv' env' denv mem' cont))
+             eval body genv' env' denv mem' cont
+          | _ -> failwith "eval EApp: should be a closure"))
 
   | EApp(f, [], (optarg_s, optarg_expr)::optargs) ->
      eval f genv env denv mem
@@ -519,7 +520,8 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
                (fun voptarg_expr genv'' mem'' ->
                  let addr_voptarg_expr = ref voptarg_expr in
                  eval
-                   (EApp (EClosure (extend_env (Some optarg_s) addr_voptarg_expr env', ELambda ([], List.remove_assoc optarg_s optparams, body)),
+                   (EApp (EClosure (extend_env (Some optarg_s) addr_voptarg_expr env',
+                                    ELambda ([], List.remove_assoc optarg_s optparams, body)),
                           [],
                           optargs))
                    genv''
@@ -527,8 +529,7 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
                    denv
                    (extend_mem addr_voptarg_expr voptarg_expr mem'')
                    cont)
-          | EClosure (env', ELambda ([], [], body)) ->
-             failwith "eval EApp: empty optional parameters"))
+          | _ -> failwith "eval EApp: should be a closure"))
 
   | EApp(f, fstposarg::posargs, optargs) ->
      eval f genv env denv mem
@@ -539,125 +540,16 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
                (fun vfstposarg genv'' mem'' ->
                  let addr_vfstposarg = ref vfstposarg in
                  eval
-                   (EApp (EClosure (extend_env (Some fstposparam) addr_vfstposarg env', ELambda (posparams, optparams, body)),
+                   (EApp (EClosure (extend_env (Some fstposparam) addr_vfstposarg env',
+                                    ELambda (posparams, optparams, body)),
                           posargs,
                           optargs))
                    genv''
                    env
                    denv
                    (extend_mem addr_vfstposarg vfstposarg mem'')
-                   cont)))
-
-
-  (* | EApp (e1, (Arg e2)::[]) ->
-   *    eval e1 genv env denv mem
-   *      (fun v1 genv' mem' -> 
-   *        (match v1 with
-   *         | EClosure (env', ELambda ((Param s)::[], body)) ->
-   *            eval e2 genv' env denv mem'
-   *              (fun v2 genv'' mem'' ->
-   *       	 let addr2 = ref v2 in
-   *       	 eval body 
-   *       	   genv''
-   *       	   (extend_env (Some s) addr2 env')
-   *       	   denv
-   *       	   (extend_mem addr2 v2 mem'')
-   *       	   cont)
-   *         | EClosure (env', ELambda (ParamOpt (s, e3)::[], body)) ->
-   *            eval e3 genv' env denv mem'
-   *              (fun v3 genv'' mem'' ->
-   *       	 let addr = ref v3 in
-   *       	 eval (EApp (body, (Arg e2)::[]))
-   *       	   genv''
-   *                  (extend_env (Some (String.sub s 1 ((String.length s) - 1))) addr env')
-   *       	   denv
-   *       	   (extend_mem addr v3 mem'')
-   *       	   cont)
-   *         | ECont (k) ->
-   *            eval e2 genv' env denv mem' k
-   *         | _ -> failwith ("Not a closure: "^(string_of_expr v1))))
-   * 
-   * | EApp (e1, (Arg e2)::rest) ->
-   *    eval e1 genv env denv mem
-   *      (fun v1 genv' mem' -> 
-   *        (match v1 with
-   *         | EClosure (env', ELambda ((Param s)::prest, body)) ->
-   *            eval e2 genv' env denv mem'
-   *              (fun v2 genv'' mem'' ->
-   *       	 let addr2 = ref v2 in
-   *                eval body genv'' (extend_env (Some s) addr2 env') denv (extend_mem addr2 v2 mem'')
-   *                  (fun vbody genv''' mem''' ->
-   *       	     eval (EApp(vbody, rest))
-   *       	       genv'''
-   *                      env
-   *       	       denv
-   *       	       mem'''
-   *                      cont))
-   *         | EClosure (env', ELambda ((ParamOpt (s, _))::prest, body)) ->
-   *            eval e2 genv' env denv mem'
-   *              (fun v2 genv'' mem'' ->
-   *       	 let addr = ref v2 in
-   *       	 eval (EApp(body,rest))
-   *       	   genv''
-   *       	   (extend_env (Some (String.sub s 1 ((String.length s) - 1))) addr env')
-   *       	   denv
-   *       	   (extend_mem addr v2 mem'')
-   *       	   cont)
-   *         | ECont (k) ->
-   *            eval e2 genv' env denv mem' k
-   *         | _ -> failwith ("111Not a closure: "^(string_of_expr v1))))
-   *            
-   * | EApp (e1, (ArgOpt(s, e2)::[])) ->
-   *    eval e1 genv env denv mem
-   *      (fun v1 genv' mem' -> 
-   *        (match v1 with
-   *         | EClosure (env', ELambda ((ParamOpt (s, _))::[], body)) ->
-   *            eval e2 genv' env denv mem'
-   *              (fun v genv'' mem'' ->
-   *       	 let addr = ref v in
-   *       	 eval body
-   *       	   genv''
-   *       	   (extend_env (Some (String.sub s 1 ((String.length s) - 1))) addr env')
-   *       	   denv
-   *       	   (extend_mem addr v mem'')
-   *       	   cont)
-   *         | ECont (k) ->
-   *            eval e2 genv' env denv mem' k
-   *         | _ -> failwith ("222Not a closure: "^(string_of_expr v1))))
-   * 
-   * | EApp (e1, (ArgOpt (s, e2)::rest)) ->
-   *    eval e1 genv env denv mem
-   *      (fun v1 genv' mem' -> 
-   *        (match v1 with
-   *         | EClosure (env', ELambda ((Param s)::[], body)) ->
-   *            eval e2 genv' env denv mem'
-   *              (fun v2 genv'' mem'' ->
-   *       	 let addr2 = ref v2 in
-   *                eval body genv'' (extend_env (Some s) addr2 env') denv (extend_mem addr2 v2 mem'')
-   *                  (fun vbody genv''' mem''' ->
-   *       	     eval (EApp(vbody, rest))
-   *       	       genv'''
-   *                      env
-   *       	       denv
-   *       	       mem'''
-   *                      cont))
-   *         | EClosure (env', ELambda ((ParamOpt (s, _))::[], body)) ->
-   *            eval e2 genv' env denv mem'
-   *              (fun v2 genv'' mem'' ->
-   *       	 let addr = ref v2 in
-   *       	 eval (EApp(body,rest))
-   *       	   genv''
-   *       	   (extend_env (Some (String.sub s 1 ((String.length s) - 1))) addr env')
-   *       	   denv
-   *       	   (extend_mem addr v2 mem'')
-   *       	   cont)
-   *         | ECont (k) ->
-   *            eval e2 genv' env denv mem' k
-   *         | _ -> failwith ("333Not a closure: "^(string_of_expr v1)))) *)
-             
-
-
-
+                   cont)
+          | _ -> failwith "eval EApp: wrong numbers of positional arguments"))
 
   | EBegin ([]) -> cont (EUnit(())) genv mem
 
@@ -821,4 +713,4 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
   | ESslSocket (a) ->  cont (ESslSocket (a)) genv mem
   | EThread (a) ->  cont (EThread (a)) genv mem
   | EUnit (a) ->  cont (EUnit (a)) genv mem
-  | _ -> failwith ("eval: not implemented: "^(string_of_expr e))
+

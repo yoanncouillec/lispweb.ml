@@ -25,18 +25,14 @@
 %}
 
 %token<int> ER_INT
-%token<string> ER_CHAR_ESC
-%token<string> ER_IDENT ER_STRING ER_CHAR ER_IDENT_OPT
-%token LPAREN RPAREN LAMBDA LET LETREC DEFINE LETSTAR LOAD_STRING LOAD EVAL
-%token TRUE FALSE IF COND ELSE EOF BEGIN EQUAL NOT AND
-%token CAR CDR CONS LIST
-%token CATCH THROW CALLCC BLOCK RETURNFROM HOSTCALL CALLWITHNEWTHREAD
-%token PLUS MINUS MULT DIV
-%token CQUOTE CQUASIQUOTE CUNQUOTE
-%token GET SET STARTWITH
-%token SCHEMETOJS JSTOSTRING
+%token<string> ER_IDENT ER_IDENT_OPT
+%token LPAREN RPAREN LCBRACKET RCBRACKET LBRACKET RBRACKET
+%token SEMICOLON COMMA
+%token ARROW ASSIGNMENT
+%token LET
+%token IF ELSE EOF
+%token PLUS
 %token FUNCTION RETURN
-%token DOT SEMICOLON COMMA ARROW VAR ASSIGNMENT LCBRACKET RCBRACKET TRY LBRACKET RBRACKET
 %start start
 %type <Expr.expr option> start
 
@@ -86,14 +82,14 @@ argument:
   | e=expression { Expr.Arg(e) }
   | id=ER_IDENT_OPT COMMA e=expression { Expr.ArgOpt(id, e) }
 
-bindings:
-  | LPAREN ER_IDENT expression RPAREN { [($2, $3)] }
-  | LPAREN ER_IDENT expression RPAREN bindings { ($2, $3)::$5 }
+/* bindings: */
+/*   | LPAREN ER_IDENT expression RPAREN { [($2, $3)] } */
+/*   | LPAREN ER_IDENT expression RPAREN bindings { ($2, $3)::$5 } */
 
-clauses:
-  | clause { [$1] }
-  | clause clauses { $1::$2 }
+/* clauses: */
+/*   | clause { [$1] } */
+/*   | clause clauses { $1::$2 } */
 
-clause:
-  | LPAREN expression expression RPAREN { Expr.EClause($2, $3) }
-  | LPAREN ELSE expression RPAREN { Expr.EElseClause($3) }
+/* clause: */
+/*   | LPAREN expression expression RPAREN { Expr.EClause($2, $3) } */
+/*   | LPAREN ELSE expression RPAREN { Expr.EElseClause($3) } */

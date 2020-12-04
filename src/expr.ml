@@ -118,6 +118,7 @@ let rec c_expr_of_expr = function
   | EBegin(es) -> CBegin(List.map c_expr_of_expr es)
   | ELet([],body,_) -> c_expr_of_expr body
   | ELet((s,e)::rest,body,env) -> CVarDecl (CtInteger,s, c_expr_of_expr e, c_expr_of_expr (ELet(rest,body,env)))
+  | _ -> failwith "c_expr_of_expr: not implemented"
 
 let rec string_of_c_type = function
   | CtVoid -> "void"
@@ -129,13 +130,17 @@ let rec string_of_c_expr = function
   | CInt(n) -> string_of_int n
   | CVar(s) -> s
   | CBinOp(OPlus,e1,e2) -> "("^(string_of_c_expr e1)^" + "^(string_of_c_expr e2)^");"
+  | CBinOp(OMinus, c_e1, c_e2) -> (string_of_c_expr c_e1) ^ " - " ^ (string_of_c_expr c_e2)
+  | CBinOp(OMult, c_e1, c_e2) -> (string_of_c_expr c_e1) ^ " * " ^ (string_of_c_expr c_e2)
+  | CBinOp(ODiv, c_e1, c_e2) -> (string_of_c_expr c_e1) ^ " / " ^ (string_of_c_expr c_e2)
   | CBegin(es) -> "{"^(List.fold_left (fun accu e -> accu^(string_of_c_expr e)) "" es)^"}"
   | CVarDecl(t, s, e, body) ->
      "{"^(string_of_c_type t)^" "^s^" = "^(string_of_c_expr e)^";"^(string_of_c_expr body)^"}"
   | CFunction(t,s,args,body) ->
      (string_of_c_type t)^" "^s^"()"^(string_of_c_expr body)
   | CReturn (e) -> "return "^(string_of_c_expr e)^";"
-  (*| CCall of c_expr * c_expr list*)
+  | CCall (c_expr, []) -> (string_of_c_expr c_expr)^"()"
+  | CCall (c_expr, fst::rest) -> (string_of_c_expr c_expr) ^ "("^(List.fold_left (fun accu c_expr -> accu^", "^(string_of_c_expr c_expr)) (string_of_c_expr fst) rest)^")"
 
   
 let rec string_of_param = function
@@ -162,6 +167,7 @@ and string_of_jsexpr = function
      "(("^param^(List.fold_left (fun a param -> a^", "^param) "" rest)^") => "^(string_of_jsexpr e1)^")"
   | JsAssignement(s,e) ->
      s ^ " = " ^ (string_of_jsexpr e)
+  | JsSequence ([]) -> ""
 
 and string_of_expr = function
   | EDot (e1, e2) -> "(-> "^(string_of_expr e1)^" "^(string_of_expr e2)^")"
@@ -213,10 +219,13 @@ and string_of_expr = function
           bindings)^") "^(string_of_expr body)^")"
   | EDefine (s, e) ->
     "(define "^s^" "^(string_of_expr e)^")"
+  | ELambda ([], _, body) ->
+     "(lambda () "^(string_of_expr body)^")"
   | ELambda (fst::rest, _, body) ->
      "(lambda ("^(List.fold_left (fun accu param -> accu^" "^param) fst rest)^") "^(string_of_expr body)^")"
   | ELambdaDot (s, body) ->
      "(lambda (. "^s^") "^(string_of_expr body)^")"
+  | EApp (e1, [],_ ) -> "("^(string_of_expr e1)^")"
   | EApp (e1, fst::posparams, optparams) ->
      "("^(string_of_expr e1)^" "^(string_of_expr fst)^(List.fold_left (fun a -> function e3 -> a^" "^(string_of_expr e3)) "" posparams)^")"
 
@@ -259,3 +268,5 @@ and string_of_expr = function
   | EBytes (_) -> "#BYTES"
   | ERegexp (_) -> "#REGEXP"
   | EHostEntry (_) -> "Unix.host_entry"
+  | EAnonymousBlock (_) -> "#ANONYMOUSBLOCK"
+  | EAnonymousReturnFrom (_) -> "#ANONYMOUSRETURNFROM"
