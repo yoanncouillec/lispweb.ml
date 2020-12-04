@@ -308,10 +308,10 @@ end
 
 module Bytes = struct
 
-  let bytes_of_string = function
+  let bytes_of_string e = match e with
     |  EList(((EString(s))::[])) ->
 	EBytes(Bytes.of_string s)
-    | _ -> failwith "wrong arguments"		    
+    | _ -> failwith ("Bytes.bytes_of_string: wrong arguments: "^(string_of_expr e))
   
   let bytes_to_string = function
     |  EList(((EBytes(b))::[])) ->
@@ -462,7 +462,7 @@ module Ssl = struct
     | EList(((ESslSocket(socket))::(EBytes(bytes))::(EInt(offset))::(EInt(length))::[])) ->
        let r = Ssl.read socket bytes offset length in
        EInt(r)
-    | _ -> failwith "wrong arguments"
+    | _ -> failwith "SSL.read: wrong arguments"
 
   let shutdown = function
     | EList(((ESslSocket(socket))::[])) ->

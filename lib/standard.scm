@@ -1,3 +1,4 @@
+(load "lib/load.scm")
 (load "lib/ssl.scm")
 (load "lib/socket.scm")
 (load "lib/string.scm")

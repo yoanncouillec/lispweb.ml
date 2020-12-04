@@ -101,7 +101,6 @@
 
 (define ssl-make-client
   (lambda (host port)
-    (print "ssl-make-client")
     (ssl-init)
     (let* ((he (gethostbyname host))
 	   (sockaddr (addr_inet (inet_addr_of_host_entry he) port))

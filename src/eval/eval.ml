@@ -478,7 +478,7 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
                    cont)
           | EClosure (env', ELambda ([], [], body)) ->
              eval body genv' env' denv mem' cont
-          | _ -> failwith "eval EApp: should be a closure"))
+          | _ -> failwith ("eval EApp: should be a closure:"^(string_of_expr vf))))
 
 
 
@@ -653,8 +653,8 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
          | EString (s) ->
             (match expr_of_string s with
              | Some e -> eval e genv' env denv mem' cont
-             | None -> failwith "ELoad: cannot parse")
-         | _ -> failwith "eval ELoad: should be a string")
+             | None -> failwith "ELoadString: cannot parse")
+         | _ -> failwith "eval ELoadString: should be a string")
 
   | ECallWithNewThread (e1) ->
      eval e1 genv env denv mem

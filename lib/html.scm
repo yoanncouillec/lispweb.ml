@@ -91,4 +91,4 @@
 	    (concat "" (list "<" (car (cdr element)) " " (concat "" (map (lambda (attribute) (concat "" (list (car attribute) "='" (car (cdr attribute)) "'"))) attributes)) ">" (concat "" (map html->string children)) "</" (car (cdr element)) ">")))
 	  (if (equal? type "string")
 	      (car (cdr element))
-	      (throw error 'wrong-type-element))))))
+	      (throw error (quote wrong-type-element)))))))

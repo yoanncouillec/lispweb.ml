@@ -65,6 +65,8 @@ uninstall-lib:
 uninstall: uninstall-bin uninstall-lib
 
 test: native
+	./evaluate.native --load test/hello.scm
+	./evaluate.native --load test/eval.scm
 	./evaluate.native --load test/testapp.scm
 	./evaluate.native --load test/deb.scm
 	./evaluate.native --load test/add.scm

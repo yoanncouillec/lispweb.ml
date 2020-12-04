@@ -18,4 +18,4 @@
 (define load-url
   (lambda (scheme host port path)
     (let (content (wget scheme host port path))
-      (eval content))))
+      (load-string content))))
