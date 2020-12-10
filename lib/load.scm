@@ -10,15 +10,15 @@
 	   :handle-no-such-file (lambda () #f)
 	   :handle-wrong-arguments (lambda () #f))
     (load-string
-     (input-line
+     (input-lines
       (open-in filename)))))
 
 (define load-url
-  (lambda (scheme host port path)
-    (load-string (wget scheme host port path))))
+  (lambda (scheme host port path file)
+    (load-string (wget scheme host port (concat "" (list path file))))))
 
 (define load-url-with-local-cache
-  (lambda (scheme host port path lib cache-path)
+  (lambda (scheme host port path lib :cache-path "./")
     (load-file lib)))
 
   

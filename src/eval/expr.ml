@@ -40,7 +40,6 @@ and c_expr =
 and info = int
 
 and expr =
-  | EException of exn
   | EDot of expr * expr
   | EJsExpr of js_expr
   | EAnd of expr * expr

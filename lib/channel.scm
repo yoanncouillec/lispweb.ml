@@ -50,8 +50,16 @@
     (hostcall Pervasives.close_out channel)))
 
 (define open-in
-  (lambda (s)
-    (hostcall Pervasives.open_in s)))
+  (lambda (s :handle-sys-error (lambda () #f)
+	     :handle-wrong-arguments (lambda () #f))
+    (let ((result (hostcall Pervasives.open_in s)))
+      (if (equal? result "sys-error")
+	  (throw sys-error
+		 (handle-sys-error))
+	  (if (equal? result "wrong-arguments")
+	      (throw wrong-arguments
+		     (handle-wrong-arguments))
+	      result)))))
 
 (define open-in-bin
   (lambda (s)

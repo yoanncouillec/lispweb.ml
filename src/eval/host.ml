@@ -106,8 +106,11 @@ module Pervasives = struct
 
   let open_in = function
     | EList(((EString(s))::[])) ->
-       EChannelIn (Stdlib.open_in s)
-    | _ -> failwith "open_in"
+       (try
+          EChannelIn (Stdlib.open_in s)
+        with Sys_error (s) ->
+              EString ("sys-error"))
+    | _ -> EString("wrong-arguments")
 
   let open_in_bin = function
     | EList(((EString(s))::[])) ->
@@ -125,7 +128,7 @@ module Pervasives = struct
           EString(Stdlib.input_line ic);
         with End_of_file ->
               EString "end-of-file")
-    | _ as params ->
+    | _  ->
        EString("wrong-parameters")
 		    
   let close_in = function
@@ -169,7 +172,7 @@ module LUnix = struct
 		      name 
 		      (List.map flag_of_string_value flags)
 		      (int_of_string perm)))
-          with Unix.Unix_error(Unix.ENOENT, "open", name) as e ->
+          with Unix.Unix_error(Unix.ENOENT, "open", name) ->
                 EString "no-such-file")
       | _ as args ->
          print_endline (string_of_expr args);
