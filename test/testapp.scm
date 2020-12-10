@@ -1,5 +1,5 @@
 (load "lib/load.scm")
-(load-url "https" "raw.githubusercontent.com" 443 "/yoanncouillec/lispweb.ml/master/lib/assert.scm")
+(load-url "https" "raw.githubusercontent.com" 443 "/yoanncouillec/lispweb.ml/master/" "lib/assert.scm")
 
 (assert
  :expects 12
