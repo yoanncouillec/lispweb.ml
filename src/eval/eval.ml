@@ -655,7 +655,7 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
             (match expr_of_string s with
              | Some e -> cont e genv' mem' (*eval e genv' env denv mem' cont*)
              | None -> failwith "ELoadString: cannot parse")
-         | _ -> failwith "eval ELoadString: should be a string")
+         | _ -> failwith ("eval ELoadString: should be a string: "^(string_of_expr v)))
 
   | ECallWithNewThread (e1) ->
      eval e1 genv env denv mem

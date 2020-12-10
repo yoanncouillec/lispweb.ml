@@ -121,8 +121,12 @@ module Pervasives = struct
 		    
   let input_line = function
     | EList(((EChannelIn(ic))::[])) ->
-       EString(Stdlib.input_line ic);
-    | _ as params -> failwith ("input_line expecting a EChannelIn. Got "^(string_of_expr params))
+       (try
+          EString(Stdlib.input_line ic);
+        with End_of_file ->
+              EString "end-of-file")
+    | _ as params ->
+       EString("wrong-parameters")
 		    
   let close_in = function
     | EList(((EChannelIn(c))::[])) ->
@@ -154,16 +158,23 @@ module LUnix = struct
     | EString ("O_CREAT") -> Unix.O_CREAT
     | EString ("O_RDWR") -> Unix.O_RDWR
     | _ -> failwith "flag_of_string_value: not managed"
-		    
+
+  exception Wrong_arguments
+  
   let openfile f =
-    match f with
-    | EList(((EString(name))::(EList(flags))::(EString(perm))::[])) ->
-       (EFile (Unix.openfile
-		 name 
-		 (List.map flag_of_string_value flags)
-		 (int_of_string perm)))
-    | _ -> failwith "unix_openfile"
-		    
+      match f with
+      | EList(((EString(name))::(EList(flags))::(EString(perm))::[])) ->
+         (try
+            (EFile (Unix.openfile
+		      name 
+		      (List.map flag_of_string_value flags)
+		      (int_of_string perm)))
+          with Unix.Unix_error(Unix.ENOENT, "open", name) as e ->
+                EString "no-such-file")
+      | _ as args ->
+         print_endline (string_of_expr args);
+         EString "wrong-arguments"
+  
   let close = function
     | EList(((EFile(fd))::[])) -> 
        EUnit (Unix.close fd)

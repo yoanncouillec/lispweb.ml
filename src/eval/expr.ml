@@ -40,6 +40,7 @@ and c_expr =
 and info = int
 
 and expr =
+  | EException of exn
   | EDot of expr * expr
   | EJsExpr of js_expr
   | EAnd of expr * expr
@@ -54,6 +55,7 @@ and expr =
   | ECallcc of string * expr
   | ECar of expr
   | ECatch of string * expr
+  | EThrow of string * expr
   | ECdr of expr
   | EChannelIn of in_channel
   | EChannelOut of out_channel
@@ -100,7 +102,6 @@ and expr =
   | ESslSocket of Ssl.socket
   | EString of string
   | EThread of Thread.t
-  | EThrow of string * expr
   | EUnQuote of expr
   | EUnit of unit
   | EVar of string
@@ -181,7 +182,8 @@ and string_of_expr = function
 	  | OMult -> "*"
           | ODiv -> "/"
 	  | OMinus -> "-")^" "^(string_of_expr e1)^" "^(string_of_expr e2)^")"
-  | EBool (_,b) -> string_of_bool b
+  | EBool (_,true) -> "#t"
+  | EBool (_,false) -> "#f"
   | ENot (e) -> "(not "^(string_of_expr e)^")"
   | EAnd (e1,e2) -> "(and "^(string_of_expr e1)^" "^(string_of_expr e2)^")"
   | ECond (clauses) ->

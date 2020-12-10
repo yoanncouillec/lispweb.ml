@@ -62,10 +62,25 @@
     (hostcall Pervasives.input_char channel)))
 
 (define input-line
-  (lambda (channel)
+  (lambda (channel
+	   :handle-end-of-file (lambda () #f))
     (let* ((s (hostcall Pervasives.input_line channel)))
-      (sub-string s 0 (string-length s)))))
+      (if (equal? s "end-of-file")
+	  (throw end-of-file
+		 (handle-end-of-file))
+	  (sub-string s 0 (string-length s))))))
+
+(define input-lines
+  (lambda (channel)
+    (catch end-of-file
+	   (concat
+	    ""
+	    (cons
+	     (input-line channel
+			 :handle-end-of-file (lambda () ""))
+	     (input-lines channel))))))
 
 (define close-in
   (lambda (channel)
     (hostcall Pervasives.close_in channel)))
+      

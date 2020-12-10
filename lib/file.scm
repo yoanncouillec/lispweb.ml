@@ -15,8 +15,15 @@
     (hostcall Unix.stderr)))
        
 (define openfile
-  (lambda (name flags perm)
-    (hostcall Unix.openfile name flags perm)))
+  (lambda (name flags perm
+		:handle-no-such-file (lambda () #f)
+		:handle-wrong-arguments (lambda () #f))
+    (let ((result (hostcall Unix.openfile name flags perm)))
+      (if (equal? result "no-such-file")
+	  (throw no-such-file (handle-no-such-file))
+	  (if (equal? result "wrong-arguments")
+	      (throw wrong-arguments (handle-wrong-arguments))
+	      result)))))
 
 (define close
   (lambda (fd)
@@ -34,7 +41,7 @@
 	  ""
 	  (string-concat 
 	   (list
-	    (bytes-to-string b)
+	    (bytes->string b)
 	    (read-file fd)))))))
 
 (define read-line 
