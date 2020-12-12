@@ -480,8 +480,6 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
              eval body genv' env' denv mem' cont
           | _ -> failwith ("eval EApp: should be a closure:"^(string_of_expr vf))))
 
-
-
   | EApp(f, [], (optarg_s, optarg_expr)::optargs) ->
      eval f genv env denv mem
        (fun vf genv' mem' ->

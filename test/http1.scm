@@ -1,8 +1,14 @@
 (load "lib/http.scm")
+(load "lib/html.scm")
+
+(print (concat " " (list "Server waiting on" --port)))
+
+(define port (string->int --port))
 
 (http-run-server
- (string->int --port)
+ port
  (lambda (client method path queryparams protocols headers)
+   (print "New client")
    (if (equal? path "/")
        (http-send-response
 	client

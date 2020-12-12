@@ -62,7 +62,7 @@
     (let* ((l (read-line read fd)))
       (if (equal? "" l)
 	    l
-	      (cons l (http-parse-headers-light fd))))))
+	      (cons l (http-parse-headers-light read fd))))))
 
 (define http-send-response
   (lambda (fd code type content)

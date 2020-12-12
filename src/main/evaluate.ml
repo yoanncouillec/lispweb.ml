@@ -22,7 +22,7 @@ let _ =
            expr_of_args (EDefine (key, EString (value))::accu) rest'
         | ('-','l',rest') ->
            expr_of_args (ELoad(EString("lisp"),EString("lib/"^(String.sub key 2 ((String.length key) - 2))^".scm"))::accu) rest'
-        | _ -> failwith "evaluate: wrong syntax")
+        | _ -> failwith help)
     | [] -> Expr.EBegin (List.rev accu)
   in
   let e = (expr_of_args [from_syntax] sargs) in
