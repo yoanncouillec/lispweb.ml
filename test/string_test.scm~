@@ -1,0 +1,6 @@
+(load "lib/assert.scm")
+(load "lib/string.scm")
+
+(assert
+ (make-string 3 'b')
+ "bbb")
