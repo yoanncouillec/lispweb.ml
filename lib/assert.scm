@@ -17,7 +17,7 @@
 	#t)))
 
 (define test-all-aux
-  (lambda (c n l)
+  (lambda (c l)
     (if (pair? l)
 	(let ((t (car l)))
 	  (if (test-aux (car (cdr t)))
@@ -26,19 +26,21 @@
 		 (concat " "
 			 (list "PASSED"
 			       (car t))))
-		(test-all-aux (+ c 1) (+ n 1) (cdr l)))
+		(test-all-aux (+ c 1) (cdr l)))
 	      (begin
 		(print
 		 (concat " "
 			 (list "FAILED"
 			       (car t))))
-		(test-all-aux c (+ n 1) (cdr l)))))
-	(print
-	 (concat "" (list (int->string c)
-			  "/"
-			  (int->string (+ n (length l)))))))))
+		(test-all-aux c (cdr l)))))
+	c)))
 
 (define test-all
-  (lambda (l)
-    (test-all-aux 0 0 l)))
+  (lambda (name l)
+    (print (concat " " (list "TEST" name)))
+    (print
+     (concat "" (list (int->string (test-all-aux 0 l))
+		      "/"
+		      (int->string (length l))
+		      " (" name ")")))))
 

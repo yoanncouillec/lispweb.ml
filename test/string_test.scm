@@ -1,7 +1,9 @@
-(load "lib/assert.scm")
-(load "lib/string.scm")
+(define lib "lib/string.scm")
 
-(test-all
+(load "lib/assert.scm")
+(load lib)
+
+(test-all lib
  (list
   
   (list "make-string"
@@ -17,4 +19,30 @@
 	(list
 	 (assert
 	  (string-length (make-empty-string 1))
-	  :expects 1)))))
+	  :expects 1)))
+
+  (list "string-length"
+	(list
+	 (assert
+	  (string-length "qwerty")
+	  :expects 6)))
+
+  (list "string->list"
+	(list
+	 (assert
+	  (string->list "qwerty")
+	  :expects (list 'q' 'w' 'e' 'r' 't' 'y'))))
+
+  (list "list->string"
+	(list
+	 (assert
+	  (list->string (list 'q' 'w' 'e' 'r' 't' 'y'))
+	  :expects "qwerty")))
+
+  (list "get-char"
+	(list
+	 (assert
+	  (get-char "qwerty" 3)
+	  :expects 'r')))
+  
+  ))
