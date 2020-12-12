@@ -1,4 +1,7 @@
 (load "lib/http.scm")
+(load "lib/html.scm")
+
+(print (concat " " (list "Server waiting on" --port)))
 
 (define hello
   (lambda (client)
@@ -32,6 +35,7 @@
 
 (define service
   (lambda (client method path queryparams protocols headers)
+    (print "New client")
     (if (equal? path "/")
 	(hello client)
 	(error client))))

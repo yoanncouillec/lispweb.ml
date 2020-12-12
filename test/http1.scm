@@ -3,10 +3,8 @@
 
 (print (concat " " (list "Server waiting on" --port)))
 
-(define port (string->int --port))
-
 (http-run-server
- port
+ (string->int --port)
  (lambda (client method path queryparams protocols headers)
    (print "New client")
    (if (equal? path "/")
