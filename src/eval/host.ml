@@ -541,7 +541,23 @@ module Misc = struct
     | _ -> failwith "wrong arguments"
 	    
 end
-                
+
+module MANSITerminal = struct
+
+  let style = function
+    | EList(EString("green")::[]) ->
+      EStyle(ANSITerminal.green)
+    | EList(EString("red")::[]) ->
+      EStyle(ANSITerminal.red)
+    | _ -> failwith "style"
+  
+  let print_string = function
+    | EList(EStyle(s)::EString(s')::[]) ->
+      EUnit(ANSITerminal.print_string [s] s')
+    | _ -> failwith "print_string"
+  
+end
+
 (* module Thread = struct
  *   
  *   let create = function
@@ -666,6 +682,9 @@ let functions =
     ("Thread.join", HThread.join);
 
     ("Misc.inet_addr_of_host_entry", Misc.inet_addr_of_host_entry);
-    ("Misc.gethostbyname", Misc.gethostbyname)
+    ("Misc.gethostbyname", Misc.gethostbyname);
+
+    ("ANSITerminal.style", MANSITerminal.style);
+    ("ANSITerminal.print_string", MANSITerminal.print_string);
 
   ]

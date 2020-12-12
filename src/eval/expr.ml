@@ -40,6 +40,7 @@ and c_expr =
 and info = int
 
 and expr =
+  | EStyle of ANSITerminal.style
   | EDot of expr * expr
   | EJsExpr of js_expr
   | EAnd of expr * expr
@@ -277,3 +278,4 @@ and string_of_expr = function
   | EHostEntry (_) -> "Unix.host_entry"
   | EAnonymousBlock (_) -> "#ANONYMOUSBLOCK"
   | EAnonymousReturnFrom (_) -> "#ANONYMOUSRETURNFROM"
+  | EStyle(_) -> "#STYLE"

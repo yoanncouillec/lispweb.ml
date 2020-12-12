@@ -1,6 +1,7 @@
 (load "lib/string.scm")
 (load "lib/stdout.scm")
 (load "lib/list.scm")
+(load "lib/ansiterminal.scm")
 
 (define assert
   (lambda (value :expects #f)
@@ -22,16 +23,12 @@
 	(let ((t (car l)))
 	  (if (test-aux (car (cdr t)))
 	      (begin
-		(print
-		 (concat " "
-			 (list "PASSED"
-			       (car t))))
+		(style-print-string (style "green") "PASSED ")
+		(print (car t))
 		(test-all-aux (+ c 1) (cdr l)))
 	      (begin
-		(print
-		 (concat " "
-			 (list "FAILED"
-			       (car t))))
+		(style-print-string (style "red") "FAILED ")
+		(print (car t))
 		(test-all-aux c (cdr l)))))
 	c)))
 

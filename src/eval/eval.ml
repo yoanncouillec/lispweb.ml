@@ -365,6 +365,8 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 
   | EString (s) -> cont (EString (s)) genv mem
 
+  | EStyle (s) -> cont (EStyle (s)) genv mem
+
   | EChar (c) -> cont (EChar (c)) genv mem
 
   | EVar (s) ->
