@@ -97,7 +97,9 @@
 (define accept-client
   (lambda (server service)
     ;; (print "accept-client") ;;
-    (let* ((client (car (accept server))))
+    (let* ((client_saddr (accept server))
+	   (client (car client_saddr))
+	   (saddr (car (cdr client_saddr))))
       (serve client service)
       (accept-client server service))))
 
