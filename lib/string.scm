@@ -49,10 +49,6 @@
   (lambda (s ofs len)
     (hostcall String.sub s ofs len)))
 
-(define sub-string
-  (lambda (s ofs len)
-    (hostcall String.sub s ofs len)))
-
 (define char->string
   (lambda (c)
     (hostcall Char.char_to_string c)))
