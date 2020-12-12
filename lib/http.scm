@@ -84,7 +84,7 @@
 	      (cons s (read-all fd))))))
 
 (define serve
-  (lambda (client service)
+  (lambda (client saddr service)
     ;; (print "serve") ;;
     (let* ((first-line (http-parse-method read client))
 	   (method (car first-line))
@@ -92,7 +92,7 @@
 	   (queryparams (car (cdr (cdr first-line))))
 	   (protocol (car (cdr (cdr (cdr first-line)))))
 	   (headers (http-parse-headers-light read client)))
-      (service client method path queryparams protocol headers))))
+      (service client saddr method path queryparams protocol headers))))
     
 (define accept-client
   (lambda (server service)
@@ -100,7 +100,7 @@
     (let* ((client_saddr (accept server))
 	   (client (car client_saddr))
 	   (saddr (car (cdr client_saddr))))
-      (serve client service)
+      (serve client saddr service)
       (accept-client server service))))
 
 (define http-run-server

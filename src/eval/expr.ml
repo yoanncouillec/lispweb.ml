@@ -253,7 +253,9 @@ and string_of_expr = function
   | ECont (_) -> "#CONT"
   | EFile (_) -> "#FILE"
   | EInetAddr (_) -> "#INETADDR"
-  | ESockAddr (_) -> "#SOCKADDR"
+  | ESockAddr (ADDR_INET(inet_addr,port)) ->
+     (Unix.string_of_inet_addr inet_addr)^":"^(string_of_int port)
+  | ESockAddr (ADDR_UNIX name) -> name
   | ESockDomain (_) -> "#SOCKDOMAIN"
   | ESockBoolOption (_) -> "#SOCK_BOOL_OPTION"
   | EShutdownCommand (_) -> "#SHUTDOWNCOMMAND"

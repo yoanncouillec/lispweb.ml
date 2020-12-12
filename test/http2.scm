@@ -34,8 +34,8 @@
 	  (<h1> (list) (list (list "string" "404!")))))))))))
 
 (define service
-  (lambda (client method path queryparams protocols headers)
-    (print "New client")
+  (lambda (client saddr method path queryparams protocols headers)
+    (print (concat " " (list "New client" (val->string saddr))))
     (if (equal? path "/")
 	(hello client)
 	(error client))))
