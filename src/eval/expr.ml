@@ -72,6 +72,7 @@ and expr =
   | EIf of expr * expr * expr
   | EInetAddr of Unix.inet_addr
   | EInt of int
+  | EFloat of float
   | ELambda of (string list) * ((string * expr) list) * expr
   | ELambdaDot of string * expr
   | ELet of ((string * expr) list) * expr * env
@@ -101,6 +102,7 @@ and expr =
   | ESslSocket of Ssl.socket
   | EString of string
   | EThread of Thread.t
+  | ETime of Unix.tm
   | EUnQuote of expr
   | EUnit of unit
   | EVar of string
@@ -175,6 +177,8 @@ and string_of_expr = function
   | EJsExpr(js_expr) -> string_of_jsexpr js_expr
   | ESchemeToJs (e) -> "(scheme->js "^(string_of_expr e)^")"
   | EInt (n) -> string_of_int n
+  | EFloat (n) -> string_of_float n
+  | ETime (tm) -> "#TM"
   | EBinary (op, e1, e2) ->
      "("^(match op with
 	  | OPlus -> "+"

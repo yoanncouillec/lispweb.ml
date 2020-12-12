@@ -49,8 +49,8 @@ module Pervasives = struct
     | _ -> failwith "print_string"
 
   let print_endline = function
-    | EList(e::[]) ->
-       EUnit (Stdlib.print_endline (string_of_expr e))
+    | EList(EString(s)::[]) ->
+       EUnit (Stdlib.print_endline s)
     | _ as e -> failwith ("error print_endline: "^(string_of_expr e))
 
   let print_newline = function
@@ -162,8 +162,6 @@ module LUnix = struct
     | EString ("O_RDWR") -> Unix.O_RDWR
     | _ -> failwith "flag_of_string_value: not managed"
 
-  exception Wrong_arguments
-  
   let openfile f =
       match f with
       | EList(((EString(name))::(EList(flags))::(EString(perm))::[])) ->
@@ -318,6 +316,26 @@ module LUnix = struct
        EUnit (Unix.setsockopt fd (socket_bool_option_of_string sbo) b)
     | _ -> failwith "unix_shutdown"
 
+  let time = function
+    | EList([]) ->
+       EFloat(Unix.time())
+    | _ -> failwith "time"
+  
+  let gettimeofday = function
+    | EList([]) ->
+       EFloat(Unix.gettimeofday())
+    | _ -> failwith "gettimeofday"
+  
+  let gmtime = function
+    | EList(EFloat(t)::[]) ->
+       ETime(Unix.gmtime(t))
+    | _ -> failwith "gmtime"
+
+  let string_of_time = function
+    | EList(EFloat(t)::[]) ->
+       EString(ISO8601.Permissive.string_of_datetime t)
+    | _ -> failwith "string_of_time"
+  
 end
 
 module Bytes = struct
@@ -601,6 +619,10 @@ let functions =
     ("Unix.shutdown", LUnix.shutdown);
     ("Unix.setsockopt", LUnix.setsockopt);
     ("Unix.inet_addr_of_sockaddr", LUnix.inet_addr_of_sockaddr);
+    ("Unix.time", LUnix.time);
+    ("Unix.gettimeofday", LUnix.gettimeofday);
+    ("Unix.gmtime", LUnix.gmtime);
+    ("Unix.string_of_time", LUnix.string_of_time);
 
     ("Bytes.of_string", Bytes.bytes_of_string);
     ("Bytes.to_string", Bytes.bytes_to_string);

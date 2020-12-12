@@ -331,6 +331,10 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 
   | EInt (n) -> cont (EInt (n)) genv mem
 
+  | EFloat (n) -> cont (EFloat (n)) genv mem
+
+  | ETime (t) -> cont (ETime (t)) genv mem
+
   | EBinary (op, e1, e2) ->
      eval e1 genv env denv mem
        (fun v1 genv' mem' ->

@@ -25,6 +25,7 @@
 %}
 
 %token<int> ER_INT
+%token<float> ER_FLOAT
 %token<string> ER_CHAR_ESC
 %token<string> ER_IDENT ER_STRING ER_CHAR ER_IDENT_OPT
 %token LPAREN RPAREN LAMBDA LET LETREC DEFINE LETSTAR LOAD EVAL
@@ -53,6 +54,7 @@ expressions:
 
 expression:
   | n = ER_INT { Expr.EInt (n) }
+  | n = ER_FLOAT { Expr.EFloat (n) }
   | ER_STRING { Expr.EString ((remove_enclosing_quotes $1)) }
   | ER_CHAR { Expr.EChar ((String.get $1 1)) }
   | ER_CHAR_ESC { Expr.EChar ((match $1 with "'\\n'" -> '\n' | "'\\r'" -> '\r' | _ -> failwith "ER_CHAR_ESC")) }

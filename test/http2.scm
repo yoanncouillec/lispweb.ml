@@ -1,5 +1,6 @@
 (load "lib/http.scm")
 (load "lib/html.scm")
+(load "lib/time.scm")
 
 (print (concat " " (list "Server waiting on" --port)))
 
@@ -36,6 +37,7 @@
 (define service
   (lambda (client saddr method path queryparams protocols headers)
     (print (concat " " (list "New client" (val->string saddr))))
+    (print (time->string (gettimeofday)))
     (if (equal? path "/")
 	(hello client)
 	(error client))))
