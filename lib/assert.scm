@@ -34,10 +34,12 @@
 
 (define test-all
   (lambda (name l)
-    (print (concat " " (list "TEST" name)))
-    (print
+    (style-print-string (style "inverse") (concat " " (list "TEST" name)))
+    (print-newline)
+    (style-print-string (style "inverse")
      (concat "" (list (int->string (test-all-aux 0 l))
 		      "/"
 		      (int->string (length l))
-		      " (" name ")")))))
+		      " (" name ")")))
+    (print-newline)))
 

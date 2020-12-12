@@ -549,6 +549,14 @@ module MANSITerminal = struct
       EStyle(ANSITerminal.green)
     | EList(EString("red")::[]) ->
       EStyle(ANSITerminal.red)
+    | EList(EString("underlined")::[]) ->
+      EStyle(ANSITerminal.Underlined)
+    | EList(EString("blink")::[]) ->
+      EStyle(ANSITerminal.Blink)
+    | EList(EString("inverse")::[]) ->
+      EStyle(ANSITerminal.Inverse)
+    | EList(EString("bold")::[]) ->
+      EStyle(ANSITerminal.Bold)
     | _ -> failwith "style"
   
   let print_string = function
