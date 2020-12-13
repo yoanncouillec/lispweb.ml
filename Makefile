@@ -68,14 +68,10 @@ repl:
 	./evaluate.native -lrepl
 
 test: native
+	./evaluate.native --load test/basic_test.scm
 	./evaluate.native --load test/string_test.scm
 	./evaluate.native --load test/list_test.scm
 	./evaluate.native --load test/load_test.scm
-	# ./evaluate.native --load test/load_file.scm
-	# ./evaluate.native --load test/load_url.scm
-	# ./evaluate.native --load test/load_url_with_cache.scm
-	# ./evaluate.native --load test/eval.scm
-	# ./evaluate.native --load test/deb.scm
 	# ./evaluate.native --load test/add.scm
 	# ./evaluate.native --load test/first.scm
 	# ./evaluate.native --load test/let.scm
