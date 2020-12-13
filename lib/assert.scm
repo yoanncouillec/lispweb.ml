@@ -8,16 +8,23 @@
     value))
 
 (define assert
-  (lambda (value :expects #f)
+  (lambda (name value :expects #t)
     (if (not (equal? value expects))
 	(begin
+	  (style-print-string (list (style "red") (style "bold")) "FAILED ")
+	  (style-print-string (list (style "bold")) name)
+	  (style-print-string (list (style "bold"))  (concat "" (list ": expecting " (val->string expects) " got " (val->string value))))
+	  (print-newline)
 	  #f)
-	#t)))
+	(begin
+	  (style-print-string (list (style "green")) "PASSED ")
+	  (print name)
+	  #t))))
 
 (define test-aux
   (lambda (l)
     (if (pair? l)
-	(if (equal? (car l) #t)
+	(if (equal? ((car l)) #t)
 	    (test-aux (cdr l))
 	    #f)
 	#t)))
@@ -28,21 +35,17 @@
 	(let ((t (car l)))
 	  (if (test-aux (car (cdr t)))
 	      (begin
-		(style-print-string (list (style "green")) (concat "" (list "  " (if (< n 10) " " "") (int->string n) ".PASSED ")))
-		(print (car t))
 		(test-all-aux (+ c 1) (+ n 1) (cdr l)))
 	      (begin
-		(style-print-string (list (style "red") (style "bold")) (concat "" (list "  " (if (< n 10) " " "") (int->string n) ".FAILED ")))
-		(style-print-string (list (style "bold")) (car t))
-		(print-newline)
 		(test-all-aux c (+ n 1) (cdr l)))))
 	c)))
 
 (define test-all
-  (lambda (name l)
+  (lambda (name li)
     (style-print-string (list (style "inverse") (style "bold")) (concat " " (list "TEST" name)))
     (print-newline)
-    (let ((c (test-all-aux 0 1 l)))
+    (let* ((l li)
+	  (c (test-all-aux 0 1 l)))
       (style-print-string
        (list (style "bold") (if (equal? c (length l)) (style "green") (style "red")) (style "inverse"))
        (concat "" (list ""

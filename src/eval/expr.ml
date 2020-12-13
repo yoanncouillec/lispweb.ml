@@ -186,8 +186,8 @@ and string_of_expr = function
           | ODiv -> "/"
           | OLt -> "<"
 	  | OMinus -> "-")^" "^(string_of_expr e1)^" "^(string_of_expr e2)^")"
-  | EBool (true) -> "EBool(true)"
-  | EBool (false) -> "EBool(false)"
+  | EBool (true) -> "#t"
+  | EBool (false) -> "#f"
   | ENot (e) -> "(not "^(string_of_expr e)^")"
   | EAnd (e1,e2) -> "(and "^(string_of_expr e1)^" "^(string_of_expr e2)^")"
   | ECond (clauses) ->

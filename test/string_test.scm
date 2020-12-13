@@ -3,92 +3,105 @@
 (load "lib/assert.scm")
 (load lib)
 
-(test-all lib
+(test-all
+ lib
  (list
   
   (list "make-string"
 	(list
-	 (assert
-	  (make-string 3 'b')
-	  :expects "bbb")
-	 (assert
-	  (make-string 4 'w')
-	  :expects "wwww")))
+	 (lambda ()
+	   (assert "make-string-1"
+	    (make-string 3 'b')
+	    :expects "bbb"))
+	 (lambda ()
+	   (assert "make-string-2"
+	    (make-string 4 'w')
+	    :expects "wwww"))))
   
   (list "make-empty-string"
 	(list
-	 (assert
-	  (string-length (make-empty-string 1))
-	  :expects 1)))
+	 (lambda ()
+	   (assert "make-empty-string-1"
+	    (string-length (make-empty-string 1))
+	    :expects 1))))
 
   (list "make-regexp"
 	(list
-	 #f))
+	 (lambda () (assert "make-regexp-1" #f))))
 
   (list "global-replace"
 	(list
-	 #f))
+	 (lambda () (assert "global-replace-1" #f))))
 
   (list "global-replace-list"
 	(list
-	 #f))
+	 (lambda ()(assert "global-replace-list-1" #f))))
 
   (list "string->list"
 	(list
-	 (assert
-	  (string->list "qwerty")
-	  :expects (list 'q' 'w' 'e' 'r' 't' 'y'))))
+	 (lambda ()
+	   (assert "string->list-1"
+	    (string->list "qwerty")
+	    :expects (list 'q' 'w' 'e' 'r' 't' 'y')))))
 
   (list "list->string"
 	(list
-	 (assert
-	  (list->string (list 'q' 'w' 'e' 'r' 't' 'y'))
-	  :expects "qwerty")))
+	 (lambda ()
+	   (assert "list->string-1"
+	    (list->string (list 'q' 'w' 'e' 'r' 't' 'y'))
+	    :expects "qwerty"))))
 
   (list "string-length"
 	(list
-	 (assert
-	  (string-length "qwerty")
-	  :expects 6)))
+	 (lambda ()
+	   (assert "string-length-1"
+	    (string-length "qwerty")
+	    :expects 6))))
 
   (list "get-char"
 	(list
-	 (assert
-	  (get-char "qwerty" 3)
-	  :expects 'r')))
+	 (lambda ()
+	   (assert "get-char-1"
+	    (get-char "qwerty" 3)
+	    :expects 'r'))))
   
   (list "sub-string"
 	(list
-	 (assert
-	  (sub-string "qwerty" 1 2)
-	  :expects "we")))
+	 (lambda ()
+	   (assert "sub-string-1"
+	    (sub-string "qwerty" 1 2)
+	    :expects "we"))))
   
   (list "char->string"
 	(list
-	 (assert
-	  (char->string 'q')
-	  :expects "q")))
+	 (lambda ()
+	   (assert "char->string-1"
+	    (char->string 'q')
+	    :expects "q"))))
 
   (list "char->byte"
 	(list
-	 #f))
+	 (lambda () (assert "char->byte-1" #f))))
 
   (list "concat"
 	(list
-	 (assert
-	  (concat "_" (list "a" (int->string 1)))
-	  :expects "a_1")))
+	 (lambda ()
+	   (assert "concat-1"
+	    (concat "_" (list "a" (int->string 1)))
+	    :expects "a_1"))))
 
   (list "string-concat"
 	(list
-	 (assert
-	  (string-concat (list "a" (int->string 1)))
-	  :expects "a1")))
+	 (lambda ()
+	   (assert "string-concat-1"
+	    (string-concat (list "a" (int->string 1)))
+	    :expects "a1"))))
 
-    (list "string-concat-sep"
+  (list "string-concat-sep"
 	(list
-	 (assert
-	  (string-concat-sep "x" (list "a" (int->string 1)))
-	  :expects "ax1")))
-    
+	 (lambda ()
+	   (assert "string-concat-sep-1"
+	    (string-concat-sep "x" (list "a" (int->string 1)))
+	    :expects "ax1"))))
+  
   ))

@@ -8,20 +8,23 @@
  (list
   (list "pair?"
 	(list
-	 (assert
-	  (pair? (list))
-	  :expects #f)
-	 (assert
-	  (pair? (list 1 2 3))
-	  :expects #t)
-	 ))
-
+	 (lambda ()
+	   (assert "pair?-1"
+	    (pair? (list))
+	    :expects #f))
+	 (lambda ()
+	   (assert "pair?-2"
+	    (pair? (list 1 2 3))
+	    :expects #t)
+	   )))
+  
   (list "length"
 	(list
-	 (assert
-	  (pair? (list))
-	  :expects 0)))
-  ))
+	 (lambda ()
+	   (assert "length-1"
+	    (pair? (list))
+	    :expects 0))))))
+
 
 
 
