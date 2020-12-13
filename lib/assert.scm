@@ -42,15 +42,15 @@
 
 (define test-all
   (lambda (name l)
-    (style-print-string (list (style "inverse") (style "bold")) (concat " " (list "TEST" name)))
+    (style-print-string (list (style "inverse") (style "bold")) (concat " " (list " TEST" name " ")))
     (print-newline)
     (let* ((c (test-all-aux 0 1 l)))
       (style-print-string
        (list (style "bold") (if (equal? c (length l)) (style "green") (style "red")) (style "inverse"))
-       (concat "" (list ""
+       (concat "" (list " "
 			(int->string c)
 			"/"
 			(int->string (length l))
-			""))))
+			" "))))
     (print-newline)))
 
