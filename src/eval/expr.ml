@@ -1,4 +1,4 @@
-type operator = OPlus | OMinus | OMult | ODiv
+type operator = OPlus | OMinus | OMult | ODiv | OLt
 
 type clause =
   | EClause of expr * expr
@@ -134,6 +134,7 @@ let rec string_of_c_expr = function
   | CBinOp(OMinus, c_e1, c_e2) -> (string_of_c_expr c_e1) ^ " - " ^ (string_of_c_expr c_e2)
   | CBinOp(OMult, c_e1, c_e2) -> (string_of_c_expr c_e1) ^ " * " ^ (string_of_c_expr c_e2)
   | CBinOp(ODiv, c_e1, c_e2) -> (string_of_c_expr c_e1) ^ " / " ^ (string_of_c_expr c_e2)
+  | CBinOp(OLt, c_e1, c_e2) -> (string_of_c_expr c_e1) ^ " < " ^ (string_of_c_expr c_e2)
   | CBegin(es) -> "{"^(List.fold_left (fun accu e -> accu^(string_of_c_expr e)) "" es)^"}"
   | CVarDecl(t, s, e, body) ->
      "{"^(string_of_c_type t)^" "^s^" = "^(string_of_c_expr e)^";"^(string_of_c_expr body)^"}"
@@ -183,6 +184,7 @@ and string_of_expr = function
 	  | OPlus -> "+"
 	  | OMult -> "*"
           | ODiv -> "/"
+          | OLt -> "<"
 	  | OMinus -> "-")^" "^(string_of_expr e1)^" "^(string_of_expr e2)^")"
   | EBool (true) -> "EBool(true)"
   | EBool (false) -> "EBool(false)"

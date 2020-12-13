@@ -60,7 +60,9 @@ let rec apply_bin_op op v1 v2 =
       | OPlus -> EInt (n1 + n2)
       | OMinus -> EInt (n1 - n2)
       | OMult -> EInt (n1 * n2)
-      | ODiv -> EInt (n1 / n2))
+      | ODiv -> EInt (n1 / n2)
+      | OLt -> EBool (n1 < n2)
+     )
   | _ -> failwith "Should be integers"
 
 let rec get_function s fs = 

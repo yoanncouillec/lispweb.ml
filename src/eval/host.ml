@@ -549,6 +549,12 @@ module MANSITerminal = struct
       EStyle(ANSITerminal.green)
     | EList(EString("red")::[]) ->
       EStyle(ANSITerminal.red)
+    | EList(EString("blue")::[]) ->
+      EStyle(ANSITerminal.blue)
+    | EList(EString("black")::[]) ->
+       EStyle(ANSITerminal.black)
+    | EList(EString("yellow")::[]) ->
+       EStyle(ANSITerminal.yellow)
     | EList(EString("underlined")::[]) ->
       EStyle(ANSITerminal.Underlined)
     | EList(EString("blink")::[]) ->
@@ -560,9 +566,9 @@ module MANSITerminal = struct
     | _ -> failwith "style"
   
   let print_string = function
-    | EList(EStyle(s)::EString(s')::[]) ->
-      EUnit(ANSITerminal.print_string [s] s')
-    | _ -> failwith "print_string"
+    | EList(EList(styles)::EString(string)::[]) ->
+      EUnit(ANSITerminal.print_string (List.map (function EStyle(s) -> s | _ -> failwith "should be style") styles) string)
+    | _ -> failwith "string_print_string"
   
 end
 

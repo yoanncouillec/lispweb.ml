@@ -32,7 +32,7 @@
 %token TRUE FALSE IF COND ELSE EOF BEGIN EQUAL NOT AND
 %token CAR CDR CONS LIST
 %token CATCH THROW CALLCC BLOCK RETURNFROM HOSTCALL CALLWITHNEWTHREAD
-%token PLUS MINUS MULT DIV
+%token PLUS MINUS MULT DIV LT
 %token CQUOTE CQUASIQUOTE CUNQUOTE
 %token GET SET STARTWITH
 %token SCHEMETOJS JSTOSTRING
@@ -73,6 +73,7 @@ expression:
   | LPAREN MINUS expression expression RPAREN { Expr.EBinary(Expr.OMinus,$3,$4) }
   | LPAREN MULT expression expression RPAREN { Expr.EBinary(Expr.OMult,$3,$4) }
   | LPAREN DIV expression expression RPAREN { Expr.EBinary(Expr.ODiv,$3,$4) }
+  | LPAREN LT expression expression RPAREN { Expr.EBinary(Expr.OLt,$3,$4) }
   | LPAREN CATCH ER_IDENT expression RPAREN { Expr.ECatch($3,$4) }
   | LPAREN THROW ER_IDENT expression RPAREN { Expr.EThrow($3,$4) }
   | LPAREN BLOCK ER_IDENT expression RPAREN { Expr.EBlock($3,$4) }

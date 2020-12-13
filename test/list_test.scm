@@ -3,11 +3,9 @@
 (load "lib/assert.scm")
 (load lib)
 
-
-
-(test-all lib
+(test-all
+ lib
  (list
-  
   (list "pair?"
 	(list
 	 (assert
@@ -17,7 +15,14 @@
 	  (pair? (list 1 2 3))
 	  :expects #t)
 	 ))
+
+  (list "length"
+	(list
+	 (assert
+	  (pair? (list))
+	  :expects 0)))
   ))
+
 
 
 
