@@ -64,26 +64,30 @@ uninstall-lib:
 
 uninstall: uninstall-bin uninstall-lib
 
+repl:
+	./evaluate.native -lrepl
+
 test: native
 	./evaluate.native --load test/string_test.scm
-	./evaluate.native --load test/load_file.scm
-	./evaluate.native --load test/load_url.scm
-	./evaluate.native --load test/load_url_with_cache.scm
-	./evaluate.native --load test/eval.scm
-	./evaluate.native --load test/deb.scm
-	./evaluate.native --load test/add.scm
-	./evaluate.native --load test/first.scm
-	./evaluate.native --load test/let.scm
-	./evaluate.native --load test/catch.scm
-	./evaluate.native --load test/block.scm
-	./evaluate.native --load test/all.scm
-	./evaluate.native --load test/library.scm
-	./evaluate.native --load test/define.scm
-	./evaluate.native --load test/basic.scm
-	./evaluate.native --from-syntax js --load test/add.js
-	./evaluate.native --from-syntax js --load test/first.js
-	./evaluate.native --from-syntax js --load test/let.js
-	./evaluate.native --from-syntax js --load test/function.js
-	./evaluate.native --load test/list.scm
-	./evaluate.native --load test/string.scm	
-	./evaluate.native --load test/callcc.scm
+	./evaluate.native --load test/list_test.scm
+	# ./evaluate.native --load test/load_file.scm
+	# ./evaluate.native --load test/load_url.scm
+	# ./evaluate.native --load test/load_url_with_cache.scm
+	# ./evaluate.native --load test/eval.scm
+	# ./evaluate.native --load test/deb.scm
+	# ./evaluate.native --load test/add.scm
+	# ./evaluate.native --load test/first.scm
+	# ./evaluate.native --load test/let.scm
+	# ./evaluate.native --load test/catch.scm
+	# ./evaluate.native --load test/block.scm
+	# ./evaluate.native --load test/all.scm
+	# ./evaluate.native --load test/library.scm
+	# ./evaluate.native --load test/define.scm
+	# ./evaluate.native --load test/basic.scm
+	# ./evaluate.native --from-syntax js --load test/add.js
+	# ./evaluate.native --from-syntax js --load test/first.js
+	# ./evaluate.native --from-syntax js --load test/let.js
+	# ./evaluate.native --from-syntax js --load test/function.js
+	# ./evaluate.native --load test/list.scm
+	# ./evaluate.native --load test/string.scm	
+	# ./evaluate.native --load test/callcc.scm

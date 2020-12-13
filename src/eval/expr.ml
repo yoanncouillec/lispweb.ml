@@ -37,8 +37,6 @@ and c_expr =
   | CReturn of c_expr
   | CCall of c_expr * c_expr list
 
-and info = int
-
 and expr =
   | EStyle of ANSITerminal.style
   | EDot of expr * expr
@@ -49,7 +47,7 @@ and expr =
   | EBinary of operator * expr * expr
   | EBlock of string * expr
   | EAnonymousBlock of expr
-  | EBool of info * bool
+  | EBool of bool
   | EBytes of Bytes.t
   | ECallWithNewThread of expr
   | ECallcc of string * expr
@@ -186,8 +184,8 @@ and string_of_expr = function
 	  | OMult -> "*"
           | ODiv -> "/"
 	  | OMinus -> "-")^" "^(string_of_expr e1)^" "^(string_of_expr e2)^")"
-  | EBool (_,true) -> "#t"
-  | EBool (_,false) -> "#f"
+  | EBool (true) -> "EBool(true)"
+  | EBool (false) -> "EBool(false)"
   | ENot (e) -> "(not "^(string_of_expr e)^")"
   | EAnd (e1,e2) -> "(and "^(string_of_expr e1)^" "^(string_of_expr e2)^")"
   | ECond (clauses) ->

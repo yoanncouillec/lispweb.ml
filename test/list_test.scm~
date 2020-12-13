@@ -1,0 +1,16 @@
+(define lib "lib/list.scm")
+
+(load "lib/assert.scm")
+(load lib)
+
+(test-all lib
+ (list
+  
+  (list "make-string"
+	(list
+	 (assert
+	  (make-string 3 'b')
+	  :expects "bbb")
+	 (assert
+	  (make-string 4 'w')
+	  :expects "wwww")))

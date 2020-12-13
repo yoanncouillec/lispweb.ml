@@ -342,24 +342,24 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 	   (fun v2 genv'' mem'' ->
 	     cont (apply_bin_op op v1 v2) genv'' mem''))
 
-  | EBool (p,b) -> cont (EBool (p,b)) genv mem
+  | EBool (b) -> cont (EBool (b)) genv mem
 
   | ENot (e) ->
      eval e genv env denv mem
        (fun v genv' mem' ->
 	 match v with
-	 | EBool (p,b) -> cont (EBool (p,not b)) genv' mem'
+	 | EBool (b) -> cont (EBool (not b)) genv' mem'
 	 | _ -> failwith ("eval ENot: boolean expected: "^(string_of_expr v)))
 
   | EAnd (e1,e2) ->
      eval e1 genv env denv mem
        (fun v1 genv' mem' ->
 	 (match v1 with
-	  | EBool (p1, b1) -> 
+	  | EBool (b1) -> 
              eval e2 genv' env denv mem'
 	       (fun v2 genv'' mem'' ->
 	         (match v2 with
-	          | EBool (p2, b2) -> cont (EBool (p1, b1 && b2)) genv'' mem''
+	          | EBool (b2) -> cont (EBool (b1 && b2)) genv'' mem''
 	          | _ -> failwith ("eval ENot: boolean expected: "^(string_of_expr v2))))
 	  | _ -> failwith ("eval ENot: boolean expected: "^(string_of_expr v1))))
 
@@ -419,7 +419,7 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
      eval a genv env denv mem
        (fun v genv' mem' -> 
 	 (match v with 
-	  | EBool (p,x) -> if x then eval b genv' env denv mem' cont 
+	  | EBool (x) -> if x then eval b genv' env denv mem' cont 
 			   else eval c genv' env denv mem' cont
 	  | _ -> failwith "eval EIf: expecting a boolean"))
 
@@ -433,7 +433,7 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
      eval e1 genv env denv mem
        (fun v genv' mem' -> 
 	 (match v with 
-	  | EBool (p,x) -> if x then eval e2 genv' env denv mem' cont 
+	  | EBool (x) -> if x then eval e2 genv' env denv mem' cont 
 			 else cont (EUnit(())) genv' mem'
 	  | _ -> failwith "eval ECond: expecting a boolean"))
 
@@ -441,7 +441,7 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
      eval e1 genv env denv mem
        (fun v genv' mem' -> 
 	 (match v with 
-	  | EBool (p,x) -> if x then eval e2 genv' env denv mem' cont 
+	  | EBool (x) -> if x then eval e2 genv' env denv mem' cont 
 			   else eval (ECond(rest)) genv' env denv mem' cont
 	  | _ -> failwith "eval ECond: expecting a boolean"))
 
@@ -585,7 +585,8 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
        (fun v genv' mem' -> 
 	 eval e2 genv' env denv mem'
 	   (fun v' genv'' mem'' ->
-	     cont (EBool (0, v = v')) genv'' mem''))
+	     cont (EBool (v = v')) genv'' mem''))
+
 
   | EList ([]) -> cont (EList ([])) genv mem
 

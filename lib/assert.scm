@@ -3,6 +3,10 @@
 (load "lib/list.scm")
 (load "lib/ansiterminal.scm")
 
+(define assert-true
+  (lambda (value)
+    value))
+
 (define assert
   (lambda (value :expects #f)
     (if (not (equal? value expects))

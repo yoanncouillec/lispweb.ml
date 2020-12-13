@@ -61,8 +61,8 @@ expression:
   | LPAREN CQUOTE expression=expression RPAREN { Expr.EQuote (expression) }
   | LPAREN CQUASIQUOTE expression=expression RPAREN { Expr.EQuasiQuote (expression) }
   | LPAREN CUNQUOTE expression=expression RPAREN { Expr.EUnQuote (expression) }
-  | TRUE { Expr.EBool (Parsing.symbol_start(), true) }
-  | FALSE { Expr.EBool (Parsing.symbol_start(), false) }
+  | TRUE { Expr.EBool (true) }
+  | FALSE { Expr.EBool (false) }
   | LPAREN EVAL expression RPAREN { Expr.EEval ($3) }
   | LPAREN STRINGTOEXPR expression RPAREN { Expr.ELoadString ($3) }
   | LPAREN LOAD expression RPAREN { Expr.ELoad (EString("lisp"), $3) }
