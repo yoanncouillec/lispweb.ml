@@ -1,29 +1,21 @@
-(define lib "lib/list.scm")
-
 (load "lib/assert.scm")
-(load lib)
+(load "lib/list.scm")
 
 (test-all
- lib
+ "lib/list.scm"
  (list
-  (list "pair?"
-	(list
-	 (lambda ()
-	   (assert "pair?-1"
+  (lambda ()
+    (assert "pair? - empty"
 	    (pair? (list))
 	    :expects #f))
-	 (lambda ()
-	   (assert "pair?-2"
+  (lambda ()
+    (assert "pair? - not empty"
 	    (pair? (list 1 2 3))
-	    :expects #t)
-	   )))
-  
-  (list "length"
-	(list
-	 (lambda ()
-	   (assert "length-1"
-	    (pair? (list))
-	    :expects 0))))))
+	    :expects #t))
+  (lambda ()
+    (assert "length - empty"
+	    (length (list))
+	    :expects 0))))
 
 
 
