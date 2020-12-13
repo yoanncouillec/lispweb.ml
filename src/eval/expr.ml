@@ -76,8 +76,6 @@ and expr =
   | ELambdaDot of string * expr
   | ELet of ((string * expr) list) * expr * env
   | EList of expr list
-  | ELoad of expr * expr
-  | ELoadString of expr
   | ENot of expr
   | EQuasiQuote of expr
   | EQuote of expr
@@ -213,8 +211,6 @@ and string_of_expr = function
   | EGet (e) -> "(get "^(string_of_expr e)^")"
   | EStartWith (e) -> "(start-with "^(string_of_expr e)^")"
   | EEval (e) -> "(eval "^(string_of_expr e)^")"
-  | ELoad (l, e) -> "(load "^(string_of_expr l)^" "^(string_of_expr e)^")"
-  | ELoadString (e) -> "(load-string "^(string_of_expr e)^")"
   | EIf (e1, e2, e3) -> 
      "(if "^(string_of_expr e1)^" "^(string_of_expr e2)^" "^(string_of_expr e3)^")"
   | ELet (bindings, body,_) ->

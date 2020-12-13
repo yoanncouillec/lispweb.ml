@@ -1,8 +1,8 @@
 (load "lib/assert.scm")
-(load "lib/load.scm")
+(load "lib/load_url.scm")
 
 (test-all
- "lib/string.scm"
+ "lib/load.scm"
  (list
   
   (lambda ()

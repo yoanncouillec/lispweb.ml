@@ -11,48 +11,6 @@ let string_of_position (position:Lexing.position option) =
                 ^ "," ^ (string_of_int p.pos_cnum) ^ ")"
   | None -> "NOPOS"
 
-let rec string_of_channel channel accu = 
-  try
-    let line = input_line channel in
-    string_of_channel channel (accu^line)
-  with
-  | End_of_file -> accu
-
-let expr_of_string s = 
-  let lexbuf = Lexing.from_string s in
-  Parser.start Lexer.token lexbuf
-  
-let print_position out_channel (lexbuf:Lexing.lexbuf) =
-  let pos = lexbuf.lex_curr_p in
-  Printf.fprintf out_channel "%s:%d:%d" 
-    pos.pos_fname pos.pos_lnum (pos.pos_cnum - pos.pos_bol + 1)
-  
-let parse_with_error language lexbuf =
-  match language with
-    | "lisp" -> 
-       (try Parser.start Lexer.token lexbuf with
-          Lexer.SyntaxError msg ->
-           Printf.fprintf stderr "%a: %s\n" print_position lexbuf msg; None
-        | Parser.Error -> 
-           Printf.fprintf stderr "%a: syntax error\n" print_position lexbuf; None)
-    | "js" -> 
-       (try ParserJs.start LexerJs.token lexbuf with
-          LexerJs.SyntaxError msg ->
-           Printf.fprintf stderr "%a: %s\n" print_position lexbuf msg; None
-        | ParserJs.Error -> 
-           Printf.fprintf stderr "%a: syntax error\n" print_position lexbuf; None)
-    | _ -> failwith "unknown language"
-     
-let rec parse_and_print language lexbuf =
-  match parse_with_error language lexbuf with
-  | Some _ -> parse_and_print language lexbuf
-  | None -> ()
-  
-let expr_of_filename language filename : expr option =
-  let lexbuf = Lexing.from_string (string_of_channel (open_in filename) "") in
-  lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
-  parse_with_error language lexbuf
-
 let rec apply_bin_op op v1 v2 = 
   match (v1, v2) with
   | (EInt (n1), EInt (n2)) ->
@@ -67,7 +25,7 @@ let rec apply_bin_op op v1 v2 =
 
 let rec get_function s fs = 
   match fs with
-  | [] -> failwith "function not found"(*("Eval: EHostCall: function not found: "^s^" is not in ("
+  | [] -> failwith ("function not found:"^s)(*("Eval: EHostCall: function not found: "^s^" is not in ("
                     ^ (List.fold_left (fun a -> function (b) -> a^" "^b) "" functions)^")")*)
   | (s',f)::rest -> 
      if s = s' then f else get_function s rest
@@ -273,16 +231,6 @@ let rec eval_quasi_quote e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont)
      eval_quasi_quote e1 genv env denv mem
        (fun v1 genv1 mem1 ->
          cont (EEval (v1)) genv1 mem1)
-
-  | ELoad (l,e1) ->
-     eval_quasi_quote e1 genv env denv mem
-       (fun v1 genv1 mem1 ->
-         cont (ELoad (l,v1)) genv1 mem1)
-
-  | ELoadString (e1) ->
-     eval_quasi_quote e1 genv env denv mem
-       (fun v1 genv1 mem1 ->
-         cont (ELoadString (v1)) genv1 mem1)
 
   | ECallWithNewThread (e1) ->
      eval_quasi_quote e1 genv env denv mem
@@ -638,31 +586,6 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
      eval e1 genv env denv mem
        (fun v genv' mem' ->
          eval v genv' env denv mem' cont)
-
-  | ELoad (l,e) ->
-     eval l genv env denv mem
-       (fun vl genv' mem' ->
-         match vl with
-         | EString (language) ->
-            (eval e genv' env denv mem'
-               (fun v genv'' mem'' ->
-                 match v with
-                 | EString (filename) ->
-                    (match expr_of_filename language filename with
-                     | Some e -> eval e genv' env denv mem' cont
-                     | None -> failwith "ELoad: cannot parse")
-                 | _ -> failwith "eval ELoad: should be a string"))
-         | _ -> failwith "eval ELoad: parameter 1 should be a string")
-
-  | ELoadString (e) ->
-     eval e genv env denv mem
-       (fun v genv' mem' ->
-         match v with
-         | EString (s) ->
-            (match expr_of_string s with
-             | Some e -> cont e genv' mem' (*eval e genv' env denv mem' cont*)
-             | None -> failwith "ELoadString: cannot parse")
-         | _ -> failwith ("eval ELoadString: should be a string: "^(string_of_expr v)))
 
   | ECallWithNewThread (e1) ->
      eval e1 genv env denv mem

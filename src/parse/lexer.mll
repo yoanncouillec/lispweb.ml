@@ -51,8 +51,6 @@ rule token = parse
   | "call/cc" { CALLCC }
   | "hostcall" { HOSTCALL }
   | "eval" { EVAL }
-  | "string->expr" { STRINGTOEXPR }
-  | "load" { LOAD }
   | "call-with-new-thread" { CALLWITHNEWTHREAD }
   | "get-env" { GET }
   | "start-with" { STARTWITH }

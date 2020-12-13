@@ -9,7 +9,7 @@ let _ =
   let rec expr_of_args accu args =
     match args with
     | "--load"::filename::rest ->
-       expr_of_args (ELoad (EVar "--from-syntax" ,EString(filename))::accu) rest
+       expr_of_args ((Load.load_scheme_file filename)::accu) rest
     | "--load"::[] ->
        failwith "expr_of_args"
     | "--version"::rest ->
@@ -21,9 +21,9 @@ let _ =
         | ('-','-',value::rest') ->
            expr_of_args (EDefine (key, EString (value))::accu) rest'
         | ('-','l',rest') ->
-           expr_of_args (ELoad(EString("lisp"),EString("lib/"^(String.sub key 2 ((String.length key) - 2))^".scm"))::accu) rest'
+           expr_of_args (Load.load_scheme_file ("lib/"^(String.sub key 2 ((String.length key) - 2))^".scm")::accu) rest'
         | _ -> failwith help)
-    | [] -> Expr.EBegin (List.rev accu)
+    | [] -> Expr.EBegin ((Load.load_scheme_file "lib/load.scm")::(List.rev accu))
   in
   let e = (expr_of_args [from_syntax] sargs) in
   (*print_endline(string_of_expr e);*)

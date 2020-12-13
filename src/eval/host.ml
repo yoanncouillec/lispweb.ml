@@ -1,5 +1,25 @@
 open Expr
 
+module MCore = struct
+
+  let read_all = function
+    | EList(EString(s)::[]) ->
+       EString(Core.In_channel.read_all s)
+    | _ -> failwith "read_all"
+  
+end
+
+module MParse = struct
+
+  let parse_scheme = function
+    | EList(EString(s)::[]) ->
+       (match Parse.expr_of_scheme_string s with
+        | Some e -> e
+        | _ -> failwith "parse_scheme")
+    | _ -> failwith "parse_scheme"
+  
+end
+
 module Pervasives = struct
 
   let string_of_int = function
@@ -701,4 +721,9 @@ let functions =
     ("ANSITerminal.style", MANSITerminal.style);
     ("ANSITerminal.print_string", MANSITerminal.print_string);
 
+    ("Parse.parse_scheme", MParse.parse_scheme);
+    
+    ("Core.In_channel.read_all", MCore.read_all);
+
+    
   ]
