@@ -70,7 +70,7 @@ build_ocaml_image:
 	docker build -t ocaml:latest -f docker/DockerfileOCaml .
 
 build_lispweb_image:
-	docker build -t lispweb:latest -f docker/DockerfileLispweb .
+	docker build --no-cache -t lispweb:latest -f docker/DockerfileLispweb .
 
 repl:
 	./lispwebevaluate.native -lrepl
