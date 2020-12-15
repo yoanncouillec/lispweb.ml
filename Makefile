@@ -24,12 +24,12 @@ mrproper: clean
 	rm -rf *~
 
 native: sanity
-	$(OCB) evaluate.native
-	$(OCB) compile.native
+	$(OCB) lispwebevaluate.native
+	$(OCB) lispwebcompile.native
 
 byte: sanity
-	$(OCB) evaluate.byte
-	$(OCB) compile.byte
+	$(OCB) lispwebevaluate.byte
+	$(OCB) lispwebcompile.byte
 
 profile: sanity
 	$(OCB) -tag profile main.native
@@ -44,16 +44,16 @@ sanity:
 install: install-bin install-lib
 
 install-bin:
-	cp evaluate.native /usr/local/bin/evaluate.$(VERSION).native
-	rm -f /usr/local/bin/evaluate.native
-	ln -s /usr/local/bin/evaluate.$(VERSION).native /usr/local/bin/evaluate.native
-	rm -f /usr/local/bin/evaluate
-	ln -s /usr/local/bin/evaluate.$(VERSION).native /usr/local/bin/evaluate
+	cp lispwebevaluate.native /usr/local/bin/lispwebevaluate.$(VERSION).native
+	rm -f /usr/local/bin/lispwebevaluate.native
+	ln -s /usr/local/bin/lispwebevaluate.$(VERSION).native /usr/local/bin/lispwebevaluate.native
+	rm -f /usr/local/bin/lispwebevaluate
+	ln -s /usr/local/bin/lispwebevaluate.$(VERSION).native /usr/local/bin/lispwebevaluate
 
 uninstall-bin:
-	rm -f /usr/local/bin/evaluate
-	rm -f  /usr/local/bin/evaluate.native
-	rm -f /usr/local/bin/evaluate.$(VERSION).native
+	rm -f /usr/local/bin/lispwebevaluate
+	rm -f  /usr/local/bin/lispwebevaluate.native
+	rm -f /usr/local/bin/lispwebevaluate.$(VERSION).native
 
 install-lib:
 	mkdir -p /usr/local/lib/lispweb
@@ -64,17 +64,30 @@ uninstall-lib:
 
 uninstall: uninstall-bin uninstall-lib
 
+build_images: build_ocaml_image build_lispweb_image
+
+build_ocaml_image:
+	docker build -t ocaml:latest -f docker/DockerfileOCaml .
+
+build_lispweb_image:
+	docker build -t lispweb:latest -f docker/DockerfileLispweb .
+
 repl:
-	./evaluate.native -lrepl
+	./lispwebevaluate.native -lrepl
 
 test: native
-	./evaluate.native --load test/basic_test.scm
-	./evaluate.native --load test/string_test.scm
-	./evaluate.native --load test/list_test.scm
-	./evaluate.native --load test/load_test.scm
-	# ./evaluate.native --load test/library.scm
-	# ./evaluate.native --from-syntax js --load test/add.js
-	# ./evaluate.native --from-syntax js --load test/first.js
-	# ./evaluate.native --from-syntax js --load test/let.js
-	# ./evaluate.native --from-syntax js --load test/function.js
+	./lispwebevaluate.native --load test/basic_test.scm
+	./lispwebevaluate.native --load test/string_test.scm
+	./lispwebevaluate.native --load test/list_test.scm
+	./lispwebevaluate.native --load test/load_test.scm
+	# ./lispwebevaluate.native --load test/library.scm
+	# ./lispwebevaluate.native --from-syntax js --load test/add.js
+	# ./lispwebevaluate.native --from-syntax js --load test/first.js
+	# ./lispwebevaluate.native --from-syntax js --load test/let.js
+	# ./lispwebevaluate.native --from-syntax js --load test/function.js
 
+test_install:
+	lispwebevaluate --load test/basic_test.scm
+	lispwebevaluate --load test/string_test.scm
+	lispwebevaluate --load test/list_test.scm
+	lispwebevaluate --load test/load_test.scm
