@@ -33,4 +33,4 @@
 	    (let (read ssl-read)
 	      (let (write ssl-write)
 		(url-get-content fd read write host path)))))
-	(begin (print "error")))))
+	(begin (print "wget|not implemented|scheme http")))))

@@ -73,7 +73,7 @@ build_lispweb_image:
 	docker build --no-cache -t lispweb:latest -f docker/DockerfileLispweb .
 
 repl:
-	./lispwebevaluate.native -lrepl
+	rlwrap ./lispwebevaluate.native -lrepl
 
 test: native
 	./lispwebevaluate.native --load test/basic_test.scm

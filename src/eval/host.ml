@@ -130,7 +130,7 @@ module Pervasives = struct
           EChannelIn (Stdlib.open_in s)
         with Sys_error (s) ->
               EString ("sys-error"))
-    | _ -> EString("wrong-arguments")
+    | _ -> failwith "wrong-arguments"
 
   let open_in_bin = function
     | EList(((EString(s))::[])) ->
@@ -142,15 +142,16 @@ module Pervasives = struct
        EChar(Stdlib.input_char ic);
     | _ -> failwith "input_char"
 		    
-  let input_line = function
-    | EList(((EChannelIn(ic))::[])) ->
-       (try
-          EString(Stdlib.input_line ic);
-        with End_of_file ->
-              EString "end-of-file")
-    | _  ->
-       EString("wrong-parameters")
-		    
+  let input_line parameters =
+      match parameters with
+      | EList(((EChannelIn(ic))::[])) ->
+         (try
+            EString(Stdlib.input_line ic);
+          with End_of_file ->
+            EString "end-of-file")
+      | _  ->
+         failwith ("input_line|wrong-parameters|"^(string_of_expr parameters))
+  
   let close_in = function
     | EList(((EChannelIn(c))::[])) ->
        EUnit (Stdlib.close_in c)

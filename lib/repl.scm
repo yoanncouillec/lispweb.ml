@@ -4,7 +4,10 @@
 
 (define repl
   (lambda ()
-    (print (load-string (input-line (stdin))))
+    (print-string "> ")
+    (flush (stdout))
+    (print (concat " " (list "=" (val->string (load-string (input-line (stdin)))))))
+    (print-newline)
     (repl)))
 
 (repl)

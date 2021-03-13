@@ -2,11 +2,11 @@
 (load "lib/stdout.scm")
 (load "lib/string.scm")
 
-(define stdin
+(define fstdin
   (lambda ()
     (hostcall Unix.stdin)))
        
-(define stdout
+(define fstdout
   (lambda ()
     (hostcall Unix.stdout)))
        
