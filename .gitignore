@@ -4,3 +4,4 @@ lispwebeval
 *.cmo
 *.byte
 *.native
+*~

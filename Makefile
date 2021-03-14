@@ -64,7 +64,7 @@ uninstall-lib:
 
 uninstall: uninstall-bin uninstall-lib
 
-build_images: build_ocaml_image build_lispweb_image
+build_images: build_lispweb_image
 
 build_ocaml_image:
 	docker build -t ocaml:latest -f docker/DockerfileOCaml .
