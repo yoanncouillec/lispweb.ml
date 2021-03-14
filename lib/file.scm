@@ -15,7 +15,8 @@
     (hostcall Unix.stderr)))
        
 (define openfile
-  (lambda (name flags perm
+  (lambda (name :flags (list "O_RDONLY")
+		:perm "0o660"
 		:handle-no-such-file (lambda () #f)
 		:handle-wrong-arguments (lambda () #f))
     (let ((result (hostcall Unix.openfile name flags perm)))
@@ -98,10 +99,10 @@
 	  (write-lines fd rest))
 	(list))))
 	
-(define in_channel_of_descr
+(define file->in-channel
   (lambda (fd)
     (hostcall Unix.in_channel_of_descr fd)))
 
-(define out_channel_of_descr
+(define file->out-channel
   (lambda (fd)
     (hostcall Unix.out_channel_of_descr fd)))

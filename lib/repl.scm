@@ -4,10 +4,9 @@
 
 (define repl
   (lambda ()
-    (print-string "> ")
-    (flush (stdout))
-    (print (concat " " (list "=" (val->string (load-string (input-line (stdin)))))))
-    (print-newline)
+    (print (val->string (load-string (input-line (stdin)))))
     (repl)))
 
-(repl)
+(catch end-of-file
+       (repl))
+(print "Bye!")

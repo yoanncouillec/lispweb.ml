@@ -4,7 +4,10 @@ module MCore = struct
 
   let read_all = function
     | EList(EString(s)::[]) ->
-       EString(Core.In_channel.read_all s)
+       (try
+          EString(Core.In_channel.read_all s)
+        with Sys_error msg ->
+              failwith ("read_all|sys_error|"^msg))
     | _ -> failwith "read_all"
   
 end
