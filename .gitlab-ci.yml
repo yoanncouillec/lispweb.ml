@@ -6,5 +6,5 @@ build:
   tags:
     - shell
   script:
-    - docker build --build-arg user=$USER --build-arg password=$PASSWORD -t localhost:5000/lispweb -f docker/DockerfileLispweb .
+    - docker build --no-cache --build-arg user=$USER --build-arg password=$PASSWORD -t localhost:5000/lispweb -f docker/DockerfileLispweb .
     - docker push localhost:5000/lispweb
