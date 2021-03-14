@@ -23,7 +23,7 @@ let _ =
         | ('-','l',rest') ->
            expr_of_args (Load.load_scheme_file ("lib/"^(String.sub key 2 ((String.length key) - 2))^".scm")::accu) rest'
         | _ -> failwith help)
-    | [] -> Expr.EBegin ((Load.load_scheme_file "lib/load.scm")::(List.rev accu))
+    | [] -> Expr.EBegin ((Load.load_scheme_file "/usr/local/lib/lispweb/lib/load.scm")::(List.rev accu))
   in
   let e = (expr_of_args [from_syntax] sargs) in
   (*print_endline(string_of_expr e);*)

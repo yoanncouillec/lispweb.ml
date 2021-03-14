@@ -56,8 +56,8 @@ uninstall-bin:
 	rm -f /usr/local/bin/lispwebevaluate.$(VERSION).native
 
 install-lib:
-	mkdir -p /usr/local/lib/lispweb
-	cp -R lib/* /usr/local/lib/lispweb
+	mkdir -p /usr/local/lib/lispweb/lib
+	cp -R lib/*.scm /usr/local/lib/lispweb/lib
 
 uninstall-lib:
 	rm -rf /usr/local/lib/lispweb
