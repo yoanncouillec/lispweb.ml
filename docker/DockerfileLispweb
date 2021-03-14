@@ -1,20 +1,9 @@
-FROM ocaml/opam:latest
-ARG DEBIAN_FRONTEND=noninteractive
-RUN sudo apt install -y libssl-dev pkg-config
-RUN sudo apt install -y libcurl4-gnutls-dev
-RUN sudo apt install -y m4
-RUN sudo apt install -y menhir
-RUN sudo apt install -y ocamlbuild
-RUN opam install -y core
-RUN opam install -y ANSITerminal
-RUN opam install -y ocurl
-RUN opam install -y ssl
-RUN opam install -y ISO8601
-RUN opam install -y ocamlfind
-ENV PATH="/root/.opam/ocaml-base-compiler.4.08.1/bin:${PATH}"
-ENV OPAM_SWITCH_PREFIX='/root/.opam/ocaml-base-compiler.4.08.1'
-ENV CAML_LD_LIBRARY_PATH='/root/.opam/ocaml-base-compiler.4.08.1/lib/stublibs:/root/.opam/ocaml-base-compiler.4.08.1/lib/ocaml/stublibs:/root/.opam/ocaml-base-compiler.4.08.1/lib/ocaml'
-ENV OCAML_TOPLEVEL_PATH='/root/.opam/ocaml-base-compiler.4.08.1/lib/toplevel'
-ENV MANPATH=':/root/.opam/ocaml-base-compiler.4.08.1/man'
-# RUN git clone https://USER:PASSWORD@gitlab.ygalaad.com/Yoann/lispweb.git
-# RUN cd lispweb.ml && make && sudo make install && make test && make test_install
+FROM lispweb/context:latest
+ARG user
+ARG password
+RUN git -c http.sslVerify=false clone https://${user}:${password}@gitlab.ygalaad.com/Yoann/lispweb.git
+WORKDIR lispweb
+RUN eval $(opam env) && make
+RUN sudo make install
+RUN eval $(opam env) && make test
+

@@ -66,11 +66,11 @@ uninstall: uninstall-bin uninstall-lib
 
 build_images: build_lispweb_image
 
-build_ocaml_image:
-	docker build -t ocaml:latest -f docker/DockerfileOCaml .
+build_context_image:
+	docker build -t lispweb/context:latest -f docker/DockerfileContext .
 
-build_lispweb_image:
-	docker build --no-cache -t lispweb:latest -f docker/DockerfileLispweb .
+build_lispweb_image: build_context_image
+	docker build --build-arg user=xxx --build-arg password=xxx --no-cache -t lispweb:latest -f docker/DockerfileLispweb .
 
 repl:
 	./lispwebevaluate.native -lrepl
