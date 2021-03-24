@@ -1,4 +1,5 @@
 open Expr
+open Typecheck
 
 let _ =
   let execname = List.hd (Array.to_list Sys.argv) in
@@ -26,6 +27,9 @@ let _ =
     | [] -> Expr.EBegin ((Load.load_scheme_file "/usr/local/lib/lispweb/lib/load.scm")::(List.rev accu))
   in
   let e = (expr_of_args [from_syntax] sargs) in
-  (*print_endline(string_of_expr e);*)
+  let env_global = ref [] in
+  let ty = type_exp !env_global e in
+  print_endline(">>>\n"^(string_of_expr e)^"\n<<<");
+  print_string "- : "; imprime_type ty; print_string(" = ");
   Eval.eval e [] [] [] []
     (fun v _ _ -> print_endline (string_of_expr v) ; v)

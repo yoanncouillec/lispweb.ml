@@ -76,12 +76,13 @@ repl:
 	./lispwebevaluate.native -lrepl
 
 test: native
-	./lispwebevaluate.native --load test/basic_test.scm
-	./lispwebevaluate.native --load test/string_test.scm
-	./lispwebevaluate.native --load test/list_test.scm
-	./lispwebevaluate.native --load test/load_test.scm
-	./lispwebevaluate.native --load test/file_test.scm
-	./lispwebevaluate.native --load test/channel_test.scm
+	./lispwebevaluate.native --load test/add.scm	
+	#./lispwebevaluate.native --load test/basic_test.scm
+	# ./lispwebevaluate.native --load test/string_test.scm
+	# ./lispwebevaluate.native --load test/list_test.scm
+	# ./lispwebevaluate.native --load test/load_test.scm
+	# ./lispwebevaluate.native --load test/file_test.scm
+	# ./lispwebevaluate.native --load test/channel_test.scm
 	# ./lispwebevaluate.native --load test/library.scm
 	# ./lispwebevaluate.native --from-syntax js --load test/add.js
 	# ./lispwebevaluate.native --from-syntax js --load test/first.js

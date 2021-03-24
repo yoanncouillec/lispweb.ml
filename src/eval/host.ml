@@ -23,6 +23,15 @@ module MParse = struct
   
 end
 
+module MType = struct
+
+  let type_check = function
+    | EList(e::[]) ->
+       Typecheck.type_exp [] e
+    | _ -> failwith "type_check"
+  
+end
+
 module Pervasives = struct
 
   let string_of_int = function
