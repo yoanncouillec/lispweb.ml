@@ -112,7 +112,7 @@ let rec unifie ty1 ty2 =
          done
 
 let rec type_exp env e = 
-  (print_endline (">>>"^(string_of_expr e)^"<<<"));
+  (*(print_endline (">>>"^(string_of_expr e)^"<<<"));*)
   match e with
 
   | EList ([]) -> type_liste (nouvelle_inconnue()), env
