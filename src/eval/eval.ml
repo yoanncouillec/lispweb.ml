@@ -265,6 +265,16 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 
   match e with
 
+  | EImport s ->
+     let prefix = (match Sys.getenv_opt "LISPWEBLIB" with
+                   | Some v -> v
+                   | None -> "./") in
+     let path = prefix^s in
+     (match Parse.expr_of_filename "lisp" path with
+      | Some e2 ->
+         eval e2 genv env denv mem cont
+      | _  -> failwith "eval|EImport|cannot parse")
+    
   | EDot (s1, s2) -> failwith "not implemented"
     
   | EJsToString (e1) ->

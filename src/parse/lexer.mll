@@ -50,10 +50,10 @@ rule token = parse
   | "return-from" { RETURNFROM }  
   | "call/cc" { CALLCC }
   | "hostcall" { HOSTCALL }
+  | "import" { IMPORT } 
   | "eval" { EVAL }
   | "call-with-new-thread" { CALLWITHNEWTHREAD }
   | "get-env" { GET }
-  | "start-with" { STARTWITH }
   | "scheme->js" { SCHEMETOJS }
   | "js->string" { JSTOSTRING }
   | "+" { PLUS }

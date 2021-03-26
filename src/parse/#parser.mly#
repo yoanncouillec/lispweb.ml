@@ -30,12 +30,13 @@
 %token<string> ER_IDENT ER_STRING ER_CHAR ER_IDENT_OPT
 %token LPAREN RPAREN LAMBDA LET LETREC DEFINE LETSTAR EVAL
 %token TRUE FALSE IF COND ELSE EOF BEGIN EQUAL NOT AND
-%token CAR CDR CONS LIST IMPORT
+%token CAR CDR CONS LIST LOAD
 %token CATCH THROW CALLCC BLOCK RETURNFROM HOSTCALL CALLWITHNEWTHREAD
 %token PLUS MINUS MULT DIV LT
 %token CQUOTE CQUASIQUOTE CUNQUOTE
 %token GET SET STARTWITH
 %token SCHEMETOJS JSTOSTRING
+%token STRINGTOEXPR
 %token DOT ARROW
 %left DOT
 
@@ -106,14 +107,14 @@ expression:
   | LPAREN HOSTCALL ER_IDENT RPAREN { Expr.EHostCall ($3,(Expr.EList ([]))) }
   | LPAREN HOSTCALL ER_IDENT expressions RPAREN { Expr.EHostCall ($3,(Expr.EList ($4))) }
   | LPAREN CALLWITHNEWTHREAD expression RPAREN { Expr.ECallWithNewThread ($3) }
-
-  | LPAREN IMPORT ER_STRING RPAREN { Expr.EImport(remove_enclosing_quotes $3) }
-
-  | LPAREN LAMBDA LPAREN RPAREN expressions RPAREN {Expr.ELambda ([],[],Expr.EBegin ($5)) }
+  | LPAREN 
+  | LPAREN LAMBDA LPAREN RPAREN expressions RPAREN {
+Expr.ELambda ([],[],Expr.EBegin ($5)) }
 
   | LPAREN LAMBDA LPAREN parameters=parameters RPAREN body=expressions RPAREN { let (posparams, optparams) = split_params parameters in ELambda (posparams, optparams, EBegin(body)) }
 
-  | LPAREN expression RPAREN {Expr.EApp ($2,[],[]) }
+  | LPAREN expression RPAREN {
+Expr.EApp ($2,[],[]) }
 
   | LPAREN expression args=arguments RPAREN { let (posargs, optargs) = split_args args in Expr.EApp($2, posargs, optargs) }
 

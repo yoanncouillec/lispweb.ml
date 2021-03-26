@@ -72,6 +72,7 @@ and expr =
   | EInetAddr of Unix.inet_addr
   | EInt of int
   | EFloat of float
+  | EImport of string
   | ELambda of (string list) * ((string * expr) list) * expr
   | ELambdaDot of string * expr
   | ELet of ((string * expr) list) * expr * env
@@ -250,7 +251,8 @@ and string_of_expr = function
   | ECallcc (s, e) -> "(call/cc "^s^" "^(string_of_expr e)^")"
   | EHostCall (s, e) ->  "(hostcall " ^ s ^ " " ^ (string_of_expr e) ^ ")"
   | EUnit (_) -> "()"
-  | EClosure (_, e) -> "#CLOSURE"^(string_of_expr e)^")"
+  (*| EClosure (_, e) -> "#CLOSURE"^(string_of_expr e)^")"*)
+  | EClosure (_,e) -> "<fun>"
   | ECont (_) -> "#CONT"
   | EFile (_) -> "#FILE"
   | EInetAddr (_) -> "#INETADDR"
