@@ -1,14 +1,14 @@
-(load "lib/stdout.scm")
-
-(define pair?
-  (lambda (l)
-    (not (equal? (length l) 0))))
+(import "lib/stdout.scm")
 
 (define length
   (lambda (l)
     (if (equal? (list) l)
 	0
 	(+ 1 (length (cdr l))))))
+
+(define pair?
+  (lambda (l)
+    (not (equal? (length l) 0))))
 
 (define index-of
   (lambda (e l)

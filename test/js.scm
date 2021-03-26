@@ -1,3 +1,3 @@
-(load "lib/stdout.scm")
+(import "lib/stdout.scm")
 
 (js->string (scheme->js (print "coucou")))

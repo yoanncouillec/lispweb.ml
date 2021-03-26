@@ -1,5 +1,5 @@
-(load "lib/http.scm")
-(load "lib/html.scm")
+(import "lib/http.scm")
+(import "lib/html.scm")
 
 (print (concat " " (list "Server waiting on" --port)))
 

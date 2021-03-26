@@ -1,4 +1,4 @@
-(load "lib/http.scm")
+(import "lib/http.scm")
 
 (define hello
   (lambda (client)

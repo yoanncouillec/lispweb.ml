@@ -1,6 +1,6 @@
-(load "lib/bytes.scm")
-(load "lib/stdout.scm")
-(load "lib/string.scm")
+(import "lib/bytes.scm")
+(import "lib/stdout.scm")
+(import "lib/string.scm")
 
 (define fstdin
   (lambda ()

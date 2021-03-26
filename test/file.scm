@@ -1,6 +1,6 @@
-(load "lib/string.scm")
-(load "lib/file.scm")
-(load "lib/stdout.scm")
+(import "lib/string.scm")
+(import "lib/file.scm")
+(import "lib/stdout.scm")
 
 (let* ((s (make-empty-string 10))
        (fd (openfile "test/http.txt")))

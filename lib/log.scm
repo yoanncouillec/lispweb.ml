@@ -1,4 +1,4 @@
-(load "lib/time.scm")
+(import "lib/time.scm")
 
 (define log
   (lambda (msg)

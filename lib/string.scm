@@ -1,4 +1,4 @@
-(load "lib/list.scm")
+(import "lib/list.scm")
 
 (define make-string
   (lambda (n c)

@@ -1,1 +1,1 @@
-(load "lib/load.scm")
+(import "lib/load.scm")

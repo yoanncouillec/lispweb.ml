@@ -9,7 +9,7 @@
     let split_params params =
       let rec split_params_aux posparams optparams = function
 	| [] -> (posparams, optparams)
-	| (Expr.Param(s))::rest -> split_params_aux (s::posparams) optparams rest
+	| (Expr.Param(s))::rest -> split_params_aux (posparams@[s]) optparams rest
     	| (Expr.ParamOpt(s,e))::rest -> split_params_aux posparams ((s,e)::optparams) rest
       in
       split_params_aux [] [] params

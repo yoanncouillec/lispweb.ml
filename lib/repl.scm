@@ -1,10 +1,10 @@
-(load "lib/channel.scm")
-(load "lib/stdout.scm")
-(load "lib/load.scm")
+(import "lib/channel.scm")
+(import "lib/stdout.scm")
+(import "lib/load.scm")
 
 (define repl
   (lambda ()
-    (print (val->string (load-string (input-line (stdin)))))
+    (print (val->string (import-string (input-line (stdin)))))
     (repl)))
 
 (catch end-of-file

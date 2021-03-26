@@ -1,3 +1,3 @@
-(load "test/libmath.scm")
+(import "test/libmath.scm")
 
 (inc (dec 0))

@@ -1,4 +1,4 @@
-(load "lib/http.scm")
+(import "lib/http.scm")
 
 (define /home
   (lambda (client)
@@ -7,7 +7,7 @@
      "200" 
      "text/html" 
      (html-page->string
-      (load "test/autocomplete_site/home.scm")))))
+      (import "test/autocomplete_site/home.scm")))))
 
 (define service
   (lambda (client method path queryparams protocol headers)

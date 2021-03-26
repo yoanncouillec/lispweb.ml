@@ -1,7 +1,7 @@
-(load "lib/string.scm")
-(load "lib/stdout.scm")
-(load "lib/list.scm")
-(load "lib/ansiterminal.scm")
+(import "lib/string.scm")
+(import "lib/stdout.scm")
+(import "lib/list.scm")
+(import "lib/ansiterminal.scm")
 
 (define assert-true
   (lambda (value)

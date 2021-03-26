@@ -1,4 +1,4 @@
-(load "lib/assert.scm")
+(import "lib/assert.scm")
 
 (test-all
  "basic"

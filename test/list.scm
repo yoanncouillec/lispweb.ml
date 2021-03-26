@@ -1,6 +1,6 @@
-(load "lib/list.scm")
-(load "lib/stdout.scm")
-(load "lib/assert.scm")
+(import "lib/list.scm")
+(import "lib/stdout.scm")
+(import "lib/assert.scm")
 
 (list
  (assert (length (list)) :expects 0)

@@ -1,5 +1,5 @@
-(load "lib/assert.scm")
-(load "lib/string.scm")
+(import "lib/assert.scm")
+(import "lib/string.scm")
 
 (test-all
  "lib/string.scm"

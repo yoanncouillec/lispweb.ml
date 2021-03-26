@@ -1,7 +1,7 @@
-(load "lib/http.scm")
-(load "lib/html.scm")
-(load "lib/time.scm")
-(load "lib/log.scm")
+(import "lib/http.scm")
+(import "lib/html.scm")
+(import "lib/time.scm")
+(import "lib/log.scm")
 
 (log (concat " " (list "Server waiting on" --port)))
 

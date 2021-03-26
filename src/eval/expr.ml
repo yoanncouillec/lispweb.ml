@@ -171,6 +171,7 @@ and string_of_jsexpr = function
   | JsSequence ([]) -> ""
 
 and string_of_expr = function
+  | EImport s -> "(import "^s^")"
   | EDot (e1, e2) -> "(-> "^(string_of_expr e1)^" "^(string_of_expr e2)^")"
   | EJsToString(e1) -> "(js->string "^(string_of_expr e1)^")"
   | EJsExpr(js_expr) -> string_of_jsexpr js_expr

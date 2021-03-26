@@ -1,4 +1,4 @@
-(load "lib/stdout.scm")
+(import "lib/stdout.scm")
 
 (print --port)
 

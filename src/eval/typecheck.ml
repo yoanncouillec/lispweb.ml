@@ -24,7 +24,6 @@ and type_fleche t1 t2 = Terme("->", [|t1;t2|])
 and type_produit t1 t2 = Terme("*", [|t1;t2|])
 and type_liste t = Terme("list", [|t|])
 
-
 type schema_de_types =
   { parametres: variable_de_type list;
     corps: type_simple }
@@ -32,12 +31,6 @@ type schema_de_types =
 type environnement = (string * schema_de_types) list
 
 let schema_trivial ty = {parametres = [] ; corps = ty}
-
-let type_arithmetique = schema_trivial
-                          (type_fleche (type_produit type_int type_int) type_int)
-
-and type_comparaison = schema_trivial
-                         (type_fleche (type_produit type_int type_int) type_bool)
 
 let niveau_de_liaison = ref 0
 let debut_de_definition () = incr niveau_de_liaison
@@ -119,8 +112,30 @@ let rec unifie ty1 ty2 =
          done
 
 let rec type_exp env e = 
-  (*(print_endline (">>>"^(string_of_expr e)^"<<<"));*)
+  (print_endline (">>>"^(string_of_expr e)^"<<<"));
   match e with
+
+  | EList ([]) -> type_liste (nouvelle_inconnue()), env
+    
+  | EIf (e1, e2, e3) ->
+     let type_e1, env2 = type_exp env e1 in
+     unifie type_bool type_e1;
+     let type_e2, env3 = type_exp env2 e2 in
+     let type_e3, env4 = type_exp env3 e3 in
+     unifie type_e2 type_e3;
+     type_e3, env4
+     
+  | EEqual (e1, e2) ->
+     let type_e1, env' = type_exp env e1 in
+     let type_e2, env'' = type_exp env' e2 in
+     unifie type_e1 type_e2;
+     type_bool, env''
+
+  | ENot e ->
+     let type_e, env' = type_exp env e in
+     unifie type_bool type_e;
+     type_bool, env'
+
   | EImport s ->
      let prefix = (match Sys.getenv_opt "LISPWEBLIB" with
                    | Some v -> v
@@ -129,6 +144,7 @@ let rec type_exp env e =
      (match Parse.expr_of_filename "lisp" path with
       | Some e2 -> type_exp env e2
       | _ -> failwith "type_exp|EImport|cannot parse")
+
   | EVar id ->
      begin
        try
@@ -136,39 +152,71 @@ let rec type_exp env e =
        with Not_found ->
          raise(Erreur("Unbound value "^id))
      end
+
   | EBool b -> type_bool, env
+
   | EInt n -> type_int, env
-  | EUnit () -> type_liste (nouvelle_inconnue()), env
+
+  | EUnit () -> type_nil, env
+
   | ECons(e1, e2) ->
      let type_e1, _ = type_exp env e1 in
      let type_e2, _ = type_exp env e2 in
      unifie (type_liste type_e1) type_e2;
      type_e2, env
+
+  | ECar(e1) ->
+     let type_e1, env2 = type_exp env e1 in
+     let type_element = nouvelle_inconnue() in
+     unifie (type_liste type_element) type_e1;
+     (type_liste type_element) , env
+
+  | ECdr(e1) ->
+     let type_e1, env2 = type_exp env e1 in
+     let type_element = nouvelle_inconnue() in
+     unifie (type_liste type_element) type_e1;
+     (type_liste type_element) , env
+
   | EBegin (e::[]) -> type_exp env e
+
   | EBegin (e::rest) ->
      let type_e, env' = type_exp env e in
      let type_rest, env'' = type_exp env' (EBegin rest) in
      type_rest, env''
+
   | EHostCall (_, _) -> type_nil, env
+
   | EEval e -> type_exp env e
+
   | EApp (fonction, argument::[], []) ->
      let type_fonction, _ = type_exp env fonction in
      let type_argument, _ = type_exp env argument in
      let type_resultat = nouvelle_inconnue() in
      unifie type_fonction (type_fleche type_argument type_resultat);
      type_resultat, env
+
   | ELet((nom,expr)::[], body, _) ->
      let _, env' = type_def env false nom expr in
      type_exp env' body
+
   | EDefine(nom, expr) ->
-     type_def env false nom expr
+     type_def env true nom expr
+
   | EString (_) -> type_string, env
+
   | EBinary(OPlus, e1, e2) | EBinary(OMinus, e1,e2) ->
      let type_e1, _ = type_exp env e1 in
      let type_e2, _ = type_exp env e2 in
      unifie type_e1 type_int;
      unifie type_e2 type_int;
      type_int, env
+
+  | ELambda (id::id'::rest, [], expr) ->
+     let type_argument = nouvelle_inconnue() in
+     let env_etendu = (id, schema_trivial type_argument) :: env in
+     let type_rest, env_rest = type_exp env_etendu (ELambda (id'::rest, [], expr)) in
+     type_fleche type_argument type_rest, env_rest
+
   | ELambda (id::[], [], expr) ->
      let type_argument = nouvelle_inconnue()
      and type_resultat = nouvelle_inconnue() in
@@ -176,6 +224,7 @@ let rec type_exp env e =
      let type_expr, _ = type_exp env_etendu expr in
      unifie type_expr type_resultat;
      type_fleche type_argument type_resultat, env_etendu
+
   | ELambda ([], [], expr) ->
      let type_argument = type_nil
      and type_resultat = nouvelle_inconnue() in

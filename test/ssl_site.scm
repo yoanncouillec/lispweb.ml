@@ -1,10 +1,10 @@
-(load "lib/file.scm")
-(load "lib/http.scm")
-(load "lib/https.scm")
-(load "lib/string.scm")
-(load "lib/html.scm")
-(load "lib/url.scm")
-(load "lib/bootstrap/bootstrap_badge.scm")
+(import "lib/file.scm")
+(import "lib/http.scm")
+(import "lib/https.scm")
+(import "lib/string.scm")
+(import "lib/html.scm")
+(import "lib/url.scm")
+(import "lib/bootstrap/bootstrap_badge.scm")
 
 (define port 8081)
 
@@ -15,7 +15,7 @@
      "200" 
      "text/html" 
      (html-page->string
-      (load "test/http/home_page.scm")))))
+      (import "test/http/home_page.scm")))))
 
 (define /eval
   (lambda (client)
@@ -24,18 +24,18 @@
      "200" 
      "text/html" 
      (html-page->string
-      (load "test/http/eval_page.scm")))))
+      (import "test/http/eval_page.scm")))))
 
 (define /response
   (lambda (client queryparams)
     (let* ((expr (assoc queryparams "expr")))
-      (let* ((v (load-string (url-decode-light expr))))
+      (let* ((v (import-string (url-decode-light expr))))
 	(https-send-response
 	 client
 	 "200"
 	 "text/html"
 	 (html->string
-	  ((load "test/http/response_page.scm") v)))))))
+	  ((import "test/http/response_page.scm") v)))))))
 
 (define /error
   (lambda (client)
@@ -43,7 +43,7 @@
      "404"
      "text/html"
      (html->string
-      (load "test/http/error_page.scm")))))
+      (import "test/http/error_page.scm")))))
 
 (define service
   (lambda (client method path queryparams protocol headers)

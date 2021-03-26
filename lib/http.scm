@@ -1,9 +1,9 @@
-(load "lib/string.scm")
-(load "lib/socket.scm")
-(load "lib/channel.scm")
-(load "lib/stdout.scm")
-(load "lib/ssl.scm")
-(load "lib/file.scm")
+(import "lib/string.scm")
+(import "lib/socket.scm")
+(import "lib/channel.scm")
+(import "lib/stdout.scm")
+(import "lib/ssl.scm")
+(import "lib/file.scm")
 
 (define http-parse-queryparams
   (lambda (queryparams)

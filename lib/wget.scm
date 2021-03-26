@@ -1,10 +1,10 @@
-(load "lib/ssl.scm")
-(load "lib/socket.scm")
-(load "lib/string.scm")
-(load "lib/bytes.scm")
-(load "lib/stdout.scm")
-(load "lib/file.scm")
-(load "lib/http.scm")
+(import "lib/ssl.scm")
+(import "lib/socket.scm")
+(import "lib/string.scm")
+(import "lib/bytes.scm")
+(import "lib/stdout.scm")
+(import "lib/file.scm")
+(import "lib/http.scm")
 
 (define url-get-content
   (lambda (fd read write host path)

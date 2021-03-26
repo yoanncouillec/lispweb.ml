@@ -1,5 +1,5 @@
-(load "lib/load.scm")
-(load-file "lib/hello.scm")
+(import "lib/load.scm")
+(import-file "lib/hello.scm")
 
 (assert
  :expects 12

@@ -1,7 +1,7 @@
 (define lib "lib/list.scm")
 
-(load "lib/assert.scm")
-(load lib)
+(import "lib/assert.scm")
+(import lib)
 
 (test-all lib
  (list

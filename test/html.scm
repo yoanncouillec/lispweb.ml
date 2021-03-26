@@ -1,5 +1,5 @@
-(load "lib/html.scm")
-(load "lib/string.scm")
+(import "lib/html.scm")
+(import "lib/string.scm")
 
 (let* ((page
 	(<html> (list)
