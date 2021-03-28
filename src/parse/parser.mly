@@ -57,7 +57,7 @@ expression:
   | ER_STRING { Expr.EString ((remove_enclosing_quotes $1)) }
   | ER_CHAR { Expr.EChar ((String.get $1 1)) }
   | ER_CHAR_ESC { Expr.EChar ((match $1 with "'\\n'" -> '\n' | "'\\r'" -> '\r' | _ -> failwith "ER_CHAR_ESC")) }
-  | LPAREN CQUOTE expression=expression RPAREN { Expr.EQuote (expression) }
+  | quote { $1 }
   | LPAREN CQUASIQUOTE expression=expression RPAREN { Expr.EQuasiQuote (expression) }
   | LPAREN CUNQUOTE expression=expression RPAREN { Expr.EUnQuote (expression) }
   | TRUE { Expr.EBool (true) }
@@ -70,10 +70,10 @@ expression:
   | LPAREN MULT expression expression RPAREN { Expr.EBinary(Expr.OMult,$3,$4) }
   | LPAREN DIV expression expression RPAREN { Expr.EBinary(Expr.ODiv,$3,$4) }
   | LPAREN LT expression expression RPAREN { Expr.EBinary(Expr.OLt,$3,$4) }
-  | LPAREN CATCH ER_IDENT expression RPAREN { Expr.ECatch($3,$4) }
-  | LPAREN THROW ER_IDENT expression RPAREN { Expr.EThrow($3,$4) }
-  | LPAREN BLOCK ER_IDENT expression RPAREN { Expr.EBlock($3,$4) }
-  | LPAREN RETURNFROM ER_IDENT expression RPAREN { Expr.EReturnFrom($3,$4) }
+  | LPAREN CATCH quote expression RPAREN { Expr.ECatch($3,$4) }
+  | LPAREN THROW quote expression RPAREN { Expr.EThrow($3,$4) }
+  | LPAREN BLOCK quote expression RPAREN { Expr.EBlock($3,$4) }
+  | LPAREN RETURNFROM quote expression RPAREN { Expr.EReturnFrom($3,$4) }
   | LPAREN CALLCC ER_IDENT expression RPAREN { Expr.ECallcc($3,$4) }
   | LPAREN CAR expression RPAREN { Expr.ECar($3) }
   | LPAREN CDR expression  RPAREN { Expr.ECdr($3) }
@@ -116,8 +116,16 @@ expression:
   | LPAREN expression RPAREN {Expr.EApp ($2,[],[]) }
 
   | LPAREN expression args=arguments RPAREN { let (posargs, optargs) = split_args args in Expr.EApp($2, posargs, optargs) }
+  | var { $1 }
 
-  | ER_IDENT { Expr.EVar ($1) }
+var: 
+  | ident=ER_IDENT { Expr.EVar (ident) }
+
+quote:
+  | LPAREN CQUOTE expression=expression RPAREN { Expr.EQuote (expression) }
+
+quote_var:
+  | LPAREN CQUOTE var=var RPAREN { Expr.EQuote (var) }
 
 parameters:
   | parameter { [$1] }

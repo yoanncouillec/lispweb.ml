@@ -18,7 +18,7 @@
 	      0
 	      (begin
 		(+ 1 (index-of e (cdr l))))))
-	(throw not-found (quote not-found)))))
+	(throw (quote not-found) (quote not-found)))))
 
 (define first-slice
   (lambda (c l)

@@ -45,15 +45,15 @@ and expr =
   | EApp of expr * (expr list) * ((string * expr) list)
   | EBegin of expr list
   | EBinary of operator * expr * expr
-  | EBlock of string * expr
+  | EBlock of expr * expr
   | EAnonymousBlock of expr
   | EBool of bool
   | EBytes of Bytes.t
   | ECallWithNewThread of expr
   | ECallcc of string * expr
   | ECar of expr
-  | ECatch of string * expr
-  | EThrow of string * expr
+  | ECatch of expr * expr
+  | EThrow of expr * expr
   | ECdr of expr
   | EChannelIn of in_channel
   | EChannelOut of out_channel
@@ -81,7 +81,7 @@ and expr =
   | EQuasiQuote of expr
   | EQuote of expr
   | ERegexp of Str.regexp
-  | EReturnFrom of string * expr
+  | EReturnFrom of expr * expr
   | EAnonymousReturnFrom of expr
   | ESet of string * expr
   | EGet of expr
@@ -235,14 +235,14 @@ and string_of_expr = function
 
   | EBegin (es) -> 
      "(begin"^(List.fold_left (fun acc x -> acc^" "^(string_of_expr x)) "" es)^")"
-  | ECatch (s, e) ->
-     "(catch ("^s^") "^(string_of_expr e)^")"
-  | EThrow (s, e) ->
-     "(throw ("^s^") "^(string_of_expr e)^")"
-  | EBlock (s, e) ->
-     "(block ("^s^") "^(string_of_expr e)^")"
-  | EReturnFrom (s, e) ->
-     "(return-from ("^s^") "^(string_of_expr e)^")"
+  | ECatch (e1, e2) ->
+     "(catch ("^(string_of_expr e1)^") "^(string_of_expr e2)^")"
+  | EThrow (e1, e2) ->
+     "(throw ("^(string_of_expr e1)^") "^(string_of_expr e2)^")"
+  | EBlock (e1, e2) ->
+     "(block ("^(string_of_expr e1)^") "^(string_of_expr e2)^")"
+  | EReturnFrom (e1, e2) ->
+     "(return-from ("^(string_of_expr e1)^") "^(string_of_expr e2)^")"
   | EEqual (e1, e2) ->
      "(equal? "^(string_of_expr e1)^" "^(string_of_expr e2)^")"
   | EList (es) -> "(list"^(List.fold_left (fun acc e -> acc^" "^(string_of_expr e)) "" es)^")"

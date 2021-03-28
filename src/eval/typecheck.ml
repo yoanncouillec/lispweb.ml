@@ -23,6 +23,7 @@ and type_nil = Terme("unit", [||])
 and type_fleche t1 t2 = Terme("->", [|t1;t2|])
 and type_produit t1 t2 = Terme("*", [|t1;t2|])
 and type_liste t = Terme("list", [|t|])
+and type_quote = Terme("quote", [||])
 
 type schema_de_types =
   { parametres: variable_de_type list;
@@ -115,6 +116,13 @@ let rec type_exp env e =
   (*(print_endline (">>>"^(string_of_expr e)^"<<<"));*)
   match e with
 
+  | EQuote e1 ->
+     type_quote, env
+    
+  | EThrow (s, e1) ->
+     let _, env' = type_exp env e1 in
+     type_nil, env'
+    
   | EList ([]) -> type_liste (nouvelle_inconnue()), env
     
   | EIf (e1, e2, e3) ->
@@ -188,13 +196,6 @@ let rec type_exp env e =
 
   | EEval e -> type_exp env e
 
-  | EApp (fonction, argument::[], []) ->
-     let type_fonction, _ = type_exp env fonction in
-     let type_argument, _ = type_exp env argument in
-     let type_resultat = nouvelle_inconnue() in
-     unifie type_fonction (type_fleche type_argument type_resultat);
-     type_resultat, env
-
   | ELet((nom,expr)::[], body, _) ->
      let _, env' = type_def env false nom expr in
      type_exp env' body
@@ -231,6 +232,21 @@ let rec type_exp env e =
      let type_expr, _ = type_exp env expr in
      unifie type_expr type_resultat;
      type_fleche type_argument type_resultat, env
+
+  | EApp (fonction, argument1::argument2::[], []) ->
+     let type_fonction, _ = type_exp env fonction in
+     let type_argument, _ = type_exp env argument1 in
+     let type_resultat = nouvelle_inconnue() in
+     unifie type_fonction (type_fleche type_argument type_resultat);
+     type_resultat, env
+
+  | EApp (fonction, argument::[], []) ->
+     let type_fonction, _ = type_exp env fonction in
+     let type_argument, _ = type_exp env argument in
+     let type_resultat = nouvelle_inconnue() in
+     unifie type_fonction (type_fleche type_argument type_resultat);
+     type_resultat, env
+
   | _ as e -> failwith ("type_exp|not implemented|"^(string_of_expr e))
      
      

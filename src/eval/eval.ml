@@ -497,11 +497,11 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
      eval expression genv env denv mem 
        (fun vs genv' mem' -> eval (EBegin (rest)) genv' env denv mem' cont)
 
-  | ECatch (s, expression) -> 
+  | ECatch (EQuote(EVar(s)), expression) -> 
      let addr = ref (ECont (cont)) in
      eval expression genv env (extend_env (Some s) addr denv) (extend_mem addr !addr mem) cont
 
-  | EThrow (s, expression) ->
+  | EThrow (EQuote(EVar(s)), expression) ->
      eval expression genv env denv mem
        (fun v genv' mem' -> 
 	 (match get_env s denv with
@@ -511,11 +511,11 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 	      | _ -> failwith "Not a continuation")
 	  | EnvNotFound id -> failwith ("eval EThrow: binding not found: "^id)))
 
-  | EBlock (s, expression) -> 
+  | EBlock (EQuote(EVar(s)), expression) -> 
      let addr = ref (ECont (cont)) in
      eval expression genv (extend_env (Some s) addr env) denv (extend_mem addr !addr mem) cont
 
-  | EReturnFrom (s, expression) ->
+  | EReturnFrom (EQuote(EVar(s)), expression) ->
      eval expression genv env denv mem
        (fun v genv' mem' -> 
 	 (match get_env s env with
