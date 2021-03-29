@@ -236,9 +236,9 @@ and string_of_expr = function
   | EBegin (es) -> 
      "(begin"^(List.fold_left (fun acc x -> acc^" "^(string_of_expr x)) "" es)^")"
   | ECatch (e1, e2) ->
-     "(catch ("^(string_of_expr e1)^") "^(string_of_expr e2)^")"
+     "(catch "^(string_of_expr e1)^" "^(string_of_expr e2)^")"
   | EThrow (e1, e2) ->
-     "(throw ("^(string_of_expr e1)^") "^(string_of_expr e2)^")"
+     "(throw "^(string_of_expr e1)^" "^(string_of_expr e2)^")"
   | EBlock (e1, e2) ->
      "(block ("^(string_of_expr e1)^") "^(string_of_expr e2)^")"
   | EReturnFrom (e1, e2) ->

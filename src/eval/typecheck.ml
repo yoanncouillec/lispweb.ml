@@ -38,12 +38,56 @@ let debut_de_definition () = incr niveau_de_liaison
 and fin_de_definition () = decr niveau_de_liaison
 let nouvelle_inconnue () = TVariable{niveau = !niveau_de_liaison; valeur = Inconnue}
 
+let noms_des_variables = ref ([] : (variable_de_type * string) list)
+and compteur_de_variables = ref 0
+
+let imprime_var var =
+  "'"^
+  try
+    List.assq var !noms_des_variables
+  with Not_found ->
+        let nom =
+          String.make 1
+            (char_of_int(int_of_char 'a' + !compteur_de_variables)) in
+        incr compteur_de_variables;
+        noms_des_variables := (var, nom) :: !noms_des_variables;
+        nom
 let rec valeur_de = function
   | TVariable({valeur = Connue ty1} as var) ->
      let valeur_de_ty1 = valeur_de ty1 in
      var.valeur <- Connue valeur_de_ty1;
      valeur_de_ty1
   | ty -> ty
+
+let rec string_of_type ty =
+  (match valeur_de ty with
+   | TVariable var -> imprime_var var
+   | Terme(constructeur, arguments) ->
+      match Array.length arguments with
+      | 0 -> constructeur
+      | 1 -> (string_of_type arguments.(0))^" "^constructeur
+      | 2 -> "("^(string_of_type arguments.(0))^" "^constructeur^" "^(string_of_type arguments.(1))^")"
+      | _ -> failwith "not implemented")
+
+let imprime_type ty =
+  noms_des_variables := [];
+  compteur_de_variables := 0;
+  string_of_type ty
+
+let imprime_schema schema =
+  noms_des_variables := [];
+  compteur_de_variables := 0;
+  if schema.parametres <> [] then
+    begin
+      "pour tout "^
+        (List.fold_left
+           (fun accu var -> accu^" "^(imprime_var var))
+           ""
+           schema.parametres)^
+          ", "
+    end
+  else "";
+  string_of_type schema.corps
 
 let generalisation ty =
   let parametres = ref [] in
@@ -91,7 +135,7 @@ let rec rectifie_niveaux niveau_max ty =
     | Terme(constructeur, arguments) ->
        Array.iter (rectifie_niveaux niveau_max) arguments
 
-let rec unifie ty1 ty2 =
+let rec unifie ty1 ty2 e2 =
   let valeur1 = valeur_de ty1
   and valeur2 = valeur_de ty2 in
   if valeur1 == valeur2 then () else
@@ -106,10 +150,11 @@ let rec unifie ty1 ty2 =
        var.valeur <- Connue ty
     | Terme (constr1, arguments1), Terme(constr2, arguments2) ->
        if constr1 <> constr2 then
-         raise (Conflit(valeur1, valeur2))
+         (failwith ("expression "^(Expr.string_of_expr e2)^"has type " ^(imprime_type ty2)^
+                      " but an expression was expected of type "^(imprime_type ty1)))
        else
          for i = 0 to (Array.length arguments1) - 1 do
-           unifie arguments1.(i) arguments2.(i)
+           unifie arguments1.(i) arguments2.(i) e2
          done
 
 let rec type_exp env e = 
@@ -121,27 +166,28 @@ let rec type_exp env e =
     
   | EThrow (s, e1) ->
      let _, env' = type_exp env e1 in
-     type_nil, env'
+     let type_throw = nouvelle_inconnue() in
+     type_throw, env'
     
   | EList ([]) -> type_liste (nouvelle_inconnue()), env
     
   | EIf (e1, e2, e3) ->
      let type_e1, env2 = type_exp env e1 in
-     unifie type_bool type_e1;
+     unifie type_bool type_e1 e1;
      let type_e2, env3 = type_exp env2 e2 in
      let type_e3, env4 = type_exp env3 e3 in
-     unifie type_e2 type_e3;
+     unifie type_e2 type_e3 e3;
      type_e3, env4
      
   | EEqual (e1, e2) ->
      let type_e1, env' = type_exp env e1 in
      let type_e2, env'' = type_exp env' e2 in
-     unifie type_e1 type_e2;
+     unifie type_e1 type_e2 e2;
      type_bool, env''
 
   | ENot e ->
      let type_e, env' = type_exp env e in
-     unifie type_bool type_e;
+     unifie type_bool type_e e;
      type_bool, env'
 
   | EImport s ->
@@ -170,19 +216,19 @@ let rec type_exp env e =
   | ECons(e1, e2) ->
      let type_e1, _ = type_exp env e1 in
      let type_e2, _ = type_exp env e2 in
-     unifie (type_liste type_e1) type_e2;
+     unifie (type_liste type_e1) type_e2 e2;
      type_e2, env
 
   | ECar(e1) ->
      let type_e1, env2 = type_exp env e1 in
      let type_element = nouvelle_inconnue() in
-     unifie (type_liste type_element) type_e1;
+     unifie (type_liste type_element) type_e1 e1;
      (type_liste type_element) , env
 
   | ECdr(e1) ->
      let type_e1, env2 = type_exp env e1 in
      let type_element = nouvelle_inconnue() in
-     unifie (type_liste type_element) type_e1;
+     unifie (type_liste type_element) type_e1 e1;
      (type_liste type_element) , env
 
   | EBegin (e::[]) -> type_exp env e
@@ -208,8 +254,8 @@ let rec type_exp env e =
   | EBinary(OPlus, e1, e2) | EBinary(OMinus, e1,e2) ->
      let type_e1, _ = type_exp env e1 in
      let type_e2, _ = type_exp env e2 in
-     unifie type_e1 type_int;
-     unifie type_e2 type_int;
+     unifie type_int type_e1 e1;
+     unifie type_int type_e2 e2;
      type_int, env
 
   | ELambda (id::id'::rest, [], expr) ->
@@ -223,31 +269,24 @@ let rec type_exp env e =
      and type_resultat = nouvelle_inconnue() in
      let env_etendu = (id, schema_trivial type_argument) :: env in
      let type_expr, _ = type_exp env_etendu expr in
-     unifie type_expr type_resultat;
+     unifie type_resultat type_expr expr;
      type_fleche type_argument type_resultat, env_etendu
 
   | ELambda ([], [], expr) ->
      let type_argument = type_nil
      and type_resultat = nouvelle_inconnue() in
      let type_expr, _ = type_exp env expr in
-     unifie type_expr type_resultat;
+     unifie type_resultat type_expr expr;
      type_fleche type_argument type_resultat, env
-
-  | EApp (fonction, argument1::argument2::[], []) ->
-     let type_fonction, _ = type_exp env fonction in
-     let type_argument, _ = type_exp env argument1 in
-     let type_resultat = nouvelle_inconnue() in
-     unifie type_fonction (type_fleche type_argument type_resultat);
-     type_resultat, env
 
   | EApp (fonction, argument::[], []) ->
      let type_fonction, _ = type_exp env fonction in
      let type_argument, _ = type_exp env argument in
      let type_resultat = nouvelle_inconnue() in
-     unifie type_fonction (type_fleche type_argument type_resultat);
+     unifie type_fonction (type_fleche type_argument type_resultat) fonction;
      type_resultat, env
 
-  | _ as e -> failwith ("type_exp|not implemented|"^(string_of_expr e))
+  | _ as e -> failwith ("ERROR|type_exp|not implemented|"^(string_of_expr e))
      
      
 and type_def env recursive nom expr =
@@ -260,52 +299,9 @@ and type_def env recursive nom expr =
        let type_expr, _ =
          type_exp ((nom, schema_trivial type_provisoire) :: env)
            expr in
-       unifie type_expr type_provisoire;
+       unifie type_provisoire type_expr expr;
        type_expr, env in
   fin_de_definition();
   type_expr, (nom, generalisation type_expr) :: env
 
-let noms_des_variables = ref ([] : (variable_de_type * string) list)
-and compteur_de_variables = ref 0
 
-let imprime_var var =
-  "'"^
-  try
-    List.assq var !noms_des_variables
-  with Not_found ->
-        let nom =
-          String.make 1
-            (char_of_int(int_of_char 'a' + !compteur_de_variables)) in
-        incr compteur_de_variables;
-        noms_des_variables := (var, nom) :: !noms_des_variables;
-        nom
-
-let rec imprime ty =
-  (match valeur_de ty with
-   | TVariable var -> imprime_var var
-   | Terme(constructeur, arguments) ->
-      match Array.length arguments with
-      | 0 -> constructeur
-      | 1 -> (imprime arguments.(0))^" "^constructeur
-      | 2 -> "("^(imprime arguments.(0))^" "^constructeur^" "^(imprime arguments.(1))^")"
-      | _ -> failwith "not implemented")
-
-let imprime_type ty =
-  noms_des_variables := [];
-  compteur_de_variables := 0;
-  imprime ty
-
-let imprime_schema schema =
-  noms_des_variables := [];
-  compteur_de_variables := 0;
-  if schema.parametres <> [] then
-    begin
-      "pour tout "^
-        (List.fold_left
-           (fun accu var -> accu^" "^(imprime_var var))
-           ""
-           schema.parametres)^
-          ", "
-    end
-  else "";
-  imprime schema.corps
