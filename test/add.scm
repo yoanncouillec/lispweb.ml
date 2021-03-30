@@ -1,1 +1,1 @@
-(import "lib/list.scm")
+(cons 12 (list))

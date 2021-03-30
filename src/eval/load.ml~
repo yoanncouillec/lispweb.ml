@@ -1,2 +1,0 @@
-let load_file f = 
-  expr_of_args (EEval (EHostCall ("Parse.parse_scheme", EList([EString (Core.In_channel.read_all f)])))::accu) rest

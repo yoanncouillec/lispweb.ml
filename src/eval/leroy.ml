@@ -1,158 +1,12 @@
 open Expr
 
 (***************)
-(* 2nd attempt *)
-(***************)
-
-type ty =
-  | TyVar of string
-  | TyBool
-  | TyInt
-  | TyString
-  | TyNil
-  | TyArrow of ty * ty
-  | TyPair of ty * ty
-  | TyList of ty
-  | TyQuote
-
-let  rec occurs (x : string) (t : ty) : bool =
-  match t with
-  | TyVar y -> x = y
-  | TyArrow (ty1, ty2) -> (occurs x ty1) || (occurs x ty2)
-  | TyPair (ty1, ty2) -> (occurs x ty1) || (occurs x ty2)
-  | TyList (ty1) -> (occurs x ty1)
-  | _ -> false
-
-let rec substitute (s : ty) (x : string) (t : ty) : ty =
-  match t with
-  | TyVar y -> if x = y then s else t
-  | TyArrow (ty1, ty2) -> TyArrow(substitute s x ty1, substitute s x ty2)
-  | TyPair (ty1, ty2) -> TyArrow(substitute s x ty1, substitute s x ty2)
-  | TyList (ty1) -> TyList(substitute s x ty1)
-  | _ -> t
-
-let rec unify (s : ty) (t : ty) =
-  match (s, t) with
-  | (TyVar x, TyVar y) -> if x = y then [] else [(x, t)]
-  | (TyVar x, _) -> if occurs x t then failwith "not unifiable: circularity" else [(x, t)]
-  | (_, TyVar y) -> if occurs y s then failwith "not unifiable: circularity" else [(y, s)]
-  | (TyArrow (ty1, ty2), TyArrow(ty3, ty4)) -> (unify ty1 ty3) @ (unify ty2 ty4)
-  | (TyPair (ty1, ty2), TyPair(ty3, ty4)) -> (unify ty1 ty3) @ (unify ty2 ty4)
-  | (TyList (ty1), TyList(ty2)) -> unify ty1 ty2
-  | TyBool, TyBool -> []
-  | TyInt, TyInt -> []
-  | TyString, TyString -> []
-  | TyNil, TyNil -> []
-  | TyQuote, TyQuote -> []
-  | _ -> failwith "not unifiable: head symbol conflict"
-
-let rec type_of_expr env e =
-
-  match e with
-  | EInt _ -> TyInt, env
-
-(***************)
-(* 3th attempt *)
-(***************)
-
-type typ = 
-| TInt
-| TVar of string 
-| TArrow of typ * typ
-| TList of typ
-
-type env = (string * typ) list
-
-let rec string_of_typ = function
-  | TInt -> "int"
-  | TVar x -> x
-  | TArrow (x,y) -> "(" ^ (string_of_typ x) ^ " -> " ^ (string_of_typ y) ^ ")"
-  | TList ty1 -> (string_of_typ ty1)^" list"
-
-let rec substitute (env : env) (ty : typ) : typ = match ty with
-  | TInt -> TInt
-  | TVar x  -> (try List.assoc x env with Not_found -> TVar x)
-  | TArrow(ty1, ty2) -> TArrow (substitute env ty1, substitute env ty2)
-  | TList(ty1) -> TList(substitute env ty1)
-  | _ -> failwith ("ERROR|substitute|not implemented|"^(string_of_typ ty))
-  
-let compsubst (env1 : env) (env2 : env) = 
-  (List.map (function (x, ty1) -> (x, substitute env1 ty1)) env2) @ env1;;
-
-let rec occur (x : string) (ty : typ) : bool = match ty with
-  | TInt -> false
-  | TVar y -> y = x
-  | TArrow(ty1, ty2) -> (occur x ty1) || (occur x ty2)
-  | TList (ty1) -> occur x ty1
-
-let rec unify (ty1 : typ) (ty2 : typ) : env = match ty1, ty2 with
-
-  | (TVar x, TVar y) -> if x = y then [] else [(x, ty2)]
-  | (TVar x, _) -> if occur x ty2 then failwith "unify: circularity" else [(x, ty2)]
-  | (_, TVar y) -> if occur y ty1 then failwith "unify: circularity" else [(y, ty1)]
-
-  | TArrow (ty1, ty2), TArrow (ty3, ty4) -> 
-     let env = unify ty1 ty3 in
-     compsubst (unify (substitute env ty2) (substitute env ty4)) env
-
-  | TList (ty1), TList (ty2) ->
-     let env = unify ty1 ty2 in
-     env
-
-  | _ -> failwith "unify: error "
-
-let c = ref 0
-let reset () = c := 0
-let gensym s = incr c ; s ^ (string_of_int !c)
-let gensym s = incr c ; "'"^(String.make 1 (char_of_int(int_of_char 'a' + !c - 1)))
-let new_variable () = TVar(incr c ; "'"^(String.make 1 (char_of_int(int_of_char 'a' + !c - 1))))
-
-let rec type_of (env : env) (e : expr) : (typ * env) =
-  print_endline("type_of: "^(string_of_expr e));
-  match e with
-    
-  | EInt n -> TInt, env
-
-  | EVar x -> List.assoc x env , env
-
-  | ELambda (x::[], _, body) -> 
-     let type_argument = new_variable() in
-     let env_etendu = (x, type_argument)::env in
-     let type_body, env_body = type_of env_etendu body in
-     TArrow (type_argument, type_body), env_body
-
-  | EApp(fonction, argument::[], _) ->
-     let type_argument, env1 = type_of env argument in
-     let type_fonction, env2 = type_of (List.map (function (x, ty_x) -> (x, substitute env1 ty_x)) env) fonction in
-     let type_resultat = new_variable() in 
-     let env3 = unify (substitute env2 type_fonction) (TArrow (type_argument, type_resultat))  in
-     type_resultat, compsubst env3 (compsubst env2 env1)
-
-  | EBegin (e::[]) -> type_of env e
-
-  | ECons (e1, e2) ->
-     let type_e1, env1 = type_of env e1 in
-     let type_e2, env2 = type_of (List.map (function (x, ty_x) -> (x, substitute env1 ty_x)) env) e2 in
-     let env3 = unify (substitute env2 (TList type_e1)) type_e2 in
-     type_e2, env3
-
-  | ECar(e1) ->
-     let type_e1, env1 = type_of env e1 in
-     let type_element = new_variable() in
-     let env2 = unify (TList type_element) type_e1 in
-     type_element, env2
-
-  | EList([]) -> TList (new_variable()), env
-
-  | _  -> failwith ("not implemented: "^(string_of_expr e))
-
-(***************)
 (* 1st attempt *)
 (***************)
 
-type type_simple =
+type ty =
   | TVariable of variable_de_type
-  | Terme of string * type_simple array
+  | Terme of string * ty array
 
 and variable_de_type =
   { mutable niveau: int;
@@ -160,11 +14,11 @@ and variable_de_type =
 
 and valeur_dune_variable =
   | Inconnue
-  | Connue of type_simple
+  | Connue of ty
 
 exception Erreur of string
-exception Conflit of type_simple * type_simple
-exception Circularite of type_simple * type_simple
+exception Conflit of ty * ty
+exception Circularite of ty * ty
 
 let type_int = Terme("int", [||])
 and type_bool = Terme("bool", [||])
@@ -177,7 +31,7 @@ and type_quote = Terme("quote", [||])
 
 type schema_de_types =
   { parametres: variable_de_type list;
-    corps: type_simple }
+    corps: ty }
 
 type environnement = (string * schema_de_types) list
 
@@ -220,7 +74,7 @@ let rec string_of_type ty =
       | 2 -> "("^(string_of_type arguments.(0))^" "^constructeur^" "^(string_of_type arguments.(1))^")"
       | _ -> failwith "not implemented")
 
-let imprime_type ty =
+let string_of_ty (ty : ty) =
   noms_des_variables := [];
   compteur_de_variables := 0;
   string_of_type ty
@@ -301,8 +155,8 @@ let rec unifie ty1 ty2 e2 =
        var.valeur <- Connue ty
     | Terme (constr1, arguments1), Terme(constr2, arguments2) ->
        if constr1 <> constr2 then
-         (failwith ("expression "^(Expr.string_of_expr e2)^"has type " ^(imprime_type ty2)^
-                      " but an expression was expected of type "^(imprime_type ty1)))
+         (failwith ("expression "^(Expr.string_of_expr e2)^"has type " ^(string_of_ty ty2)^
+                      " but an expression was expected of type "^(string_of_ty ty1)))
        else
          for i = 0 to (Array.length arguments1) - 1 do
            unifie arguments1.(i) arguments2.(i) e2
@@ -462,4 +316,15 @@ and type_def env recursive nom expr =
   fin_de_definition();
   type_expr, (nom, generalisation type_expr) :: env
 
-
+let type_of (e : expr) : ty = 
+  let env_global = ref [] in
+  let ty, _ =
+    try
+      type_exp !env_global e
+    with
+    | Conflit (ty1, ty2) ->
+       print_string ("expression has type " ^(string_of_ty ty1)^
+         " but an expression was expected of type "^(string_of_ty ty2));
+       type_nil, !env_global
+  in
+  ty

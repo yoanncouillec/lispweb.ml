@@ -1,5 +1,5 @@
 open Expr
-open Typecheck
+open Cornell
 
 let _ =
   let execname = List.hd (Array.to_list Sys.argv) in
@@ -32,17 +32,8 @@ let _ =
   in
   (*let e = (expr_of_args [from_syntax] sargs) in*)
   let e = (expr_of_args [] sargs) in
-  let env_global = ref [] in
-  let ty, _ =
-    try
-      type_exp !env_global e
-    with
-    | Conflit (ty1, ty2) ->
-       print_string ("expression has type " ^(imprime_type ty1)^
-         " but an expression was expected of type "^(imprime_type ty2));
-       type_nil, !env_global
-  in
+  let ty = type_of e in
   print_endline(">>>\n"^(string_of_expr e)^"\n<<<");
-  print_string "- : "; print_string (imprime_type ty); print_string(" = ");
+  print_string "- : "; print_string (string_of_ty ty); print_string(" = ");
   Eval.eval e [] [] [] []
     (fun v _ _ -> print_endline (string_of_expr v) ; v)
