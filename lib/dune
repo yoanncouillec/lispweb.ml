@@ -1,0 +1,7 @@
+(library
+ (name lispw)
+ (libraries ANSITerminal ssl threads.posix core ISO8601 str))
+(menhir
+ (modules parser parserJs))
+(ocamllex lexer lexerJs)
+ 

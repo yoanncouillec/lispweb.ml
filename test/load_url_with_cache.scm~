@@ -1,5 +1,0 @@
-(import "lib/load.scm")
-
-(import-url-with-cache "https" "raw.githubusercontent.com" 443 "/yoanncouillec/lispweb.ml/master/" "lib/hello.scm")
-
-(hello)
