@@ -19,7 +19,9 @@ let test_not () = Alcotest.(check expr_testable) "not" (Eval.eval (Expr.ENot (Ex
 let test_if () = Alcotest.(check expr_testable) "if" (Eval.eval (Expr.EIf (Expr.EBool true, Expr.EInt 1, Expr.EInt 2)) [] [] [] [] (fun v _ _ -> v)) (Expr.EInt 1)
 let test_if_false () = Alcotest.(check expr_testable) "if" (Eval.eval (Expr.EIf (Expr.EBool false, Expr.EInt 1, Expr.EInt 2)) [] [] [] [] (fun v _ _ -> v)) (Expr.EInt 2)
 let test_parse_let () = Alcotest.(check expr_testable) "Parse let" (Eval.eval (parse "(let (x 12) x)") [] [] [] [] (fun v _ _ -> v)) (Expr.EInt 12)
-                  
+let test_parse_let_nested () = Alcotest.(check expr_testable) "Parse let" (Eval.eval (parse "(let (x 12) (let (y 13) (+ x y)))") [] [] [] [] (fun v _ _ -> v)) (Expr.EInt 25)
+let test_parse_app_lambda () = Alcotest.(check expr_testable) "App Lambda" (Eval.eval (parse "((lambda (x) x) 12)") [] [] [] [] (fun v _ _ -> v)) (Expr.EInt 12)                             
+                             
 let () =
   print_endline (Unix.getcwd());
   Alcotest.run "Test Lisp Web" [
@@ -33,8 +35,8 @@ let () =
         Alcotest.test_case "Not" `Quick test_not;
         Alcotest.test_case "If" `Quick test_if;
         Alcotest.test_case "If False" `Quick test_if_false;
-        Alcotest.test_case "Parse Let" `Quick test_parse_let;        
+        Alcotest.test_case "Parse Let" `Quick test_parse_let;
+        Alcotest.test_case "Parse Let Nested" `Quick test_parse_let_nested;
+        Alcotest.test_case "Parse App Lambda" `Quick test_parse_app_lambda;                        
       ];
     ]
-
-
