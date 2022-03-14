@@ -1,3 +1,8 @@
 (test
  (name test_lispw)
  (libraries lispw alcotest))
+(rule
+ (target archive.tar.gz)
+ (deps
+  (:scm (glob_files scm/*.scm)))
+ (action (run %{bin:tar} -czvf %{target} %{deps})))

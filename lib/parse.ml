@@ -40,3 +40,8 @@ let expr_of_filename language filename : Expr.expr option =
   lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
   parse_with_error language lexbuf
 
+let expr_of_filename_no_opt filename : Expr.expr =
+  match expr_of_filename "lisp" filename with
+  | None -> failwith "cannot parse"
+  | Some e -> e
+

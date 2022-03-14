@@ -629,5 +629,7 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
   | EUnit (a) ->  cont (EUnit (a)) genv mem
   | _ -> failwith "not implemented"
 
-                  (*let%test _ = eval (EInt(12)) [] [] [] [] (fun v _ _ -> v) = EInt 12*)
+let%test _ = eval (EInt(12)) [] [] [] [] (fun v _ _ -> v) = EInt 12
+
+
                    

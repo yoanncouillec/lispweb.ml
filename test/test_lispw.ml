@@ -20,8 +20,15 @@ let test_if () = Alcotest.(check expr_testable) "if" (Eval.eval (Expr.EIf (Expr.
 let test_if_false () = Alcotest.(check expr_testable) "if" (Eval.eval (Expr.EIf (Expr.EBool false, Expr.EInt 1, Expr.EInt 2)) [] [] [] [] (fun v _ _ -> v)) (Expr.EInt 2)
 let test_parse_let () = Alcotest.(check expr_testable) "Parse let" (Eval.eval (parse "(let (x 12) x)") [] [] [] [] (fun v _ _ -> v)) (Expr.EInt 12)
 let test_parse_let_nested () = Alcotest.(check expr_testable) "Parse let" (Eval.eval (parse "(let (x 12) (let (y 13) (+ x y)))") [] [] [] [] (fun v _ _ -> v)) (Expr.EInt 25)
-let test_parse_app_lambda () = Alcotest.(check expr_testable) "App Lambda" (Eval.eval (parse "((lambda (x) x) 12)") [] [] [] [] (fun v _ _ -> v)) (Expr.EInt 12)                             
-                             
+let test_parse_app_lambda () = Alcotest.(check expr_testable) "App Lambda" (Eval.eval (parse "((lambda (x) x) 12)") [] [] [] [] (fun v _ _ -> v)) (Expr.EInt 12)
+let test_parse_begin () = Alcotest.(check expr_testable) "Begin" (Eval.eval (parse "(begin 1 2 3)") [] [] [] [] (fun v _ _ -> v)) (Expr.EInt 3)
+let test_parse_file () = Alcotest.(check expr_testable) "Callcc" (Eval.eval (Parse.expr_of_filename_no_opt "scm/callcc.scm") [] [] [] [] (fun v _ _ -> v)) (Expr.EBool true)
+(* TODO: reverse expected/eval *)
+(* TODO: stop la truandrie *)
+let test_parse_cons () = Alcotest.(check expr_testable) "Cons" (parse "(list 12)") (Eval.eval (Parse.expr_of_filename_no_opt "scm/add.scm") [] [] [] [] (fun v _ _ -> EBegin [v]))
+let test_parse_list () = Alcotest.(check expr_testable) "List" (parse "(list 1 2 3 4 5)") (Eval.eval (Parse.expr_of_filename_no_opt "scm/list.scm") [] [] [] [] (fun v _ _ -> EBegin [v]))
+let test_parse_car () = Alcotest.(check expr_testable) "Car" (parse "1") (Eval.eval (Parse.expr_of_filename_no_opt "scm/car.scm") [] [] [] [] (fun v _ _ -> EBegin [v]))                                               
+                        
 let () =
   print_endline (Unix.getcwd());
   Alcotest.run "Test Lisp Web" [
@@ -37,6 +44,11 @@ let () =
         Alcotest.test_case "If False" `Quick test_if_false;
         Alcotest.test_case "Parse Let" `Quick test_parse_let;
         Alcotest.test_case "Parse Let Nested" `Quick test_parse_let_nested;
-        Alcotest.test_case "Parse App Lambda" `Quick test_parse_app_lambda;                        
+        Alcotest.test_case "Parse App Lambda" `Quick test_parse_app_lambda;
+        Alcotest.test_case "Parse Begin" `Quick test_parse_begin;
+        Alcotest.test_case "Callcc" `Quick test_parse_file;
+        Alcotest.test_case "Cons" `Quick test_parse_cons;
+        Alcotest.test_case "List" `Quick test_parse_list;
+        Alcotest.test_case "Car" `Quick test_parse_car;                        
       ];
     ]

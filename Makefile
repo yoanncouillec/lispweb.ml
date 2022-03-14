@@ -1,7 +1,7 @@
 build:
 	dune build
 
-runtest:
+runtest: clean build
 	dune runtest
 
 clean:

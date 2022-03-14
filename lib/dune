@@ -1,7 +1,8 @@
 (library
  (name lispw)
+ (inline_tests)
+ (preprocess (pps ppx_inline_test))
  (libraries ANSITerminal ssl threads.posix core ISO8601 str))
 (menhir
  (modules parser parserJs))
 (ocamllex lexer lexerJs)
- 
