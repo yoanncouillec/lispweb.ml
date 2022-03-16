@@ -23,7 +23,7 @@
 %token<int> ER_INT
 %token<float> ER_FLOAT
 %token<string> ER_CHAR_ESC ER_QUOTE
-%token<string> ER_IDENT ER_STRING ER_CHAR ER_IDENT_OPT
+%token<string> ER_IDENT ER_STRING ER_CHAR ER_IDENT_OPT ER_SIMPLE_IDENT
 %token LPAREN RPAREN LAMBDA LET LETREC DEFINE LETSTAR EVAL
 %token TRUE FALSE IF COND ELSE EOF BEGIN EQUAL NOT AND
 %token CAR CDR CONS LIST IMPORT
@@ -104,6 +104,7 @@ expression:
   | LPAREN CALLWITHNEWTHREAD expression RPAREN { Expr.ECallWithNewThread ($3) }
 
   | LPAREN IMPORT ER_STRING RPAREN { Expr.EImport(remove_enclosing_quotes $3) }
+  | LPAREN IMPORT ER_SIMPLE_IDENT RPAREN { Expr.EImport($3^".scm") }
 
   | LPAREN LAMBDA LPAREN RPAREN expressions RPAREN {Expr.ELambda ([],[],Expr.EBegin ($5)) }
 

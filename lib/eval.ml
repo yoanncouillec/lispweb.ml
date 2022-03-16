@@ -272,7 +272,7 @@ and eval (e:expr) (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
   | EImport s ->
      let prefix = (match Sys.getenv_opt "LISPWEBLIB" with
                    | Some v -> v
-                   | None -> "./") in
+                   | None -> "") in
      let path = prefix^s in
      (match Parse.expr_of_filename "lisp" path with
       | Some e2 ->

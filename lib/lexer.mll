@@ -68,6 +68,7 @@ rule token = parse
   | ['-']? ['0'-'9']+ { ER_INT (int_of_string (Lexing.lexeme lexbuf)) }
   | ['0'-'9']+ '.' ['0'-'9']+ { ER_FLOAT (float_of_string (Lexing.lexeme lexbuf)) }
   | ['A'-'Z''a'-'z''<''/''-''$']['A'-'Z''a'-'z''+''-''*''/''#''-''@''{'']''*''&''%''$''!''?''_''0'-'9''>''.']* { ER_IDENT (Lexing.lexeme lexbuf) }
+  | ['a'-'z'] ['a'-'z']* { ER_SIMPLE_IDENT (Lexing.lexeme lexbuf) }
   | [':']['A'-'Z''a'-'z''+''-''*''/''#''-''@''{'']''*''&''%''$''!''?''_''0'-'9''>''.']* { ER_IDENT_OPT (Lexing.lexeme lexbuf) }
   | _ { raise (SyntaxError ("Unexpected char: " ^ Lexing.lexeme lexbuf)) }
   | eof { EOF }
