@@ -1,4 +1,12 @@
-type operator = OPlus | OMinus | OMult | ODiv | OLt
+(** Module Expr *)
+
+(** Type Operator *)
+type operator =
+  | OPlus (** OPlus operator *)
+  | OMinus (** OMinus operator *)
+  | OMult
+  | ODiv
+  | OLt
 
 type clause =
   | EClause of expr * expr

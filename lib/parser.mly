@@ -22,7 +22,7 @@
 
 %token<int> ER_INT
 %token<float> ER_FLOAT
-%token<string> ER_CHAR_ESC
+%token<string> ER_CHAR_ESC ER_QUOTE
 %token<string> ER_IDENT ER_STRING ER_CHAR ER_IDENT_OPT
 %token LPAREN RPAREN LAMBDA LET LETREC DEFINE LETSTAR EVAL
 %token TRUE FALSE IF COND ELSE EOF BEGIN EQUAL NOT AND
@@ -119,6 +119,7 @@ var:
 
 quote:
   | LPAREN CQUOTE expression=expression RPAREN { Expr.EQuote (expression) }
+  | ER_QUOTE { Expr.EQuote (EString $1) }
 
 (* quote_var:
   | LPAREN CQUOTE var=var RPAREN { Expr.EQuote (var) } *)

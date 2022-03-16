@@ -1,3 +1,5 @@
+(** Module Eval **)
+
 open Expr
 open Mem
 open Env
@@ -257,8 +259,10 @@ and js_of_scheme e =
   | EApp(e1,[],[]) -> JsApp(js_of_scheme e1,[])
   | _ -> failwith ("js_of_scheme: not implemented: "^(string_of_expr e))
 
-and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
-
+(** Evaluate an expression **)
+and eval (e:expr) (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
+  (** [eval e genv env denv mem cont] evaluates an expression **)
+  
   (*(print_newline());
   (print_endline ("evaluate: "^(string_of_expr e)));
   (print_endline ("env: "^(string_of_env mem env)));*)
@@ -629,7 +633,7 @@ and eval e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
   | EUnit (a) ->  cont (EUnit (a)) genv mem
   | _ -> failwith "not implemented"
 
-let%test _ = eval (EInt(12)) [] [] [] [] (fun v _ _ -> v) = EInt 12
+                  (* let%test _ = eval (EInt(12)) [] [] [] [] (fun v _ _ -> v) = EInt 12 *)
 
 
                    
