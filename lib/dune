@@ -10,8 +10,3 @@
 (ocamllex lexer lexerJs)
 (documentation
  (package lispw))
-(rule
- (target archive.tar.gz)
- (deps
-  (:scm (glob_files scm/*.scm)))
- (action (run %{bin:tar} -czvf %{target} %{deps})))
