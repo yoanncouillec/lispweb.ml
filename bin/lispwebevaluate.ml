@@ -31,7 +31,7 @@ let _ =
     | [] -> Expr.EBegin (List.rev accu)
   in
   let e = (expr_of_args [] sargs) in
-  (print_endline (Expr.string_of_expr e));
+  (*(print_endline (Expr.string_of_expr e));*)
   Eval.eval e [] [] [] []
     (fun v _ _ -> v)
 

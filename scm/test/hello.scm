@@ -4,4 +4,4 @@
 
 (load-string (wget "https" "raw.githubusercontent.com" 443 "/yoanncouillec/lispweb.ml/master/scm/lib/hello.scm"))
 
-(print (hello :name "to Lispw"))
+(print (welcome :name "to Lispw"))
