@@ -69,3 +69,7 @@
 (define string-of-domain
   (lambda (domain)
     (hostcall Unix.string_of_domain domain)))
+
+(define gethostname
+  (lambda ()
+    (hostcall Unix.gethostname)))

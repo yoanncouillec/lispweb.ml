@@ -1,4 +1,5 @@
 (import "standard.scm")
+(print (gethostname))
 (info "loading library")
 (load-string (wget "https" "raw.githubusercontent.com" 443 "/yoanncouillec/lispweb.ml/master/scm/lib/hello.scm"))
 (success "library loaded")

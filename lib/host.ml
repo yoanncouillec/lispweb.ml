@@ -369,6 +369,11 @@ module LUnix = struct
        EString(ISO8601.Permissive.string_of_datetime t)
     | _ -> failwith "string_of_time"
   
+  let gethostname = function
+    | EList([]) ->
+       EString(Unix.gethostname())
+    | _ -> failwith "gethostname"
+  
 end
 
 module Bytes = struct
@@ -686,6 +691,7 @@ let functions =
     ("Unix.gettimeofday", LUnix.gettimeofday);
     ("Unix.gmtime", LUnix.gmtime);
     ("Unix.string_of_time", LUnix.string_of_time);
+    ("Unix.gethostname", LUnix.gethostname);
 
     ("Bytes.of_string", Bytes.bytes_of_string);
     ("Bytes.to_string", Bytes.bytes_to_string);
