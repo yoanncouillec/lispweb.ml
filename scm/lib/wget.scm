@@ -28,7 +28,6 @@
 (define wget
   (lambda (scheme host port path)
     (begin
-      (print scheme)
       (if (equal? scheme "https")
 	  (begin
 	    (let (fd (ssl-make-client host port))

@@ -1,5 +1,7 @@
 (import "standard.scm")
 
-(print "Welcome to Lispw")
+(print "Getting library...")
 
-(print (wget "https" "192.168.1.77" 8383 "/"))
+(load-string (wget "https" "raw.githubusercontent.com" 443 "/yoanncouillec/lispweb.ml/master/scm/lib/hello.scm"))
+
+(print (hello :name "to Lispw"))
