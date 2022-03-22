@@ -1,11 +1,8 @@
 (import "standard.scm")
-
-(debug "loading library")
-(load-string (wget "https" "192.168.1.77" 8383 "https://raw.githubusercontent.com/yoanncouillec/lispweb.ml/master/scm/lib/hello.scm"))
-(info "library loaded")
-(warning "Loading Library")
-(success "Loading Library")
-(error "Loading Library")
-(critical "Loading Library")
-(hello "to Lispw")
-
+(info "loading library")
+(load-string (wget "https" "raw.githubusercontent.com" 443 "/yoanncouillec/lispweb.ml/master/scm/lib/hello.scm"))
+(success "library loaded")
+(print (hello :name "to Lispw"))
+(error "this is to test error log")
+(critical "this is to test critical log")
+(warning "this is to test warning log")

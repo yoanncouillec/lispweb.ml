@@ -5,7 +5,7 @@ test-release:
 	dune runtest
 
 welcome:
-	rlwrap lispw --load scm/test/hello.scm
+	LISPW_LIB_DIR=/usr/lib/lispw/ rlwrap lispw --load scm/test/hello.scm
 
 doc: clean
 	dune build
@@ -21,7 +21,6 @@ install:
 uninstall:
 	rm -r /usr/lib/lispw
 	rm /usr/bin/lispw
-	unset LISPW_LIB_DIR
 
 clean:
 	dune clean
