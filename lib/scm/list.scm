@@ -1,4 +1,4 @@
-(import "lib/stdout.scm")
+(import "stdout.scm")
 
 (define length
   (lambda (l)
