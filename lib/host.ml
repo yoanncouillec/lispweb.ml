@@ -374,6 +374,11 @@ module LUnix = struct
        EString(Unix.gethostname())
     | _ -> failwith "gethostname"
   
+  let getpid = function
+    | EList([]) ->
+       EInt(Unix.getpid())
+    | _ -> failwith "getpid"
+  
 end
 
 module Bytes = struct
@@ -583,24 +588,23 @@ end
 module MANSITerminal = struct
 
   let style = function
-    | EList(EString("green")::[]) ->
-      EStyle(ANSITerminal.green)
-    | EList(EString("red")::[]) ->
-      EStyle(ANSITerminal.red)
-    | EList(EString("blue")::[]) ->
-      EStyle(ANSITerminal.blue)
-    | EList(EString("black")::[]) ->
-       EStyle(ANSITerminal.black)
-    | EList(EString("yellow")::[]) ->
-       EStyle(ANSITerminal.yellow)
-    | EList(EString("underlined")::[]) ->
-      EStyle(ANSITerminal.Underlined)
-    | EList(EString("blink")::[]) ->
-      EStyle(ANSITerminal.Blink)
-    | EList(EString("inverse")::[]) ->
-      EStyle(ANSITerminal.Inverse)
-    | EList(EString("bold")::[]) ->
-      EStyle(ANSITerminal.Bold)
+    | EList(EString("black")::[]) ->EStyle(ANSITerminal.black)
+    | EList(EString("red")::[]) -> EStyle(ANSITerminal.red)
+    | EList(EString("green")::[]) -> EStyle(ANSITerminal.green)
+    | EList(EString("yellow")::[]) -> EStyle(ANSITerminal.yellow)
+    | EList(EString("blue")::[]) -> EStyle(ANSITerminal.blue)
+    | EList(EString("magenta")::[]) -> EStyle(ANSITerminal.magenta)
+    | EList(EString("cyan")::[]) -> EStyle(ANSITerminal.cyan)
+    | EList(EString("white")::[]) -> EStyle(ANSITerminal.white)
+    | EList(EString("default")::[]) -> EStyle(ANSITerminal.default)                                   
+
+    | EList(EString("reset")::[]) -> EStyle(ANSITerminal.Reset)
+    | EList(EString("bold")::[]) -> EStyle(ANSITerminal.Bold)
+    | EList(EString("underlined")::[]) -> EStyle(ANSITerminal.Underlined)
+    | EList(EString("blink")::[]) -> EStyle(ANSITerminal.Blink)
+    | EList(EString("inverse")::[]) -> EStyle(ANSITerminal.Inverse)
+    | EList(EString("hidden")::[]) -> EStyle(ANSITerminal.Hidden)
+                                     
     | _ -> failwith "style"
   
   let print_string = function
@@ -692,6 +696,7 @@ let functions =
     ("Unix.gmtime", LUnix.gmtime);
     ("Unix.string_of_time", LUnix.string_of_time);
     ("Unix.gethostname", LUnix.gethostname);
+    ("Unix.getpid", LUnix.getpid);    
 
     ("Bytes.of_string", Bytes.bytes_of_string);
     ("Bytes.to_string", Bytes.bytes_to_string);

@@ -1,9 +1,14 @@
 (import "time.scm")
 (import "ansiterminal.scm")
+(import "process.scm")
 
 (define log
   (lambda (level s msg)
     (style-print-string (list (style "green")) (time->string (gettimeofday)))
+    (print-string " ")
+    (style-print-string (list (style "cyan")) (gethostname))
+    (print-string " ")
+    (style-print-string (list (style "blue")) (val->string (getpid)))
     (print-string " ")
     (style-print-string (list (style "black") (style "bold")) level)
     (print-string " ")
