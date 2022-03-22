@@ -270,7 +270,7 @@ and eval (e:expr) (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
   match e with
 
   | EImport s ->
-     let prefix = (match Sys.getenv_opt "LISPWEBLIB" with
+     let prefix = (match Sys.getenv_opt "LISPW_LIB_DIR" with
                    | Some v -> v
                    | None -> "") in
      let path = prefix^s in
