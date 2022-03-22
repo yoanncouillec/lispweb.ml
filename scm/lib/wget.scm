@@ -1,10 +1,10 @@
-(import "lib/ssl.scm")
-(import "lib/socket.scm")
-(import "lib/string.scm")
-(import "lib/bytes.scm")
-(import "lib/stdout.scm")
-(import "lib/file.scm")
-(import "lib/http.scm")
+(import "ssl.scm")
+(import "socket.scm")
+(import "string.scm")
+(import "bytes.scm")
+(import "stdout.scm")
+(import "file.scm")
+(import "http.scm")
 
 (define url-get-content
   (lambda (fd read write host path)
@@ -27,10 +27,14 @@
 
 (define wget
   (lambda (scheme host port path)
-    (if (equal? scheme "https")
-	(begin
-	  (let (fd (ssl-make-client host port))
-	    (let (read ssl-read)
-	      (let (write ssl-write)
-		(url-get-content fd read write host path)))))
-	(begin (print "wget|not implemented|scheme http")))))
+    (begin
+      (print scheme)
+      (if (equal? scheme "https")
+	  (begin
+	    (let (fd (ssl-make-client host port))
+	      (let (read ssl-read)
+		(let (write ssl-write)
+		  (url-get-content fd read write host path)))))
+	  (begin
+	    (print-string "wget|not implemented|scheme http|")
+	    (print scheme))))))

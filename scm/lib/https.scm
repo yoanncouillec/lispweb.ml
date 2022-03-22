@@ -1,9 +1,9 @@
-(import "lib/string.scm")
-(import "lib/socket.scm")
-(import "lib/channel.scm")
-(import "lib/stdout.scm")
-(import "lib/ssl.scm")
-(import "lib/http.scm")
+(import "string.scm")
+(import "socket.scm")
+(import "channel.scm")
+(import "stdout.scm")
+(import "ssl.scm")
+(import "http.scm")
 
 (define https-serve
   (lambda (ssl-client-socket service)

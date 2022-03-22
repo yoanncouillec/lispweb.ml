@@ -13,7 +13,7 @@
     let split_args args =
       let rec split_args_aux posargs optargs = function
 	| [] -> (posargs, optargs)
-	| (Expr.Arg(e))::rest -> split_args_aux (e::posargs) optargs rest
+	| (Expr.Arg(e))::rest -> split_args_aux (List.append posargs [e]) optargs rest
     	| (ArgOpt(s,e))::rest -> split_args_aux posargs ((s,e)::optargs) rest
       in
       split_args_aux [] [] args

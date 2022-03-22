@@ -1,6 +1,6 @@
-(import "lib/bytes.scm")
-(import "lib/stdout.scm")
-(import "lib/string.scm")
+(import "bytes.scm")
+(import "stdout.scm")
+(import "string.scm")
 
 (define fstdin
   (lambda ()
@@ -15,16 +15,8 @@
     (hostcall Unix.stderr)))
        
 (define openfile
-  (lambda (name :flags (list "O_RDONLY")
-		:perm "0o660"
-		:handle-no-such-file (lambda () #f)
-		:handle-wrong-arguments (lambda () #f))
-    (let ((result (hostcall Unix.openfile name flags perm)))
-      (if (equal? result "no-such-file")
-	  (throw no-such-file (handle-no-such-file))
-	  (if (equal? result "wrong-arguments")
-	      (throw wrong-arguments (handle-wrong-arguments))
-	      result)))))
+  (lambda (name flags perm)
+    (hostcall Unix.openfile name flags perm)))
 
 (define close
   (lambda (fd)

@@ -1,9 +1,9 @@
-(import "lib/string.scm")
-(import "lib/socket.scm")
-(import "lib/channel.scm")
-(import "lib/stdout.scm")
-(import "lib/ssl.scm")
-(import "lib/file.scm")
+(import "string.scm")
+(import "socket.scm")
+(import "channel.scm")
+(import "stdout.scm")
+(import "ssl.scm")
+(import "file.scm")
 
 (define http-parse-queryparams
   (lambda (queryparams)
@@ -17,7 +17,6 @@
 
 (define http-parse-method
   (lambda (read fd)
-    ;; (print "http-parse-method") ;;
     (let* ((fst-line (map list->string (split ' ' (string->list (read-line read fd)))))
 	   (method (car fst-line))
 	   (path (car (cdr fst-line)))
@@ -25,13 +24,7 @@
 	   (path (list->string (car pathqueryparams)))
 	   (queryparams (http-parse-queryparams (car (cdr pathqueryparams))))
 	   (protocol (car (cdr (cdr fst-line)))))
-      ;; (print (concat "=" (list "  method" method))) ;;
-      ;; (print (concat "=" (list "  path" path))) ;;
-      ;; (print (concat "=" (list "  queryparams" (val->string queryparams)))) ;;
-      ;; (print (concat "=" (list "  protocol" (val->string protocol)))) ;;
-      (if (equal? "GET" method)
-	  (list method path queryparams protocol)
-	  (throw wrong-method method)))))
+      (list method path queryparams protocol))))
 
 (define http-parse-response-status
   (lambda (l)
@@ -58,11 +51,10 @@
 
 (define http-parse-headers-light
   (lambda (read fd)
-    ;; (print "http-parse-headers-light") ;;
     (let* ((l (read-line read fd)))
       (if (equal? "" l)
-	    l
-	      (cons l (http-parse-headers-light read fd))))))
+	  l
+	  (cons l (http-parse-headers-light read fd))))))
 
 (define http-send-response
   (lambda (fd code type content)
@@ -80,12 +72,11 @@
   (lambda (fd)
     (let* ((s (make-empty-string 1)))
       (if (equal? (read fd s 0 1) 0)
-	    (list)
-	      (cons s (read-all fd))))))
+	  (list)
+	  (cons s (read-all fd))))))
 
 (define serve
   (lambda (client saddr service)
-    ;; (print "serve") ;;
     (let* ((first-line (http-parse-method read client))
 	   (method (car first-line))
 	   (path (car (cdr first-line)))
@@ -96,7 +87,6 @@
     
 (define accept-client
   (lambda (server service)
-    ;; (print "accept-client") ;;
     (let* ((client_saddr (accept server))
 	   (client (car client_saddr))
 	   (saddr (car (cdr client_saddr))))

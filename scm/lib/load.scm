@@ -1,5 +1,5 @@
 (define load-scheme-file
-  (lambda (filename :path "/usr/local/lib/lispweb/")
+  (lambda (filename :path "/usr/local/lispweb/")
     (eval (hostcall Parse.parse_scheme (hostcall Core.In_channel.read_all (hostcall String.concat "" (list path filename)))))))
 
 (define load load-scheme-file)

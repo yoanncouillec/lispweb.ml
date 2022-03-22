@@ -1,6 +1,6 @@
-(import "lib/file.scm")
-(import "lib/string.scm")
-(import "lib/parse.scm")
+(import "file.scm")
+(import "string.scm")
+(import "parse.scm")
 
 (define load-string
   (lambda (string)

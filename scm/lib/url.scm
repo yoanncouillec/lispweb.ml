@@ -1,4 +1,4 @@
-(import "lib/string.scm")
+(import "string.scm")
 
 (define url-decode-light
   (lambda (s)

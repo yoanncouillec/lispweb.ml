@@ -1,4 +1,4 @@
-(import "lib/stdout.scm")
-(import "lib/string.scm")
+(import "stdout.scm")
+(import "string.scm")
 
 (define hello (lambda (:name "World!") (concat " " (list "Hello" name))))

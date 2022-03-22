@@ -1,4 +1,4 @@
-(import "lib/string.scm")
+(import "string.scm")
 
 (define stdin
   (lambda ()
@@ -50,16 +50,8 @@
     (hostcall Pervasives.close_out channel)))
 
 (define open-in
-  (lambda (s :handle-sys-error (lambda () #f)
-	     :handle-wrong-arguments (lambda () #f))
-    (let ((result (hostcall Pervasives.open_in s)))
-      (if (equal? result "sys-error")
-	  (throw sys-error
-		 (handle-sys-error))
-	  (if (equal? result "wrong-arguments")
-	      (throw wrong-arguments
-		     (handle-wrong-arguments))
-	      result)))))
+  (lambda (s)
+    (hostcall Pervasives.open_in s)))
 
 (define open-in-bin
   (lambda (s)
@@ -70,20 +62,8 @@
     (hostcall Pervasives.input_char channel)))
 
 (define input-line
-  (lambda (channel
-	   :handle-end-of-file (lambda () ""))
-    (let* ((s (hostcall Pervasives.input_line channel)))
-      (if (equal? s "end-of-file")
-	  (throw end-of-file
-		 (handle-end-of-file))
-	  (sub-string s 0 (string-length s))))))
-
-(define input-lines
   (lambda (channel)
-    (catch end-of-file
-	   (cons
-	    (input-line channel :handle-end-of-file (lambda () (list)))
-	    (input-lines channel)))))
+    (hostcall Pervasives.input_line channel)))
 
 (define close-in
   (lambda (channel)
