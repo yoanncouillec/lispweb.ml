@@ -4,7 +4,7 @@ build:
 test-release:
 	dune runtest
 
-test-install: build
+welcome:
 	rlwrap lispw --load scm/test/hello.scm
 
 doc: clean
