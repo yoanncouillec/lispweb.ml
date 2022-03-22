@@ -1,1 +1,3 @@
-(import "/home/yoann/lispw/_build/default/lib/scm/list.scm")
+(import "list.scm")
+
+(pair? (list))
