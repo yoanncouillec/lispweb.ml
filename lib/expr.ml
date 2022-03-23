@@ -50,6 +50,7 @@ and expr =
   | EDot of expr * expr
   | EJsExpr of js_expr
   | EAnd of expr * expr
+  | EOr of expr * expr          
   | EApp of expr * (expr list) * ((string * expr) list)
   | EBegin of expr list
   | EBinary of operator * expr * expr
@@ -198,6 +199,7 @@ and string_of_expr = function
   | EBool (false) -> "#f"
   | ENot (e) -> "(not "^(string_of_expr e)^")"
   | EAnd (e1,e2) -> "(and "^(string_of_expr e1)^" "^(string_of_expr e2)^")"
+  | EOr (e1,e2) -> "(or "^(string_of_expr e1)^" "^(string_of_expr e2)^")"                  
   | ECond (clauses) ->
      "(cond "^
        (List.fold_left

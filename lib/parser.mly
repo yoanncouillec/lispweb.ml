@@ -25,7 +25,7 @@
 %token<string> ER_CHAR_ESC ER_QUOTE
 %token<string> ER_IDENT ER_STRING ER_CHAR ER_IDENT_OPT ER_SIMPLE_IDENT
 %token LPAREN RPAREN LAMBDA LET LETREC DEFINE LETSTAR EVAL
-%token TRUE FALSE IF COND ELSE EOF BEGIN EQUAL NOT AND
+%token TRUE FALSE IF COND ELSE EOF BEGIN EQUAL NOT AND OR
 %token CAR CDR CONS LIST IMPORT
 %token CATCH THROW CALLCC BLOCK RETURNFROM HOSTCALL CALLWITHNEWTHREAD
 %token PLUS MINUS MULT DIV LT
@@ -61,6 +61,7 @@ expression:
   | LPAREN EVAL expression RPAREN { Expr.EEval ($3) }
   | LPAREN NOT expression RPAREN { Expr.ENot ($3) }
   | LPAREN AND expression expression RPAREN { Expr.EAnd ($3, $4) }
+  | LPAREN OR expression expression RPAREN { Expr.EOr ($3, $4) }
   | LPAREN PLUS expression expression RPAREN { Expr.EBinary(Expr.OPlus,$3,$4) }
   | LPAREN MINUS expression expression RPAREN { Expr.EBinary(Expr.OMinus,$3,$4) }
   | LPAREN MULT expression expression RPAREN { Expr.EBinary(Expr.OMult,$3,$4) }

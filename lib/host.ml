@@ -80,6 +80,11 @@ module Pervasives = struct
        EUnit (Stdlib.print_string s)
     | _ -> failwith "print_string"
 
+  let prerr_string = function
+    | EList(((EString(s))::[])) ->
+       EUnit (Stdlib.prerr_string s)
+    | _ -> failwith "prerr_string"
+
   let print_endline = function
     | EList(EString(s)::[]) ->
        EUnit (Stdlib.print_endline s)
@@ -89,6 +94,11 @@ module Pervasives = struct
     | EList([]) ->
        EUnit (Stdlib.print_newline())
     | _ -> failwith "print_newline"
+
+  let prerr_newline = function
+    | EList([]) ->
+       EUnit (Stdlib.prerr_newline())
+    | _ -> failwith "prerr_newline"
 
   (* Input functions on standard input *)
 
@@ -623,6 +633,11 @@ module MANSITerminal = struct
       EUnit(ANSITerminal.print_string (List.map (function EStyle(s) -> s | _ -> failwith "should be style") styles) string)
     | _ -> failwith "string_print_string"
   
+  let prerr_string = function
+    | EList(EList(styles)::EString(string)::[]) ->
+      EUnit(ANSITerminal.prerr_string (List.map (function EStyle(s) -> s | _ -> failwith "should be style") styles) string)
+    | _ -> failwith "style_prerr_string"
+  
 end
 
 (* module Thread = struct
@@ -657,8 +672,10 @@ let functions =
 
     ("Pervasives.print_char", Pervasives.print_char);
     ("Pervasives.print_string", Pervasives.print_string);
+    ("Pervasives.prerr_string", Pervasives.prerr_string);    
     ("Pervasives.print_endline", Pervasives.print_endline);
     ("Pervasives.print_newline", Pervasives.print_newline);
+    ("Pervasives.prerr_newline", Pervasives.prerr_newline);    
 
     ("Pervasives.read_line", Pervasives.read_line);
     ("Pervasives.read_int", Pervasives.read_int);
@@ -755,6 +772,7 @@ let functions =
 
     ("ANSITerminal.style", MANSITerminal.style);
     ("ANSITerminal.print_string", MANSITerminal.print_string);
+    ("ANSITerminal.prerr_string", MANSITerminal.prerr_string);
 
     ("Parse.parse_scheme", MParse.parse_scheme);
     

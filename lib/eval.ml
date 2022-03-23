@@ -57,6 +57,13 @@ let rec eval_quasi_quote e (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont)
 	   (fun v2 genv'' mem'' ->
 	     cont (EAnd(v1, v2)) genv'' mem''))
 
+  | EOr (e1,e2) ->
+     eval_quasi_quote e1 genv env denv mem
+       (fun v1 genv' mem' ->
+         eval_quasi_quote e2 genv' env denv mem'
+	   (fun v2 genv'' mem'' ->
+	     cont (EOr(v1, v2)) genv'' mem''))
+
   | ESet (_, e) -> 
      eval_quasi_quote e genv env denv mem
        (fun v genv' mem' -> 
@@ -324,8 +331,20 @@ and eval (e:expr) (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
 	       (fun v2 genv'' mem'' ->
 	         (match v2 with
 	          | EBool (b2) -> cont (EBool (b1 && b2)) genv'' mem''
-	          | _ -> failwith ("eval ENot: boolean expected: "^(string_of_expr v2))))
-	  | _ -> failwith ("eval ENot: boolean expected: "^(string_of_expr v1))))
+	          | _ -> failwith ("eval EAnd: boolean expected: "^(string_of_expr v2))))
+	  | _ -> failwith ("eval EAnd: boolean expected: "^(string_of_expr v1))))
+
+  | EOr (e1,e2) ->
+     eval e1 genv env denv mem
+       (fun v1 genv' mem' ->
+	 (match v1 with
+	  | EBool (b1) -> 
+             eval e2 genv' env denv mem'
+	       (fun v2 genv'' mem'' ->
+	         (match v2 with
+	          | EBool (b2) -> cont (EBool (b1 || b2)) genv'' mem''
+	          | _ -> failwith ("eval EOr: boolean expected: "^(string_of_expr v2))))
+	  | _ -> failwith ("eval EOr: boolean expected: "^(string_of_expr v1))))
 
   | EString (s) -> cont (EString (s)) genv mem
 

@@ -10,6 +10,10 @@
   (lambda (s)
     (hostcall Pervasives.print_string s)))
 
+(define prerr-string
+  (lambda (s)
+    (hostcall Pervasives.prerr_string s)))
+
 (define print-line
   (lambda (s)
     (hostcall Pervasives.print_endline s)))
@@ -19,6 +23,10 @@
 (define print-newline
   (lambda ()
     (hostcall Pervasives.print_newline)))
+
+(define prerr-newline
+  (lambda ()
+    (hostcall Pervasives.prerr_newline)))
 
 (define int->string
   (lambda (n)

@@ -43,6 +43,7 @@ rule token = parse
   | "cons" { CONS }
   | "not" { NOT }
   | "and" { AND }
+  | "or" { OR }  
   | "begin" { BEGIN }
   | "throw" { THROW }  
   | "catch" { CATCH }  
