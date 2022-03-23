@@ -604,8 +604,19 @@ module MANSITerminal = struct
     | EList(EString("blink")::[]) -> EStyle(ANSITerminal.Blink)
     | EList(EString("inverse")::[]) -> EStyle(ANSITerminal.Inverse)
     | EList(EString("hidden")::[]) -> EStyle(ANSITerminal.Hidden)
-                                     
-    | _ -> failwith "style"
+
+    | EList(EString("on-black")::[]) -> EStyle(ANSITerminal.on_black)
+    | EList(EString("on-red")::[]) -> EStyle(ANSITerminal.on_red)
+    | EList(EString("on-green")::[]) -> EStyle(ANSITerminal.on_green)
+    | EList(EString("on-yellow")::[]) -> EStyle(ANSITerminal.on_yellow)
+    | EList(EString("on-blue")::[]) -> EStyle(ANSITerminal.on_blue)
+    | EList(EString("on-magenta")::[]) -> EStyle(ANSITerminal.on_magenta)
+    | EList(EString("on-cyan")::[]) -> EStyle(ANSITerminal.on_cyan)
+    | EList(EString("on-white")::[]) -> EStyle(ANSITerminal.on_white)
+    | EList(EString("on-default")::[]) -> EStyle(ANSITerminal.on_default)
+
+    | EList(EString(s)::[]) -> failwith ("style does not exist: "^s)
+    | _ -> failwith "style malformed"
   
   let print_string = function
     | EList(EList(styles)::EString(string)::[]) ->
