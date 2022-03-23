@@ -7,6 +7,9 @@ test-release:
 welcome:
 	LISPW_LIB_DIR=/usr/lib/lispw/ rlwrap lispw --load scm/test/hello.scm
 
+repl:
+	LISPW_LIB_DIR=/usr/lib/lispw/ rlwrap lispw --load scm/test/repl.scm
+
 doc: clean
 	dune build
 	dune build @doc
@@ -16,7 +19,7 @@ install:
 	mkdir /usr/lib/lispw
 	cp -R ./scm/lib/* /usr/lib/lispw
 	cp ./_build/default/bin/lispwebevaluate.exe /usr/bin/lispw
-	echo "You should consider adding: echo 'export LISPW_LIB_DIR=/usr/lib/lispw/' > ~/.profile"
+#echo "You should consider adding: echo 'export LISPW_LIB_DIR=/usr/lib/lispw/' > ~/.profile"
 
 uninstall:
 	rm -r /usr/lib/lispw
