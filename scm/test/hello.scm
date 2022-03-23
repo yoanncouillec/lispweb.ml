@@ -8,6 +8,6 @@
 (success "library loaded")
 (print (hello :name "to Lispw"))
 (error "this is to test error log")
-(critical "this is to test critical log")
+(fatal "this is to test fatal log")
 (warning "this is to test warning log")
 
