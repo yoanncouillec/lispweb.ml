@@ -1,7 +1,9 @@
 (import "standard.scm")
 (import "process.scm")
 
-(define mylogger (logger --level))
+(print (getenv "LISPW_LIB_DIR"))
+
+(define mylogger (logger (getenv "LEVEL")))
 
 (print (gethostname))
 (mylogger "DEBUG" "loading library")

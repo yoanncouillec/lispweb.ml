@@ -10,7 +10,7 @@ build-lispweb-image:
 	docker build --no-cache -t lispw:latest -f docker/DockerfileLispweb .
 
 run-image:
-	docker run lispw
+	docker run -e LEVEL=INFO lispw
 
 test-release:
 	dune runtest

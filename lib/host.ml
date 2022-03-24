@@ -12,6 +12,19 @@ module MCore = struct
   
 end
 
+module MEnv = struct
+
+  let getenv = function
+    | EList(EString(s)::[]) ->
+       (try
+          EString(Sys.getenv s)
+        with Not_found ->
+              failwith ("MEnv|getenv|Not_found|"))
+    | _ -> failwith "MEnv|getenv"
+       
+  
+end
+
 module MParse = struct
 
   let parse_scheme = function
@@ -777,6 +790,7 @@ let functions =
     ("Parse.parse_scheme", MParse.parse_scheme);
     
     ("Core.In_channel.read_all", MCore.read_all);
+    ("Env.getenv", MEnv.getenv);
 
     
   ]

@@ -10,3 +10,4 @@
 (import "http.scm")
 (import "wget.scm")
 (import "log.scm")
+(import "env.scm")
