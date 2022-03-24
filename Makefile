@@ -1,11 +1,22 @@
 build:
 	dune build
 
+build-images: build-ocaml-image build-lispweb-image
+
+build-ocaml-image:
+	docker build -t context:latest -f docker/DockerfileContext .
+
+build-lispweb-image:
+	docker build --no-cache -t lispw:latest -f docker/DockerfileLispweb .
+
+run-image:
+	docker run lispw
+
 test-release:
 	dune runtest
 
 welcome:
-	LISPW_LIB_DIR=/usr/lib/lispw/ rlwrap lispw --level INFO --port 8080 --load scm/test/hello.scm
+	LISPW_LIB_DIR=/usr/lib/lispw/ rlwrap lispw --level INFO --load scm/test/hello.scm
 
 repl:
 	LISPW_LIB_DIR=/usr/lib/lispw/ rlwrap lispw --load scm/test/repl.scm

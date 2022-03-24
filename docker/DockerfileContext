@@ -1,0 +1,17 @@
+FROM ocaml/opam:ubuntu-20.04
+ARG DEBIAN_FRONTEND=noninteractive
+RUN sudo apt update
+RUN sudo apt install -y libssl-dev pkg-config
+RUN sudo apt install -y libcurl4-gnutls-dev
+RUN sudo apt install -y m4
+RUN sudo apt install -y rlwrap
+RUN opam update
+RUN opam install menhir
+RUN opam install ocamlfind
+RUN opam install ocamlbuild
+RUN opam install core
+RUN opam install ANSITerminal
+RUN opam install ocurl
+RUN opam install ssl
+RUN opam install ISO8601
+RUN opam install alcotest
