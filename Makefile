@@ -16,7 +16,7 @@ test-release:
 	dune runtest
 
 welcome:
-	LISPW_LIB_DIR=/usr/lib/lispw/ rlwrap lispw --level INFO --load scm/test/hello.scm
+	LISPW_LIB_DIR=/usr/lib/lispw/ LEVEL=INFO rlwrap lispw --load scm/test/hello.scm
 
 repl:
 	LISPW_LIB_DIR=/usr/lib/lispw/ rlwrap lispw --load scm/test/repl.scm
