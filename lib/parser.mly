@@ -78,6 +78,7 @@ expression:
   | LPAREN LIST RPAREN { Expr.EList([]) }
   | LPAREN LIST expressions RPAREN { Expr.EList($3) }
   | LPAREN IF expression expression expression RPAREN { Expr.EIf ($3, $4, $5) }
+  | LPAREN IF expression expression RPAREN { Expr.EIf ($3, $4, Expr.EBool(true)) }
   | LPAREN COND clauses RPAREN { Expr.ECond ($3) }
   | LPAREN LET LPAREN ER_IDENT expression RPAREN expressions RPAREN { Expr.ELet ([($4, $5)], (Expr.EBegin ($7)), []) }
 
