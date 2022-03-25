@@ -509,7 +509,7 @@ and eval (e:expr) (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
                    cont)
           | ECont (k) ->
              eval fstposarg genv' env denv mem' k
-          | _ -> failwith "eval EApp: wrong numbers of positional arguments"))
+          | _ -> failwith ("eval EApp: wrong numbers of positional arguments:"^(string_of_expr f))))
 
   | EBegin ([]) -> cont (EUnit(())) genv mem
 

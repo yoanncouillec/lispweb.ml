@@ -1,5 +1,4 @@
 (import "standard.scm")
-(import "process.scm")
 
 (print (getenv "LISPW_LIB_DIR"))
 
