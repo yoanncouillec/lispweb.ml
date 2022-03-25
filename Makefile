@@ -1,4 +1,4 @@
-build:
+build-distrib:
 	dune build
 
 build-context-image:

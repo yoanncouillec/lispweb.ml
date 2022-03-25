@@ -24,6 +24,13 @@ Then, run it
 make run-repl-image
 ```
 
+Start evaluating a simple expression
+
+```bash
+>>> (+ 1 2)
+3
+```
+
 ## A REST API in one line
 
 ```scheme
