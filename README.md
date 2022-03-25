@@ -24,9 +24,10 @@ Then, run it
 make run-repl-image
 ```
 
-Start evaluating a simple expression
+You can start writing lisp expressions
 
 ```bash
+Lispw 1.0.0
 >>> (+ 1 2)
 3
 ```

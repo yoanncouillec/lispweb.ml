@@ -1,3 +1,4 @@
+(import "standard.scm")
 (import "repl.scm")
 
 (print "Lispw 1.0.0")
