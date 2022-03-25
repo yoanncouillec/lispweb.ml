@@ -8,6 +8,16 @@ It becomes very easy to write web application in LispWeb because there
 is no other language you need to use. You write the whole application
 in LispWeb (server, client and database access)
 
+## ⚡️ Quick start
+
+```bash
+make build-images
+```
+
+```bash
+make run-image
+```
+
 ## A REST API in one line
 
 ```scheme
