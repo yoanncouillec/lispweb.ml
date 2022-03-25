@@ -4,9 +4,8 @@
 
 (define repl
   (lambda ()
-    (print-string "# ")
+    (print-string ">>> ")
     (flush (stdout))
-    (print-string "= ")    
     (print (val->string (load-string (input-line (stdin)))))
     (repl)))
 

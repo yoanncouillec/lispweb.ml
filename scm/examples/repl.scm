@@ -1,6 +1,6 @@
 (import "repl.scm")
 
-(print "Welcome to Lispw")
+(print "Lispw 1.0.0")
 
 (print
  (val->string
