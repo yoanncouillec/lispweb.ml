@@ -30,6 +30,8 @@ You can start writing lisp expressions
 Lispw 1.0.0
 >>> (+ 1 2)
 3
+>>> (wget "https" "api.ipify.org" 443 "/")
+123.123.123.123
 ```
 
 ## A REST API in one line
