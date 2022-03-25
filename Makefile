@@ -1,16 +1,20 @@
 build:
 	dune build
 
-build-images: build-ocaml-image build-lispweb-image
-
-build-ocaml-image:
+build-context-image:
 	docker build -t context:latest -f docker/DockerfileContext .
 
-build-lispweb-image:
-	docker build --no-cache -t lispw:latest -f docker/DockerfileLispweb .
+build-hello-image: build-context-image
+	docker build --no-cache -t lispwhello:latest -f docker/DockerfileLispweb .
 
-run-image:
-	docker run -e LEVEL=INFO lispw
+build-repl-image: build-context-image
+	docker build --no-cache -t lispwrepl:latest -f docker/DockerfileLispwebRepl .
+
+run-hello-image:
+	docker run -e LEVEL=INFO lispwhello
+
+run-repl-image:
+	docker run -i lispwrepl
 
 test-release:
 	dune runtest

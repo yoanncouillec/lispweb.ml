@@ -1,0 +1,8 @@
+FROM context:latest
+RUN git clone https://github.com/yoanncouillec/lispweb.ml.git
+WORKDIR lispweb.ml
+RUN eval $(opam env) && make
+RUN sudo make install
+RUN eval $(opam env)
+ENV LISPW_LIB_DIR=/usr/lib/lispw/
+ENTRYPOINT ["lispw", "--load", "scm/examples/repl.scm"]
