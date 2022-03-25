@@ -10,12 +10,18 @@ in LispWeb (server, client and database access)
 
 ## ⚡️ Quick start
 
-```bash
-make build-images
-```
+To try it quickly, you can run a *read-eval-print-loop* (`repl`) into a docker container.
+
+First, build the `repl` image
 
 ```bash
-make run-image
+make build-repl-image
+```
+
+Then, run it
+
+```bash
+make run-repl-image
 ```
 
 ## A REST API in one line
