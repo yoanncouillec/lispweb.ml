@@ -1,3 +1,0 @@
-(import "repl.scm")
-
-(repl)

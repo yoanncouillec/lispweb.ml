@@ -180,10 +180,7 @@ module Pervasives = struct
   let input_line parameters =
       match parameters with
       | EList(((EChannelIn(ic))::[])) ->
-         (try
-            EString(Stdlib.input_line ic);
-          with End_of_file ->
-            EString "end-of-file")
+         EString(Stdlib.input_line ic)
       | _  ->
          failwith ("input_line|wrong-parameters|"^(string_of_expr parameters))
   

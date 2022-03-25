@@ -284,7 +284,7 @@ and eval (e:expr) (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
      (match Parse.expr_of_filename "lisp" path with
       | Some e2 ->
          eval e2 genv env denv mem cont
-      | _  -> failwith "eval|EImport|cannot parse")
+      | _  -> failwith ("eval|EImport|cannot parse|"^path))
     
   | EDot (_, _) -> failwith "not implemented"
     
@@ -609,7 +609,10 @@ and eval (e:expr) (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
   | EHostCall (s, e) ->
      eval e genv env denv mem
        (fun v genv' mem' ->
-	 cont ((get_function s functions) v) genv' mem')
+         try
+           cont ((get_function s functions) v) genv' mem'
+         with End_of_file ->
+           eval (EThrow ((EQuote (EVar "end-of-file")), (EBool false))) genv' env denv mem' cont)
 
   | EQuote (e) -> cont e genv mem
   | EQuasiQuote (e) -> eval_quasi_quote e genv env denv mem cont
@@ -650,7 +653,7 @@ and eval (e:expr) (genv:env) (env:env) (denv:env) (mem:mem) (cont:cont) =
   | ESslSocket (a) ->  cont (ESslSocket (a)) genv mem
   | EThread (a) ->  cont (EThread (a)) genv mem
   | EUnit (a) ->  cont (EUnit (a)) genv mem
-  | _ -> failwith "not implemented"
+  | _ -> failwith ("eval: not implemented "^(string_of_expr e))
 
                   (* let%test _ = eval (EInt(12)) [] [] [] [] (fun v _ _ -> v) = EInt 12 *)
 

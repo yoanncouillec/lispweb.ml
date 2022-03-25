@@ -122,7 +122,7 @@ var:
 
 quote:
   | LPAREN CQUOTE expression=expression RPAREN { Expr.EQuote (expression) }
-  | ER_QUOTE { Expr.EQuote (EString $1) }
+  | ER_QUOTE { Expr.EQuote (EVar (String.sub $1 1 ((String.length $1) - 1))) }
 
 (* quote_var:
   | LPAREN CQUOTE var=var RPAREN { Expr.EQuote (var) } *)
