@@ -1,4 +1,9 @@
 name: Lispw
+
+on:
+  push:
+    branches: master
+
 jobs:
   Build job:
     runs-on: ubuntu-latest
