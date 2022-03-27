@@ -1,17 +1,16 @@
 name: Lispw
 
-on:
-  push:
-    branches: master
+on: push
 
 jobs:
   build-job:
     runs-on: ubuntu-latest
     steps:
+      - name: Check out repository code
       - uses: actions/checkout@v2
       - name: Install Opam
-        run: sudo apt install opam
-      - name: Init Opam
-        run: opam init
-      - name: Install Dune
-        run: opam install dune
+        run: |
+          sudo apt update
+          sudo apt install opam
+          opam init
+          opam install dune
