@@ -12,5 +12,6 @@ jobs:
       - name: Use OCaml
         uses: ocaml/setup-ocaml@v2
       - run: opam install . --deps-only --with-test
+      - run: opam install ISO8601
       - run: opam exec -- dune build
       - run: opam exec -- dune runtest
