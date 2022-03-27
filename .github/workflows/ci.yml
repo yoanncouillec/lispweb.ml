@@ -14,6 +14,7 @@ jobs:
           sudo apt install opam
           opam init
           opam install dune
+          eval $(opam env)
       - name: Build Lispw
         run: |
           dune build
