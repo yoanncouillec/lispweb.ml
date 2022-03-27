@@ -9,5 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Build step
+      - name: Install Opam
         run: sudo apt install opam
+      - name: Install Dune
+        run: opam install dune
