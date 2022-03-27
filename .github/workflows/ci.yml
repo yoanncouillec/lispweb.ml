@@ -14,6 +14,7 @@ jobs:
       - run: opam install . --deps-only --with-test
       - run: opam install ISO8601
       - run: opam install core
-      - run: opam install ssl        
+      - run: opam install ssl
+      - run: opam install ANSITerminal
       - run: opam exec -- dune build
       - run: opam exec -- dune runtest
