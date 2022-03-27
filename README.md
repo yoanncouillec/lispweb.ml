@@ -5,6 +5,10 @@ LispWeb
 target="_blank">
     <img src="https://img.shields.io/badge/version-0.1.0-blue?style=for-the-badge" alt="lispw version" />
   </a>&nbsp;
+  <a href="https://pkg.go.dev/github.com/create-go-app/cli/v3?tab=doc" 
+target="_blank">
+    <img src="https://img.shields.io/github/issues/yoanncouillec/lispweb.ml?style=for-the-badge" alt="lispw version" />
+  </a>&nbsp;
   <a href="https://gocover.io/github.com/create-go-app/cli/pkg/cgapp" target="_blank">
     <img src="https://img.shields.io/badge/Go_Cover-88.3%25-success?style=for-the-badge&logo=none" alt="lispw cover" />
   </a>&nbsp;
