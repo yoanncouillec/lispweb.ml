@@ -11,5 +11,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Install Opam
         run: sudo apt install opam
+      - name: Init Opam
+        run: opam init
       - name: Install Dune
         run: opam install dune
