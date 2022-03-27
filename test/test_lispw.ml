@@ -22,7 +22,7 @@ let test_parse_let () = Alcotest.(check expr_testable) "Parse let" (Eval.eval (p
 let test_parse_let_nested () = Alcotest.(check expr_testable) "Parse let" (Eval.eval (parse "(let (x 12) (let (y 13) (+ x y)))") [] [] [] [] (fun v _ _ -> v)) (Expr.EInt 25)
 let test_parse_app_lambda () = Alcotest.(check expr_testable) "App Lambda" (Eval.eval (parse "((lambda (x) x) 12)") [] [] [] [] (fun v _ _ -> v)) (Expr.EInt 12)
 let test_parse_begin () = Alcotest.(check expr_testable) "Begin" (Eval.eval (parse "(begin 1 2 3)") [] [] [] [] (fun v _ _ -> v)) (Expr.EInt 3)
-let test_parse_file () = Alcotest.(check expr_testable) "Callcc" (Eval.eval (Parse.expr_of_filename_no_opt "scm/callcc.scm") [] [] [] [] (fun v _ _ -> v)) (Expr.EBool true)
+(*let test_parse_file () = Alcotest.(check expr_testable) "Callcc" (Eval.eval (Parse.expr_of_filename_no_opt "scm/callcc.scm") [] [] [] [] (fun v _ _ -> v)) (Expr.EBool true)
 (* TODO: reverse expected/eval *)
 (* TODO: stop la truandrie *)
 let test_parse_add () = Alcotest.(check expr_testable) "Add" (parse "0") (Eval.eval (Parse.expr_of_filename_no_opt "scm/add.scm") [] [] [] [] (fun v _ _ -> EBegin [v]))
@@ -31,6 +31,7 @@ let test_parse_car () = Alcotest.(check expr_testable) "Car" (parse "1") (Eval.e
 let test_parse_cons () = Alcotest.(check expr_testable) "Cons" (parse "(list 1 2)") (Eval.eval (Parse.expr_of_filename_no_opt "scm/cons.scm") [] [] [] [] (fun v _ _ -> EBegin [v]))
 let test_parse_block () = Alcotest.(check expr_testable) "Block" (parse "12") (Eval.eval (Parse.expr_of_filename_no_opt "scm/block.scm") [] [] [] [] (fun v _ _ -> EBegin [v]))
 let test_parse_factorial () = Alcotest.(check expr_testable) "Factorial" (parse "6") (Eval.eval (Parse.expr_of_filename_no_opt "scm/factorial.scm") [] [] [] [] (fun v _ _ -> EBegin [v]))                        let test_parse_import () = Alcotest.(check expr_testable) "Import" (parse "#f") (Eval.eval (Parse.expr_of_filename_no_opt "scm/import.scm") [] [] [] [] (fun v _ _ -> EBegin [v]))
+ *)
                         
 let () =
   print_endline (Unix.getcwd());
@@ -49,13 +50,14 @@ let () =
         Alcotest.test_case "Parse Let Nested" `Quick test_parse_let_nested;
         Alcotest.test_case "Parse App Lambda" `Quick test_parse_app_lambda;
         Alcotest.test_case "Parse Begin" `Quick test_parse_begin;
-        Alcotest.test_case "Callcc" `Quick test_parse_file;
-        Alcotest.test_case "Cons" `Quick test_parse_cons;
-        Alcotest.test_case "List" `Quick test_parse_list;
-        Alcotest.test_case "Car" `Quick test_parse_car;
-        Alcotest.test_case "Begin" `Quick test_parse_begin;
-        Alcotest.test_case "Add" `Quick test_parse_add;
-        Alcotest.test_case "Block" `Quick test_parse_block;
-        Alcotest.test_case "Factorial" `Quick test_parse_factorial;                                              Alcotest.test_case "Import" `Quick test_parse_import;                                                                          
+        (* Alcotest.test_case "Callcc" `Quick test_parse_file;
+         * Alcotest.test_case "Cons" `Quick test_parse_cons;
+         * Alcotest.test_case "List" `Quick test_parse_list;
+         * Alcotest.test_case "Car" `Quick test_parse_car;
+         * Alcotest.test_case "Begin" `Quick test_parse_begin;
+         * Alcotest.test_case "Add" `Quick test_parse_add;
+         * Alcotest.test_case "Block" `Quick test_parse_block;
+         * Alcotest.test_case "Factorial" `Quick test_parse_factorial;
+         * Alcotest.test_case "Import" `Quick test_parse_import;                                                                           *)
       ];
     ]
