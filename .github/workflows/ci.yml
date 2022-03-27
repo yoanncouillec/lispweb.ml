@@ -13,6 +13,7 @@ jobs:
         uses: ocaml/setup-ocaml@v2
       - run: opam install . --deps-only --with-test
       - run: opam install ISO8601
-      - run: opam install core        
+      - run: opam install core
+      - run: opam install ssl        
       - run: opam exec -- dune build
       - run: opam exec -- dune runtest
