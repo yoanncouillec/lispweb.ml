@@ -40,7 +40,7 @@ make build-repl-image
 make run-repl-image
 ```
 
-You can start writing lisp expressions
+3. Write Lisp expressions
 
 ```bash
 Lispw 1.0.0
