@@ -26,7 +26,7 @@ in LispWeb (server, client and database access)
 
 ## ⚡️ Quick start
 
-To try it quickly, you can run a *read-eval-print-loop* (`repl`) into a docker container.
+You can run a *read-eval-print-loop* (`repl`) into a docker container.
 
 1. Build the `repl` image
 
