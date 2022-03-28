@@ -21,8 +21,6 @@ jobs:
       - run: opam exec -- dune build
       - run: opam exec -- dune runtest
       - run: opam install bisect_ppx
-      - run: dune runtest --instrument-with bisect_ppx --force
-      - run: pwd
-      - run: ls -lrt
-      - run: bisect-ppx-report summary
+      - run: opam exec -- dune runtest --instrument-with bisect_ppx --force
+      - run: opam exec -- bisect-ppx-report summary _build/default/test/*.coverage
         
