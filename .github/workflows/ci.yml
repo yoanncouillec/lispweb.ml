@@ -21,10 +21,10 @@ jobs:
       - run: opam exec -- dune build
       - run: opam exec -- dune runtest
       - run: opam install bisect_ppx
-      - run: ls -lrtR
-      - run: pwd
       - run: opam exec -- dune runtest --instrument-with bisect_ppx --force
       - run: opam exec -- bisect-ppx-report summary _build/default/test/*.coverage
+      - run: ls -lrtR
+      - run: pwd
       - run: bisect-ppx-report send-to Coveralls
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
