@@ -28,13 +28,13 @@ in LispWeb (server, client and database access)
 
 To try it quickly, you can run a *read-eval-print-loop* (`repl`) into a docker container.
 
-First, build the `repl` image
+1. Build the `repl` image
 
 ```bash
 make build-repl-image
 ```
 
-Then, run it
+2. Run it
 
 ```bash
 make run-repl-image
