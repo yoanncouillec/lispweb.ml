@@ -26,21 +26,21 @@ in LispWeb (server, client and database access)
 
 ## ⚡️ Quick start
 
-To try it quickly, you can run a *read-eval-print-loop* (`repl`) into a docker container.
+You can run a *read-eval-print-loop* (`repl`) into a docker container.
 
-First, build the `repl` image
+1. Build the `repl` image
 
 ```bash
 make build-repl-image
 ```
 
-Then, run it
+2. Run it
 
 ```bash
 make run-repl-image
 ```
 
-You can start writing lisp expressions
+3. Write Lisp expressions
 
 ```bash
 Lispw 1.0.0
