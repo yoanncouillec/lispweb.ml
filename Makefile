@@ -1,4 +1,4 @@
-build-distrib:
+build:
 	dune build
 
 build-context-image:
@@ -10,19 +10,19 @@ build-hello-image: build-context-image
 build-repl-image: build-context-image
 	docker build --no-cache -t lispwrepl:latest -f docker/DockerfileLispwebRepl .
 
-run-hello-image:
+hello: build-hello-image
 	docker run -e LEVEL=INFO lispwhello
 
-run-repl-image:
+repl: build-repl-image
 	docker run -i lispwrepl
 
 test-release:
 	dune runtest
 
 welcome:
-	LISPW_LIB_DIR=/usr/lib/lispw/ LEVEL=INFO rlwrap lispw --load scm/examples/hello.scm
+	LISPW_LIB_DIR=/usr/lib/lispw/ LEVEL=DEBUG rlwrap lispw --load scm/examples/hello.scm
 
-repl:
+repl-raw:
 	LISPW_LIB_DIR=/usr/lib/lispw/ rlwrap lispw --load scm/examples/repl.scm
 
 doc: clean
@@ -34,7 +34,7 @@ install:
 	mkdir /usr/lib/lispw
 	cp -R ./scm/lib/* /usr/lib/lispw
 	cp ./_build/default/bin/lispwebevaluate.exe /usr/bin/lispw
-#echo "You should consider adding: echo 'export LISPW_LIB_DIR=/usr/lib/lispw/' > ~/.profile"
+	echo "You should consider adding: echo 'export LISPW_LIB_DIR=/usr/lib/lispw/' > ~/.profile"
 
 uninstall:
 	rm -r /usr/lib/lispw

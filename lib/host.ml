@@ -19,7 +19,7 @@ module MEnv = struct
        (try
           EString(Sys.getenv s)
         with Not_found ->
-              failwith ("MEnv|getenv|Not_found|"))
+              failwith ("MEnv|getenv|Not_found|"^s))
     | _ -> failwith "MEnv|getenv"
        
   

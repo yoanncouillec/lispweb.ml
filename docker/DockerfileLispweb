@@ -5,4 +5,4 @@ RUN eval $(opam env) && make
 RUN sudo make install
 RUN eval $(opam env)
 ENV LISPW_LIB_DIR=/usr/lib/lispw/
-ENTRYPOINT ["rlwrap", "lispw", "--load", "scm/test/hello.scm"]
+ENTRYPOINT ["rlwrap", "lispw", "--load", "scm/examples/hello.scm"]
