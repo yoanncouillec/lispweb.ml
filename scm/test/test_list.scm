@@ -1,21 +1,8 @@
 (import "standard.scm")
 (import "list.scm")
+(import "assert.scm")
 
-(define logger (logger (getenv "LEVEL")))
-(define tests-success 0)
-(define tests-total 0)
-
-(define assert
-  (lambda (name result expected)
-    (set! tests-total (+ 1 tests-total))
-    (if (equal? expected result)
-	(begin
-	  (logger "SUCCESS" name)
-	  (set! tests-success (+ 1 tests-success)))
-	(begin
-	  (logger "FAIL" name)
-	  (logger "FAIL" (string-concat-sep " " (list "expected:" (val->string expected))))
-	  (logger "FAIL" (string-concat-sep " " (list "result:" (val->string result))))))))
+(begin-test "list.scm")
 
 (assert "length 1" (length (list 1 2 3)) 3)
 (assert "length 2" (length (list)) 0)
@@ -59,9 +46,4 @@
 
 (assert "replace-first 1" (replace-first (list 1 2 3 4 5 6) (list 3 4) (list 9 9)) (list 1 2 9 9 5 6))
 
-(if (equal? tests-success tests-total)
-    (logger "SUCCESS" (string-concat-sep " " (list (val->string tests-success) "/" (val->string tests-total))))
-    (begin
-      (logger "SUCCESS" (string-concat-sep " " (list (val->string tests-success) "/" (val->string tests-total))))
-      (logger "FAIL" (string-concat-sep " " (list (val->string (- tests-total tests-success)) "/" (val->string tests-total))))))
-    
+(end-test)    
