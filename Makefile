@@ -19,6 +19,9 @@ repl: build-repl-image
 test-release:
 	dune runtest
 
+test-lib:
+	LISPW_LIB_DIR=/usr/lib/lispw/ LEVEL=DEBUG rlwrap lispw --load scm/test/test_list.scm --load scm/test/test_string.scm
+
 welcome:
 	LISPW_LIB_DIR=/usr/lib/lispw/ LEVEL=DEBUG rlwrap lispw --load scm/examples/hello.scm
 
