@@ -1,0 +1,47 @@
+(import "lib/list.scm")
+(import "lib/stdout.scm")
+(import "lib/assert.scm")
+
+(list
+ (assert (length (list)) :expects 0)
+ (assert (length (list 1 2 3)) :expects 3)
+ (assert (index-of 'x' (list 2 2 2 2 2 'x' 2 2 2)) :expects 5)
+ (catch not-found (index-of 'x' (list 2 2 2 2 2 'x' 2 2 2)))
+ (catch not-found (index-of 1 (list 2 2 2)))
+ (assert (first-slice 3 (list 1 2 3 4 5)) :expects (list 1 2))
+ (assert (split-into-2 3 (list 1 2 3 4 5)) :expects (list (list 1 2) (list 4 5)))
+ (assert (split 3 (list 1 2 3 4 5 2 6 7 8 9 3 1 2 3 4 5)) :expects (list (list 1 2) (list 4 5 2 6 7 8 9) (list 1 2) (list 4 5)))
+ (assert (trim-left 0 (list 0 0 0 1 1 1 0 0 0)) :expects (list 1 1 1 0 0 0))
+ (assert (append (list 1 2 3) (list 4 5 6)) :expects (list 1 2 3 4 5 6))
+ (assert (reverse (list 1 2 3 4 5)) :expects (list 5 4 3 2 1))
+ (assert (trim-right 0 (list 0 0 0 1 1 1 0 0 0)) :expects (list 0 0 0 1 1 1))
+ (assert (trim 0 (list 0 0 0 1 1 1 0 0 0)) :expects (list 1 1 1))
+ (assert (car (list 1 2 3)) :expects 1)
+ (assert (cdr (list 1 2 3)) :expects (list 2 3))
+ (assert (car (cdr (cdr (list "html" (list) "child")))) :expects "child")
+ (assert (is-begin-of? (list 1 2 3) (list 1 2 3 4)) :expects #t)
+ (assert (is-begin-of? (list 1 2 3) (list 1 2)) :expects #f)
+ (assert (is-begin-of? (list 1 2 3) (list 1 2 3)) :expects #t)
+ (assert (is-begin-of? (list 1 2 3) (list)) :expects #f)
+ (assert (drop (list 1 2 3 4 5) 2) :expects (list 3 4 5))
+ (assert (drop (list 1 2 3 4 5) 0) :expects (list 1 2 3 4 5))
+ (assert (drop (list 1 2 3 4 5) 5) :expects (list))
+ (assert
+  (split-into-two (list 2 3) (list 1 2 3 4 5))
+  :expects (list (list 1) (list 4 5)))
+ (assert
+  (split-into-two (list 1 2) (list 1 2 3 4 5))
+  :expects (list (list) (list 3 4 5)))
+ (assert
+  (split-into-two (list 4 5) (list 1 2 3 4 5))
+  :expects (list (list 1 2 3) (list)))
+ (assert
+  (split-into-two (list 9 9 9) (list 1 2 3 4 5))
+  :expects (list (list 1 2 3 4 5) (list)))
+ (assert
+  (replace-first (list 1 2 3 4 5) (list 2 3) (list 9 9 9 9 9))
+  :expects (list 1 9 9 9 9 9 4 5))
+ (assert
+  (replace-first (list 1 2 3 4 5) (list 2 3) (list))
+  :expects (list 1 4 5))
+ )

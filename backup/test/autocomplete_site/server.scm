@@ -1,0 +1,18 @@
+(import "lib/http.scm")
+(import "lib/html.scm")
+
+(define /home
+  (lambda (client)
+    (http-send-response 
+     client 
+     "200" 
+     "text/html" 
+     (html-page->string
+      (import "test/autocomplete_site/home.scm")))))
+
+(define service
+  (lambda (client method path queryparams protocol headers)
+    (/home client)))
+
+(http-run-server (string->int --port)
+		 service)

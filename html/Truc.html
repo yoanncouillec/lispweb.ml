@@ -1,0 +1,192 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="Start" href="index.html">
+<link rel="Up" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of class attributes" rel=Appendix href="index_attributes.html">
+<link title="Index of class methods" rel=Appendix href="index_methods.html">
+<link title="Index of classes" rel=Appendix href="index_classes.html">
+<link title="Index of class types" rel=Appendix href="index_class_types.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Index of module types" rel=Appendix href="index_module_types.html">
+<link title="Truc" rel="Chapter" href="Truc.html"><title>Truc</title>
+</head>
+<body>
+<div class="navbar">&nbsp;<a class="up" href="index.html" title="Index">Up</a>
+&nbsp;</div>
+<h1>Module <a href="type_Truc.html">Truc</a></h1>
+
+<pre><span id="MODULETruc"><span class="keyword">module</span> Truc</span>: <code class="code">sig</code> <a href="Truc.html">..</a> <code class="code">end</code></pre><div class="info module top">
+<div class="info-desc">
+<p>The first special comment of the file is the comment associated
+    with the whole module.</p>
+</div>
+</div>
+<hr width="100%">
+<p>Special comments can be placed between elements and are kept
+    by the OCamldoc tool, but are not associated to any element.
+    @-tags in these comments are ignored.</p>
+<p>Comments like the one above, with more than two asterisks,
+    are ignored.</p>
+
+<pre><span id="VALf"><span class="keyword">val</span> f</span> : <code class="type">int -> int -> int</code></pre><div class="info ">
+<div class="info-desc">
+<p>The comment for function f.</p>
+
+<p>The continuation of the comment for function f.</p>
+</div>
+</div>
+
+<pre><span id="EXCEPTIONMy_exception"><span class="keyword">exception</span> My_exception</span> <span class="keyword">of</span> <code class="type">(int -> int) * int</code></pre>
+<div class="info ">
+<div class="info-desc">
+<p>Comment for exception My_exception, even with a simple comment
+    between the special comment and the exception.</p>
+</div>
+</div>
+
+<pre><code><span id="TYPEweather"><span class="keyword">type</span> <code class="type"></code>weather</span> = </code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTweather.Rain"><span class="constructor">Rain</span></span> <span class="keyword">of</span> <code class="type">int</code></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+<div class="info-desc">
+<p>The comment for constructor Rain</p>
+</div>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTweather.Sun"><span class="constructor">Sun</span></span></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+<div class="info-desc">
+<p>The comment for constructor Sun</p>
+</div>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr></table>
+
+<div class="info ">
+<div class="info-desc">
+<p>Comment for type weather</p>
+</div>
+</div>
+
+
+<pre><code><span id="TYPEweather2"><span class="keyword">type</span> <code class="type"></code>weather2</span> = </code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTweather2.Rain"><span class="constructor">Rain</span></span> <span class="keyword">of</span> <code class="type">int</code></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+<div class="info-desc">
+<p>The comment for constructor Rain</p>
+</div>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTweather2.Sun"><span class="constructor">Sun</span></span></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+<div class="info-desc">
+<p>The comment for constructor Sun</p>
+</div>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr></table>
+
+<div class="info ">
+<div class="info-desc">
+<p>Comment for type weather2</p>
+
+<p>I can continue the comment for type weather2 here
+  because there is already a comment associated to the last constructor.</p>
+</div>
+</div>
+
+
+<pre><code><span id="TYPEmy_record"><span class="keyword">type</span> <code class="type"></code>my_record</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTmy_record.foo">foo</span>&nbsp;: <code class="type">int</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+<div class="info-desc">
+<p>Comment for field foo</p>
+</div>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTmy_record.bar">bar</span>&nbsp;: <code class="type">string</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+<div class="info-desc">
+<p>Comment for field bar</p>
+</div>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr></table>
+}
+
+<div class="info ">
+<div class="info-desc">
+<p>The comment for type my_record</p>
+
+<p>Continuation of comment for type my_record</p>
+</div>
+</div>
+
+
+<pre><span id="VALfoo"><span class="keyword">val</span> foo</span> : <code class="type">string</code></pre><div class="info ">
+<div class="info-desc">
+<p>Comment for foo</p>
+
+<p>This comment is associated to foo and not to bar.</p>
+</div>
+</div>
+
+<pre><span id="VALbar"><span class="keyword">val</span> bar</span> : <code class="type">string</code></pre><div class="info ">
+<div class="info-desc">
+<p>This comment is associated to bar.</p>
+</div>
+</div>
+
+<pre><span id="TYPEmy_class"><span class="keyword">class</span> <a href="Truc.my_class-c.html">my_class</a></span> : <code class="type"></code><code class="code">object</code> <a href="Truc.my_class-c.html">..</a> <code class="code">end</code></pre><div class="info">
+<p>The comment for class my_class</p>
+
+</div>
+
+<pre><span id="TYPEmy_class_type"><span class="keyword">class type</span> <a href="Truc.my_class_type-c.html">my_class_type</a></span> = <code class="code">object</code> <a href="Truc.my_class_type-c.html">..</a> <code class="code">end</code></pre><div class="info">
+<p>The comment for the class type my_class_type</p>
+
+</div>
+
+<pre><span id="MODULEFoo"><span class="keyword">module</span> <a href="Truc.Foo.html">Foo</a></span>: <code class="code">sig</code> <a href="Truc.Foo.html">..</a> <code class="code">end</code></pre><div class="info">
+<p>The comment for module Foo</p>
+
+</div>
+
+<pre><span id="MODULETYPEmy_module_type"><span class="keyword">module type</span> <a href="Truc.my_module_type-c.html">my_module_type</a></span> = <code class="code">sig</code> <a href="Truc.my_module_type-c.html">..</a> <code class="code">end</code></pre><div class="info">
+<p>The comment for module type my_module_type.</p>
+
+</div>
+</body></html>

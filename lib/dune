@@ -1,0 +1,12 @@
+(library
+ (public_name lispw)
+ (name lispw)
+ (modules_without_implementation truc)
+ (inline_tests)
+ (preprocess (pps ppx_inline_test))
+ (libraries ANSITerminal ssl threads.posix core ISO8601 str))
+(menhir
+ (modules parser parserJs))
+(ocamllex lexer lexerJs)
+(documentation
+ (package lispw))

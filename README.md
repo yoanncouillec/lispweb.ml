@@ -1,12 +1,54 @@
 LispWeb
 ============
-![Current Version](https://img.shields.io/badge/version-1.0.0--alpha-green.svg)
+<p align="center">
+  <a href="https://pkg.go.dev/github.com/create-go-app/cli/v3?tab=doc" 
+target="_blank">
+    <img src="https://img.shields.io/badge/version-0.1.0-blue?style=for-the-badge" alt="lispw version" />
+  </a>&nbsp;
+  <a href="https://pkg.go.dev/github.com/create-go-app/cli/v3?tab=doc" 
+target="_blank">
+    <img src="https://img.shields.io/github/issues/yoanncouillec/lispweb.ml?style=for-the-badge" alt="lispw version" />
+  </a>&nbsp;
+  <a href="https://gocover.io/github.com/create-go-app/cli/pkg/cgapp" target="_blank">
+    <img src="https://img.shields.io/badge/Go_Cover-88.3%25-success?style=for-the-badge&logo=none" alt="lispw cover" />
+  </a>&nbsp;
+  <a href="https://goreportcard.com/report/github.com/create-go-app/cli" target="_blank">
+    <img src="https://img.shields.io/badge/Go_report-A+-success?style=for-the-badge&logo=none" alt="lispw report" />
+  </a>&nbsp;
+  <img src="https://img.shields.io/badge/license-apache_2.0-red?style=for-the-badge&logo=none" alt="license" />
+</p>
 
 LispWeb is a functional multi-tiers programming language.
 
 It becomes very easy to write web application in LispWeb because there
 is no other language you need to use. You write the whole application
 in LispWeb (server, client and database access)
+
+## ⚡️ Quick start
+
+You can run a *read-eval-print-loop* (`repl`) into a docker container.
+
+1. Build the `repl` image
+
+```bash
+make build-repl-image
+```
+
+2. Run it
+
+```bash
+make run-repl-image
+```
+
+3. Write Lisp expressions
+
+```bash
+Lispw 1.0.0
+>>> (+ 1 2)
+3
+>>> (wget "https" "api.ipify.org" 443 "/")
+123.123.123.123
+```
 
 ## A REST API in one line
 

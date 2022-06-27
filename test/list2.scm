@@ -1,1 +1,0 @@
-(load "lib/list.scm")
