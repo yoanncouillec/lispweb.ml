@@ -70,4 +70,4 @@
 (define fatal (lambda (msg) (log "FATAL" "   " (list (style "white") (style "on-red") (style "bold")) (list (style "red") (style "bold")) msg)))
 
 (define success (lambda (msg) (log "SUCCESS" " " (list (style "green") (style "bold")) (list (style "green")) msg)))
-(define fail (lambda (msg) (log "FAIL" " " (list (style "red") (style "bold")) (list (style "red")) msg)))
+(define fail (lambda (msg) (log "FAIL" "    " (list (style "red") (style "bold")) (list (style "red")) msg)))

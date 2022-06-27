@@ -59,7 +59,9 @@
     (define logger (logger (getenv "LEVEL")))
     (logger "INFO" name)    
     (define tests-success 0)
-    (define tests-total 0)))
+    (define tests-total 0)
+    (define tests-fail 0)
+    (define tests-todo 0)))    
 
 (define assert
   (lambda (name result expected)
@@ -69,14 +71,36 @@
 	  (logger "SUCCESS" name)
 	  (set! tests-success (+ 1 tests-success)))
 	(begin
+	  (set! tests-fail (+ 1 tests-fail))
 	  (logger "FAIL" name)
 	  (logger "FAIL" (string-concat-sep " " (list "expected:" (val->string expected))))
 	  (logger "FAIL" (string-concat-sep " " (list "result:" (val->string result))))))))
 
+(define assert
+  (lambda (name result expected)
+    (set! tests-total (+ 1 tests-total))
+    (if (equal? expected result)
+	(begin
+	  (logger "SUCCESS" name)
+	  (set! tests-success (+ 1 tests-success)))
+	(begin
+	  (logger "FAIL"
+		  (string-concat-sep ", "
+				     (list name
+					   (string-concat-sep " " (list "expected:" (val->string expected)))
+					   (string-concat-sep " " (list "result:" (val->string result))))))))))
+
+(define assert-todo
+  (lambda (name)
+    (begin
+      (set! tests-todo (+ 1 tests-todo))
+      (set! tests-total (+ 1 tests-total))      
+      (logger "WARNING" (string-concat-sep " " (list name "TODO"))))))
+
 (define end-test
   (lambda ()
-    (if (equal? tests-success tests-total)
-	(logger "SUCCESS" (string-concat-sep " " (list (val->string tests-success) "/" (val->string tests-total))))
-	(begin
-	  (logger "SUCCESS" (string-concat-sep " " (list (val->string tests-success) "/" (val->string tests-total))))
-	  (logger "FAIL" (string-concat-sep " " (list (val->string (- tests-total tests-success)) "/" (val->string tests-total))))))))
+    (begin
+      (logger "SUCCESS" (string-concat-sep " " (list (val->string tests-success) "/" (val->string tests-total))))
+      (if (not (equal? tests-todo 0)) (logger "WARNING" (string-concat-sep " " (list (val->string tests-todo) "/" (val->string tests-total)))))
+      (if (not (equal? tests-fail 0)) (logger "FAIL" (string-concat-sep " " (list (val->string tests-fail) "/" (val->string tests-total))))))))
+
